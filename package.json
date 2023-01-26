@@ -9,15 +9,35 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.4.9",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@next/font": "13.1.2",
+    "@notionhq/client": "^1.0.4",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
+    "axios": "^1.2.3",
+    "cookie": "^0.5.0",
     "eslint": "8.32.0",
     "eslint-config-next": "13.1.2",
+    "framer-motion": "^8.5.0",
+    "jsonp": "^0.2.1",
     "next": "13.1.2",
+    "notion-client": "^6.15.6",
+    "notion-types": "^6.15.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-notion-x": "^6.15.7",
+    "react-query": "^3.39.2",
     "typescript": "4.9.4"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.5.1",
+    "@types/jsonp": "^0.2.1",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-standard-with-typescript": "^31.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.3"
   }
 }

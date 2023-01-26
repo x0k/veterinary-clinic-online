@@ -1,3 +1,22 @@
 {
-  "extends": "next/core-web-vitals"
+  "parserOptions": {
+    "project": [
+      "tsconfig.json"
+    ],
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "extends": [
+    "next/core-web-vitals",
+    "standard-with-typescript",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/no-invalid-void-type": "warn",
+    "@typescript-eslint/strict-boolean-expressions": "off"
+  }
 }
