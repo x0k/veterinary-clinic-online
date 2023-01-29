@@ -1,5 +1,3 @@
-import { AuthenticationData } from './auth'
-
 export enum AppRoute {
   Home = '/',
   Info = '/info',
@@ -8,9 +6,14 @@ export enum AppRoute {
 
 export const APP_ROUTES = Object.values(AppRoute)
 
+export enum ApiRoutes {
+  Clinic = '/api/clinic',
+  User = '/api/user'
+}
+
+export const API_ROUTS = Object.values(ApiRoutes)
+
 export const queryKey = {
-  auth: 'auth',
-  user: (data: AuthenticationData | null) => ['user', data] as const,
-  info: 'info',
-  services: (pageId: string) => ['services', pageId] as const,
+  user: 'user',
+  clinicRecords: 'clinicRecords'
 }

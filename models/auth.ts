@@ -32,17 +32,10 @@ export interface GoogleAuthenticationData
 
 export type AuthenticationData = VKAuthenticationData | GoogleAuthenticationData
 
-export interface AbstractSuccessAuthenticationResponse<
-  T extends AuthenticationType
-> {
-  state: T
-}
-
-export interface VKSuccessAuthenticationResponse
-  extends AbstractSuccessAuthenticationResponse<AuthenticationType.VK> {
+export interface VKSuccessAuthenticationResponse {
   access_token: string
-  expires_in: string
-  user_id: string
+  expires_in: number
+  user_id: number
   email: string
 }
 
@@ -51,11 +44,11 @@ export interface VKErrorAuthenticationResponse {
   error_description: string
 }
 
-export interface GoogleSuccessAuthenticationResponse
-  extends AbstractSuccessAuthenticationResponse<AuthenticationType.Google> {
+export interface GoogleSuccessAuthenticationResponse {
   token_type: 'Bearer'
   access_token: string
-  expires_in: string
+  expires_in: number
+  refresh_token: string
 }
 
 export interface GoogleErrorAuthenticationResponse {
@@ -81,9 +74,7 @@ export interface Authentication {
 }
 
 export interface IAuthenticationService {
-  saveAuthenticationData: <T extends AuthenticationType>(
-    data: SuccessAuthenticationResponses[T]
-  ) => Promise<void>
+  authenticate: <T extends AuthenticationType>(type: T, code: string) => Promise<void>
   loadAuthenticationData: () => Promise<AuthenticationData | null>
   clearAuthenticationData: () => Promise<void>
 }
@@ -114,7 +105,7 @@ export const AUTH_SCOPES: Record<AuthenticationType, string> = encode({
 export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN as string
 
 export const REDIRECT_URL = encodeURIComponent(
-  `${REDIRECT_ORIGIN}/callback`
+  `${REDIRECT_ORIGIN}/api/callback`
 )
 
 export const CLIENTS_ID: Record<AuthenticationType, string> = encode({
@@ -122,6 +113,16 @@ export const CLIENTS_ID: Record<AuthenticationType, string> = encode({
     .NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
   [AuthenticationType.VK]: process.env.NEXT_PUBLIC_VK_CLIENT_ID as string,
 })
+
+export const ACCESS_TOKEN_ENDPOINTS: Record<AuthenticationType, string> = {
+  [AuthenticationType.Google]: 'https://oauth2.googleapis.com/token',
+  [AuthenticationType.VK]: 'https://oauth.vk.com/access_token'
+}
+
+export const CLIENTS_SECRET: Record<AuthenticationType, string> = {
+  [AuthenticationType.Google]: process.env.GOOGLE_CLIENT_SECRET as string,
+  [AuthenticationType.VK]: process.env.VK_CLIENT_SECRET as string,
+}
 
 export function isAuthenticationType<T extends AuthenticationType>(
   value: any
@@ -162,5 +163,5 @@ export function isErrorAuthenticationResponse(
 }
 
 export function makeAuthenticationLink(type: AuthenticationType): string {
-  return `${AUTH_ENDPOINTS[type]}?client_id=${CLIENTS_ID[type]}&redirect_uri=${REDIRECT_URL}&scope=${AUTH_SCOPES[type]}&response_type=token&state=${type}`
+  return `${AUTH_ENDPOINTS[type]}?client_id=${CLIENTS_ID[type]}&redirect_uri=${REDIRECT_URL}&scope=${AUTH_SCOPES[type]}&response_type=code&state=${type}`
 }

@@ -1,4 +1,4 @@
-import { fetchJSONP } from '@/lib/jsonp'
+import axios from 'axios'
 
 export const VK_API_ROOT = 'https://api.vk.com/method'
 
@@ -26,7 +26,7 @@ export interface VKResponse<T> {
 }
 
 export async function getUserInfo(accessToken: string): Promise<VKUser> {
-  const data = await fetchJSONP<VKResponse<VKUser[]>>(
+  const { data } = await axios.get<VKResponse<VKUser[]>>(
     `${VK_API_ROOT}/users.get?fields=contacts,has_mobile&v=${VK_API_VERSION}&access_token=${accessToken}`
   )
   return data.response[0]
@@ -108,7 +108,7 @@ export interface VKProfileInfo {
 export async function getProfileInfo(
   accessToken: string
 ): Promise<VKProfileInfo> {
-  const data = await fetchJSONP<VKResponse<VKProfileInfo>>(
+  const { data } = await axios.get<VKResponse<VKProfileInfo>>(
     `${VK_API_ROOT}/account.getProfileInfo?v=${VK_API_VERSION}&access_token=${accessToken}`
   )
   return data.response

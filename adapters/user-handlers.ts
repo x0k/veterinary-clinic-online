@@ -1,8 +1,13 @@
+import { makeRPCClient } from '@/lib/axios-simple-rpc-client'
 import { IUserService } from '@/models/user'
+import { ApiRoutes } from '@/models/app'
 import { UserHandlers } from '@/domains/user'
 
-export function makeUserHandlers(userService: IUserService): UserHandlers {
+const call = makeRPCClient<IUserService>(ApiRoutes.User)
+
+export function makeUserHandlers(): UserHandlers {
   return {
-    fetchUser: userService.fetchUser.bind(userService),
+    fetchUser: () => call('fetchUserData'),
+    logout: () => call('logout'),
   }
 }

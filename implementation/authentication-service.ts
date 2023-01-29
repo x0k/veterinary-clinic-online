@@ -1,10 +1,17 @@
-import { makeStorageAccessor, StorageAccessor } from '@/lib/storage'
+import { NextApiRequest, NextApiResponse } from 'next'
+import { serialize } from 'cookie'
+import axios from 'axios'
 
 import {
   AbstractAuthenticationData,
+  ACCESS_TOKEN_ENDPOINTS,
   AuthenticationData,
   AuthenticationType,
+  AUTHENTICATION_COOKIE_KEY,
+  CLIENTS_ID,
+  CLIENTS_SECRET,
   IAuthenticationService,
+  REDIRECT_URL,
   SuccessAuthenticationResponses,
 } from '@/models/auth'
 
@@ -16,40 +23,60 @@ const AUTHENTICATION_DATA_FACTORIES: {
   [AuthenticationType.Google]: (data) => ({
     t: AuthenticationType.Google,
     at: data.access_token,
-    ei: Number(data.expires_in),
+    ei: data.expires_in,
   }),
   [AuthenticationType.VK]: (data) => ({
     t: AuthenticationType.VK,
     at: data.access_token,
-    ei: Number(data.expires_in),
+    ei: data.expires_in,
     em: data.email,
-    id: data.user_id,
+    id: String(data.user_id),
   }),
 }
 
 export class AuthenticationService implements IAuthenticationService {
-  private readonly accessor: StorageAccessor<AuthenticationData | null>
-
-  constructor(storage: Storage, key: string) {
-    this.accessor = makeStorageAccessor<AuthenticationData | null>(
-      storage,
-      key,
-      null
+  private saveAuthenticationData(data: AuthenticationData): void {
+    this.res.setHeader(
+      'Set-Cookie',
+      serialize(AUTHENTICATION_COOKIE_KEY, JSON.stringify(data), {
+        httpOnly: true,
+        maxAge: data.ei,
+      })
     )
   }
 
-  async saveAuthenticationData<T extends AuthenticationType>(
-    data: SuccessAuthenticationResponses[T]
+  constructor(
+    private readonly req: NextApiRequest,
+    private readonly res: NextApiResponse
+  ) {}
+
+  async authenticate<T extends AuthenticationType>(
+    type: T,
+    code: string
   ): Promise<void> {
-    const authData = AUTHENTICATION_DATA_FACTORIES[data.state](data as never)
-    this.accessor.save(authData)
+    const { data } = await axios.post<SuccessAuthenticationResponses[T]>(
+      `${ACCESS_TOKEN_ENDPOINTS[type]}?code=${code}&client_id=${CLIENTS_ID[type]}&client_secret=${CLIENTS_SECRET[type]}&redirect_uri=${REDIRECT_URL}&grant_type=authorization_code`
+    )
+    const authData = AUTHENTICATION_DATA_FACTORIES[type](data)
+    this.saveAuthenticationData(authData)
   }
 
   async loadAuthenticationData(): Promise<AuthenticationData | null> {
-    return this.accessor.load()
+    const value = this.req.cookies[AUTHENTICATION_COOKIE_KEY]
+    if (!value) {
+      return null
+    }
+    return JSON.parse(value)
   }
 
   async clearAuthenticationData(): Promise<void> {
-    this.accessor.clear()
+    this.res.setHeader(
+      'Set-Cookie',
+      serialize(AUTHENTICATION_COOKIE_KEY, '', {
+        httpOnly: true,
+        maxAge: 0,
+        sameSite: true
+      })
+    )
   }
 }

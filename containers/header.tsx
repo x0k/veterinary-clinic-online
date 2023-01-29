@@ -1,16 +1,17 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Box, Button, Link, Text } from '@chakra-ui/react'
+import { Box, Button, IconButton, Link, useColorMode } from '@chakra-ui/react'
+import { FaMoon, FaSun } from 'react-icons/fa'
 
 import { AppRoute } from '@/models/app'
+import { isUserAuthenticated } from '@/models/user'
 import { useUser } from '@/domains/user'
 import { Links } from '@/components/links'
-import { useAuthentication } from '@/domains/auth'
 
 export function HeaderContainer(): JSX.Element {
   const router = useRouter()
   const user = useUser()
-  const { logout } = useAuthentication()
+  const { colorMode, toggleColorMode } = useColorMode()
   return (
     <Links
       linkClassName="no-decoration inactive-link"
@@ -27,12 +28,14 @@ export function HeaderContainer(): JSX.Element {
         Информация
       </Link>
       <Box flexGrow="1" />
-      {user ? (
-        <>
-          <Text fontSize="large">{user.name}</Text>
-          <Button onClick={logout}>Выйти</Button>
-        </>
-      ) : null}
+      <IconButton
+        aria-label="Color mode switch"
+        onClick={toggleColorMode}
+        icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
+      />
+      {isUserAuthenticated(user) && (
+        <Button onClick={user.logout}>Выйти</Button>
+      )}
     </Links>
   )
 }

@@ -4,18 +4,19 @@ import {
   AbstractAuthenticationData,
   AuthenticationData,
   AuthenticationType,
+  IAuthenticationService,
 } from '@/models/auth'
-import { IUserService, User } from '@/models/user'
+import { IUserService, UserData, UserId } from '@/models/user'
 
 const USER_DATA_FACTORIES: {
   [T in AuthenticationType]: (
     data: Extract<AuthenticationData, AbstractAuthenticationData<T>>
-  ) => Promise<User>
+  ) => Promise<UserData>
 } = {
   [AuthenticationType.VK]: async ({ at: accessToken, em: email, id }) => {
     const user = await getUserInfo(accessToken)
     return {
-      id,
+      id: id as UserId,
       name: `${user.last_name} ${user.first_name}`,
       email,
       phone:
@@ -27,7 +28,7 @@ const USER_DATA_FACTORIES: {
   [AuthenticationType.Google]: async ({ at: accessToken }) => {
     const person = await getPerson(accessToken)
     return {
-      id: person.resourceName.slice(7),
+      id: person.resourceName.slice(7) as UserId,
       email: person.emailAddresses.find((e) => e.metadata.primary)?.value,
       name:
         person.names.length > 0
@@ -41,7 +42,16 @@ const USER_DATA_FACTORIES: {
 }
 
 export class UserService implements IUserService {
-  async fetchUser(authData: AuthenticationData): Promise<User> {
-    return await USER_DATA_FACTORIES[authData.t](authData as never)
+  constructor(private readonly authService: IAuthenticationService) {}
+
+  async fetchUserData(): Promise<UserData | null> {
+    const authData = await this.authService.loadAuthenticationData()
+    return (
+      authData && (await USER_DATA_FACTORIES[authData.t](authData as never))
+    )
+  }
+
+  async logout(): Promise<void> {
+    await this.authService.clearAuthenticationData()
   }
 }
