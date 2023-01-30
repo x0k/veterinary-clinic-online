@@ -1,4 +1,4 @@
-import { DateProperty, EmailProperty, NumberProperty, PhoneNumberProperty, RelationProperty, RichTextItemResponse, RichTextProperty, SelectProperty, TitleProperty } from './vendor'
+import { DateProperty, EmailProperty, NumberProperty, PhoneNumberProperty, RelationProperty, RichTextItemResponse, RichTextProperty, RichTextTextItem, SelectProperty, TitleProperty } from './vendor'
 
 const {
   NOTION_CLIENT_SECRET,
@@ -18,18 +18,26 @@ export const NOTION_RECORDS_PAGE_ID = notionRecordsPageId as string
 
 export const NOTION_PRIVACY_POLICY_PAGE_ID = notionPrivacyPolicyPageId as string
 
+export function isRichTextTextItem(item: RichTextItemResponse): item is RichTextTextItem {
+  return item.type === 'text'
+}
+
 export function getRichTextValue(richText: RichTextItemResponse[]): string {
-  return richText.map(t => t.plain_text).join('')
+  return richText.filter(isRichTextTextItem).map(t => t.text.content).join('')
 }
 
 export enum ClinicServiceEntityProperty {
   Title = 'Наименование',
   Duration = 'Продолжительность в минутах',
+  Description = 'Описание',
+  Cost = 'Стоимость'
 }
 
 export interface ClinicServiceEntityProperties {
   [ClinicServiceEntityProperty.Title]: TitleProperty
   [ClinicServiceEntityProperty.Duration]: NumberProperty
+  [ClinicServiceEntityProperty.Description]: RichTextProperty
+  [ClinicServiceEntityProperty.Cost]: RichTextProperty
 }
 
 export enum ClinicRecordProperty {

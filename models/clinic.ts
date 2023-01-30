@@ -9,6 +9,8 @@ export interface ClinicServiceEntity {
   id: ClinicServiceEntityID
   title: string
   durationInMinutes: number
+  description: string
+  costDescription: string
 }
 
 export type ClinicRecordID = Brand<'clinicRecordId'>

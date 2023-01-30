@@ -6,6 +6,7 @@ import {
   Radio,
   FormErrorMessage,
   Box,
+  Text,
 } from '@chakra-ui/react'
 import { Control, UseFormSetValue, useWatch, Controller } from 'react-hook-form'
 import { isValid } from 'date-fns'
@@ -38,17 +39,20 @@ export function TimePeriodSelect({
     const date = new Date(selectedDate)
     return isValid(date) ? getFreeTimePeriodsForDate(date) : null
   }, [getFreeTimePeriodsForDate, selectedDate])
-  const getTimePeriodsForService = useMemo(() => {
-    const service =
+  const selectedClinicService = useMemo(
+    () =>
       selectedServiceId &&
-      clinicServices.find((s) => s.id === selectedServiceId)
-    return service
+      clinicServices.find((s) => s.id === selectedServiceId),
+    [selectedServiceId, clinicServices]
+  )
+  const getTimePeriodsForService = useMemo(() => {
+    return selectedClinicService
       ? makeFreeTimePeriodsWithDurationCalculator(
-          service.durationInMinutes,
+          selectedClinicService.durationInMinutes,
           sampleRate
         )
       : null
-  }, [selectedServiceId, clinicServices, sampleRate])
+  }, [selectedClinicService, sampleRate])
   const periods = useMemo(
     () =>
       getTimePeriodsForService && freeTimePeriods
@@ -64,25 +68,45 @@ export function TimePeriodSelect({
     setValue('recordTime', '')
   }, [periods, setValue])
   return (
-    <Controller
-      control={control}
-      name="recordTime"
-      rules={{ required: REQUIRED_FIELD_ERROR_MESSAGE }}
-      render={({ field, fieldState: { invalid, error } }) => (
-        <FormControl isInvalid={invalid}>
-          <FormLabel htmlFor="recordTime">Время</FormLabel>
-          <RadioGroup id="recordTime" {...field}>
-            <Box display="flex" flexDirection="column" gap="4">
-              {periods.map((p, i) => (
-                <Radio key={periodValues[i]} value={periodValues[i]}>
-                  {timeDataToJSON(p.start)} - {timeDataToJSON(p.end)}
-                </Radio>
-              ))}
+    <>
+      {selectedClinicService && (
+        <>
+          {selectedClinicService.description && (
+            <Box>
+              <Text>Подробности</Text>
+              <Text color="GrayText">{selectedClinicService.description}</Text>
             </Box>
-          </RadioGroup>
-          <FormErrorMessage>{error?.message}</FormErrorMessage>
-        </FormControl>
+          )}
+          {selectedClinicService.costDescription && (
+            <Box>
+              <Text>Стоимость</Text>
+              <Text color="GrayText">
+                {selectedClinicService.costDescription}
+              </Text>
+            </Box>
+          )}
+        </>
       )}
-    />
+      <Controller
+        control={control}
+        name="recordTime"
+        rules={{ required: REQUIRED_FIELD_ERROR_MESSAGE }}
+        render={({ field, fieldState: { invalid, error } }) => (
+          <FormControl isInvalid={invalid}>
+            <FormLabel htmlFor="recordTime">Время</FormLabel>
+            <RadioGroup id="recordTime" {...field}>
+              <Box display="flex" flexDirection="column" gap="4">
+                {periods.map((p, i) => (
+                  <Radio key={periodValues[i]} value={periodValues[i]}>
+                    {timeDataToJSON(p.start)} - {timeDataToJSON(p.end)}
+                  </Radio>
+                ))}
+              </Box>
+            </RadioGroup>
+            <FormErrorMessage>{error?.message}</FormErrorMessage>
+          </FormControl>
+        )}
+      />
+    </>
   )
 }

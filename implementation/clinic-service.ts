@@ -90,6 +90,12 @@ export class ClinicService implements IClinicService {
       ),
       durationInMinutes:
         r.properties[ClinicServiceEntityProperty.Duration].number ?? 0,
+      description: getRichTextValue(
+        r.properties[ClinicServiceEntityProperty.Description].rich_text
+      ),
+      costDescription: getRichTextValue(
+        r.properties[ClinicServiceEntityProperty.Cost].rich_text
+      ),
     }))
   }
 
