@@ -32,6 +32,17 @@ const shiftToMoscowTZ = makeDateTimeShifter({
   hours: 3,
 })
 
+const serverOffset = (() => {
+  const serverDate = new Date()
+  return serverDate.getTimezoneOffset() + 180
+})()
+
+function moscowDate(dateString = ''): Date {
+  const date = new Date(dateString)
+  date.setMinutes(date.getMinutes() + serverOffset)
+  return date
+}
+
 export class ClinicService implements IClinicService {
   private createClinicRecord(
     page: NotionFullQueryResult<ClinicRecordProperties>,
@@ -53,13 +64,12 @@ export class ClinicService implements IClinicService {
           : InnerRecordStatus.Awaits,
       dateTimePeriod: {
         start: dateToDateTimeData(
-          new Date(
-            page.properties[ClinicRecordProperty.DateTimePeriod].date?.start ??
-              ''
+          moscowDate(
+            page.properties[ClinicRecordProperty.DateTimePeriod].date?.start
           )
         ),
         end: dateToDateTimeData(
-          new Date(
+          moscowDate(
             page.properties[ClinicRecordProperty.DateTimePeriod].date?.end ?? ''
           )
         ),
