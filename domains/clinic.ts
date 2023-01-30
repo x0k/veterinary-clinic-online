@@ -104,84 +104,87 @@ export function ClinicProvider({
   const toast = useToast({
     position: 'bottom-right',
   })
-  const { mutateAsync: dismissRecord } = useMutation(handlers.dismissRecord, {
-    async onMutate(recordId) {
-      await queryClient.cancelQueries(queryKey.clinicRecords)
-      const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
-        queryKey.clinicRecords
-      )
-      queryClient.setQueryData<ClinicRecord[] | undefined>(
-        queryKey.clinicRecords,
-        (records) => records?.filter((r) => r.id !== recordId)
-      )
-      return { previousRecords }
-    },
-    onError(error, _, context) {
-      if (context && 'previousRecords' in context) {
-        queryClient.setQueryData(
-          queryKey.clinicRecords,
-          context.previousRecords
+  const { mutateAsync: dismissRecord, isLoading: isDismissRecordLoading } =
+    useMutation(handlers.dismissRecord, {
+      async onMutate(recordId) {
+        await queryClient.cancelQueries(queryKey.clinicRecords)
+        const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
+          queryKey.clinicRecords
         )
-      }
-      toast({
-        status: 'error',
-        title: 'Ошибка при отмене записи',
-        description: error instanceof Error ? error.message : undefined,
-      })
-    },
-    async onSettled() {
-      await queryClient.invalidateQueries(queryKey.clinicRecords)
-    },
-  })
-  const { mutateAsync: createRecord } = useMutation(handlers.createRecord, {
-    async onMutate({ identity, utcDateTimePeriod }) {
-      await queryClient.cancelQueries(queryKey.clinicRecords)
-      const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
-        queryKey.clinicRecords
-      )
-      queryClient.setQueryData<ClinicRecord[] | undefined>(
-        queryKey.clinicRecords,
-        (records = []) =>
-          records
-            .concat({
-              id: dateId() as ClinicRecordID,
-              status: ClinicRecordStatus.Awaits,
-              userId: identity,
-              dateTimePeriod: {
-                start: shiftToMoscowTZ(utcDateTimePeriod.start),
-                end: shiftToMoscowTZ(utcDateTimePeriod.end),
-              },
-            })
-            .sort((a, b) =>
-              dateTimePeriodsAPI.comparePeriods(
-                a.dateTimePeriod,
-                b.dateTimePeriod
+        queryClient.setQueryData<ClinicRecord[] | undefined>(
+          queryKey.clinicRecords,
+          (records) => records?.filter((r) => r.id !== recordId)
+        )
+        return { previousRecords }
+      },
+      onError(error, _, context) {
+        if (context && 'previousRecords' in context) {
+          queryClient.setQueryData(
+            queryKey.clinicRecords,
+            context.previousRecords
+          )
+        }
+        toast({
+          status: 'error',
+          title: 'Ошибка при отмене записи',
+          description: error instanceof Error ? error.message : undefined,
+        })
+      },
+      async onSettled() {
+        await queryClient.invalidateQueries(queryKey.clinicRecords)
+      },
+    })
+  const { mutateAsync: createRecord, isLoading: isCreateRecordLoading } =
+    useMutation(handlers.createRecord, {
+      async onMutate({ identity, utcDateTimePeriod }) {
+        await queryClient.cancelQueries(queryKey.clinicRecords)
+        const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
+          queryKey.clinicRecords
+        )
+        queryClient.setQueryData<ClinicRecord[] | undefined>(
+          queryKey.clinicRecords,
+          (records = []) =>
+            records
+              .concat({
+                id: dateId() as ClinicRecordID,
+                status: ClinicRecordStatus.Awaits,
+                userId: identity,
+                dateTimePeriod: {
+                  start: shiftToMoscowTZ(utcDateTimePeriod.start),
+                  end: shiftToMoscowTZ(utcDateTimePeriod.end),
+                },
+              })
+              .sort((a, b) =>
+                dateTimePeriodsAPI.comparePeriods(
+                  a.dateTimePeriod,
+                  b.dateTimePeriod
+                )
               )
-            )
-      )
-      return { previousRecords }
-    },
-    onError(error, _, context) {
-      if (context && 'previousRecords' in context) {
-        queryClient.setQueryData(
-          queryKey.clinicRecords,
-          context.previousRecords
         )
-      }
-      toast({
-        status: 'error',
-        title: 'Ошибка при создании записи',
-        description: error instanceof Error ? error.message : undefined,
-      })
-    },
-    async onSettled() {
-      await queryClient.invalidateQueries(queryKey.clinicRecords)
-    },
-  })
+        return { previousRecords }
+      },
+      onError(error, _, context) {
+        if (context && 'previousRecords' in context) {
+          queryClient.setQueryData(
+            queryKey.clinicRecords,
+            context.previousRecords
+          )
+        }
+        toast({
+          status: 'error',
+          title: 'Ошибка при создании записи',
+          description: error instanceof Error ? error.message : undefined,
+        })
+      },
+      async onSettled() {
+        await queryClient.invalidateQueries(queryKey.clinicRecords)
+      },
+    })
   const value: Clinic = useMemo(
     () => ({
       isRecordsLoading,
-      isRecordsFetching,
+      isRecordsFetching:
+        isRecordsFetching || isDismissRecordLoading || isCreateRecordLoading,
       clinicRecords: clinicRecords ?? [],
       createRecord,
       dismissRecord,
@@ -189,6 +192,8 @@ export function ClinicProvider({
     [
       isRecordsLoading,
       isRecordsFetching,
+      isDismissRecordLoading,
+      isCreateRecordLoading,
       clinicRecords,
       dismissRecord,
       createRecord,
