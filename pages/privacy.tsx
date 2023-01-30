@@ -31,7 +31,7 @@ export default function PrivacyPage({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <MainLayout header={<HeaderContainer />}>
+      <MainLayout header={<HeaderContainer title="Политика конфиденциальности" />}>
         <NotionRenderer darkMode={isDarkMode} recordMap={recordMap} />
       </MainLayout>
     </>

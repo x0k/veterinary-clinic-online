@@ -11,7 +11,6 @@ export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
     <>
       <Box
         display="flex"
-        flexDirection={{ base: 'column', sm: 'row' }}
         top="0"
         position="sticky"
         marginX="auto"
@@ -24,10 +23,6 @@ export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
           md: "3xl"
         }}
         fontWeight="bold"
-        alignItems={{
-          base: 'stretch',
-          sm: 'normal'
-        }}
         lineHeight="10"
         bgColor="chakra-body-bg"
         zIndex="sticky"
