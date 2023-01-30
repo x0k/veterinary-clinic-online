@@ -1,15 +1,6 @@
-import {
-  Button,
-  Center,
-  Heading,
-  Text,
-} from '@chakra-ui/react'
+import { Button, Center, Heading, Text } from '@chakra-ui/react'
 
-import {
-  ClinicRecord,
-  ClinicRecordID,
-  ClinicRecordStatus,
-} from '@/models/clinic'
+import { ClinicRecord, ClinicRecordStatus } from '@/models/clinic'
 import {
   compareDate,
   dateTimeDataToDate,
@@ -19,12 +10,11 @@ import {
   formatDate,
   timeDataToJSON,
 } from '@/models/date'
+import { useClinic } from '@/domains/clinic'
 
 export interface RecordInfoProps {
-  isRecordsFetching: boolean
   record: ClinicRecord
   hasRecordsBefore: boolean
-  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
 }
 
 function makeWaitedStateText({ start, end }: DateTimePeriod): string {
@@ -38,9 +28,8 @@ function makeWaitedStateText({ start, end }: DateTimePeriod): string {
 export function RecordInfo({
   record: { id, dateTimePeriod, status },
   hasRecordsBefore,
-  isRecordsFetching,
-  dismissRecord,
 }: RecordInfoProps): JSX.Element {
+  const { isRecordsFetching, dismissRecord } = useClinic()
   const inWork = status === ClinicRecordStatus.InWork
   const shouldBeInWork = dateTimePeriodsAPI.makePeriodContainsCheck(
     dateTimePeriod
