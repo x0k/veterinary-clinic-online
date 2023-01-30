@@ -1,5 +1,6 @@
 import { Client as NotionClient } from '@notionhq/client'
 
+import { isSomething } from '@/lib/guards'
 import {
   ClinicRecord,
   ClinicRecordCreate,
@@ -37,7 +38,7 @@ const serverOffset = (() => {
   return serverDate.getTimezoneOffset() + 180
 })()
 
-function moscowDate(dateString = ''): Date {
+function moscowDate(dateString: string): Date {
   const date = new Date(dateString)
   date.setMinutes(date.getMinutes() + serverOffset)
   return date
@@ -47,7 +48,14 @@ export class ClinicService implements IClinicService {
   private createClinicRecord(
     page: NotionFullQueryResult<ClinicRecordProperties>,
     userId?: UserId
-  ): ClinicRecord {
+  ): ClinicRecord | null {
+    const startDateTimePeriod =
+      page.properties[ClinicRecordProperty.DateTimePeriod].date?.start
+    const endDateTimePeriod =
+      page.properties[ClinicRecordProperty.DateTimePeriod].date?.end
+    if (!startDateTimePeriod || !endDateTimePeriod) {
+      return null
+    }
     return {
       id: page.id as ClinicRecordID,
       userId:
@@ -63,16 +71,8 @@ export class ClinicService implements IClinicService {
           ? InnerRecordStatus.InWork
           : InnerRecordStatus.Awaits,
       dateTimePeriod: {
-        start: dateToDateTimeData(
-          moscowDate(
-            page.properties[ClinicRecordProperty.DateTimePeriod].date?.start
-          )
-        ),
-        end: dateToDateTimeData(
-          moscowDate(
-            page.properties[ClinicRecordProperty.DateTimePeriod].date?.end ?? ''
-          )
-        ),
+        start: dateToDateTimeData(moscowDate(startDateTimePeriod)),
+        end: dateToDateTimeData(moscowDate(endDateTimePeriod)),
       },
     }
   }
@@ -97,18 +97,28 @@ export class ClinicService implements IClinicService {
     const { results } = await this.notionClient.databases.query({
       database_id: NOTION_RECORDS_PAGE_ID,
       filter: {
-        or: [
+        and: [
           {
-            property: ClinicRecordProperty.State,
-            select: {
-              equals: ClinicRecordStatus.Awaits,
+            property: ClinicRecordProperty.DateTimePeriod,
+            date: {
+              is_not_empty: true,
             },
           },
           {
-            property: ClinicRecordProperty.State,
-            select: {
-              equals: ClinicRecordStatus.InWork,
-            },
+            or: [
+              {
+                property: ClinicRecordProperty.State,
+                select: {
+                  equals: ClinicRecordStatus.Awaits,
+                },
+              },
+              {
+                property: ClinicRecordProperty.State,
+                select: {
+                  equals: ClinicRecordStatus.InWork,
+                },
+              },
+            ],
           },
         ],
       },
@@ -119,9 +129,9 @@ export class ClinicService implements IClinicService {
         },
       ],
     })
-    return (results as Results<ClinicRecordProperties>).map((result) =>
-      this.createClinicRecord(result, userId)
-    )
+    return (results as Results<ClinicRecordProperties>)
+      .map((result) => this.createClinicRecord(result, userId))
+      .filter(isSomething)
   }
 
   async createRecord({
@@ -176,7 +186,7 @@ export class ClinicService implements IClinicService {
     return this.createClinicRecord(
       response as NotionFullQueryResult<ClinicRecordProperties>,
       identity
-    )
+    ) as ClinicRecord
   }
 
   async removeRecord(id: string): Promise<void> {
