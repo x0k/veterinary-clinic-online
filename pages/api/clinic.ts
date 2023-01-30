@@ -17,6 +17,9 @@ export default makeRPCHandler<ClinicRPCConfig>({
     const userData = await userService.fetchUserData()
     return await clinicService.fetchActualRecords(userData?.id)
   },
+  createRecord: async (ctx, data) => {
+    return await clinicService.createRecord(data)
+  },
   dismissRecord: async (ctx, recordId) => {
     await clinicService.removeRecord(recordId)
   },

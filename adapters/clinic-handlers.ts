@@ -8,5 +8,8 @@ export function makeClinicHandlers({
   return {
     fetchRecords: () => call('fetchActualRecords'),
     dismissRecord: (recordId) => call('dismissRecord', recordId),
+    createRecord: async (data) => {
+      await call('createRecord', data)
+    },
   }
 }

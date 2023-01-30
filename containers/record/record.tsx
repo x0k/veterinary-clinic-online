@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
+import { Center, CircularProgress } from '@chakra-ui/react'
 
 import { ClinicServiceEntity } from '@/models/clinic'
 import { OpeningHours, ProductionCalendar, WorkBreaks } from '@/models/schedule'
 import { UserData } from '@/models/user'
 import { useClinic } from '@/domains/clinic'
+
 import { RecordInfo } from './record-info'
 import { CreateRecord } from './create-record'
 
@@ -22,19 +24,22 @@ export function RecordContainer({
   productionCalendar,
   workBreaks,
 }: RecordContainerProps): JSX.Element | null {
-  const { clinicRecords, dismissRecord } = useClinic()
+  const { isRecordsLoading, clinicRecords, dismissRecord, createRecord } =
+    useClinic()
   const userRecordIndex = useMemo(
     () => clinicRecords.findIndex((r) => r.userId === userData.id),
     [clinicRecords, userData.id]
   )
   const userHasRecord = userRecordIndex > -1
-  return userHasRecord ? (
+  return isRecordsLoading ? (
+    <Center height="full">
+      <CircularProgress isIndeterminate color="teal.500" size="8rem" />
+    </Center>
+  ) : userHasRecord ? (
     <RecordInfo
       record={clinicRecords[userRecordIndex]}
       hasRecordsBefore={userRecordIndex > 0}
-      dismissRecord={() => {
-        dismissRecord(clinicRecords[userRecordIndex].id)
-      }}
+      dismissRecord={dismissRecord}
     />
   ) : (
     <CreateRecord
@@ -44,6 +49,7 @@ export function RecordContainer({
       productionCalendar={productionCalendar}
       userData={userData}
       workBreaks={workBreaks}
+      createRecord={createRecord}
     />
   )
 }

@@ -5,25 +5,25 @@ import axios from 'axios'
 import { Client } from '@notionhq/client'
 
 import { makeRPCClient } from '@/lib/axios-simple-rpc-client'
+import { TimePeriod } from '@/models/date'
 import {
   makeProductionCalendarWithoutSaturdayWeekend,
   OpeningHours,
   ProductionCalendarData,
   PRODUCTION_CALENDAR_URL,
-  TimePeriod,
   WorkBreaks,
 } from '@/models/schedule'
 import { ClinicServiceEntity } from '@/models/clinic'
-import { ApiRoutes } from '@/models/app'
+import { ApiRoutes, PAGE_REVALIDATE_INTERVAL } from '@/models/app'
 import { NOTION_AUTH } from '@/models/notion'
+import { isUserAuthenticated } from '@/models/user'
 import { useUser } from '@/domains/user'
+import { ClinicProvider } from '@/domains/clinic'
 import { MainLayout } from '@/components/main-layout'
 import { HeaderContainer } from '@/containers/header'
 import { AuthorizeContainer } from '@/containers/authorize'
 import { RecordContainer } from '@/containers/record'
 import { ClinicService } from '@/implementation/clinic-service'
-import { isUserAuthenticated } from '@/models/user'
-import { ClinicProvider } from '@/domains/clinic'
 import { makeClinicHandlers } from '@/adapters/clinic-handlers'
 
 export interface HomePageProps {
@@ -83,7 +83,7 @@ export default function HomePage({
       </Head>
       <MainLayout header={<HeaderContainer />}>
         {isUserAuthenticated(user) ? (
-          <ClinicProvider handlers={clinicHandlers}>
+          <ClinicProvider userData={user.userData} handlers={clinicHandlers}>
             <RecordContainer
               userData={user.userData}
               clinicServices={clinicServices}
@@ -110,5 +110,6 @@ export async function getStaticProps(): Promise<
   const clinicServices = await clinicService.fetchServices()
   return {
     props: { productionCalendarData, clinicServices },
+    revalidate: PAGE_REVALIDATE_INTERVAL
   }
 }

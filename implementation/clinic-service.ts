@@ -7,6 +7,7 @@ import {
   ClinicServiceEntity,
   ClinicServiceEntityID,
   IClinicService,
+  ClinicRecordStatus as InnerRecordStatus,
 } from '@/models/clinic'
 import {
   ClinicRecordProperties,
@@ -21,7 +22,15 @@ import {
   Results,
 } from '@/models/notion'
 import { UserId } from '@/models/user'
-import { dateTimeDataToJSON, dateToDateTimeData } from '@/models/schedule'
+import {
+  dateTimeDataToJSON,
+  dateToDateTimeData,
+  makeDateTimeShifter,
+} from '@/models/date'
+
+const shiftToMoscowTZ = makeDateTimeShifter({
+  hours: 3,
+})
 
 export class ClinicService implements IClinicService {
   private createClinicRecord(
@@ -37,6 +46,11 @@ export class ClinicService implements IClinicService {
         ) === userId
           ? userId
           : undefined),
+      status:
+        page.properties[ClinicRecordProperty.State].select?.name ===
+        ClinicRecordStatus.InWork
+          ? InnerRecordStatus.InWork
+          : InnerRecordStatus.Awaits,
       dateTimePeriod: {
         start: dateToDateTimeData(
           new Date(
@@ -73,11 +87,27 @@ export class ClinicService implements IClinicService {
     const { results } = await this.notionClient.databases.query({
       database_id: NOTION_RECORDS_PAGE_ID,
       filter: {
-        property: ClinicRecordProperty.State,
-        select: {
-          equals: ClinicRecordStatus.Awaits,
-        },
+        or: [
+          {
+            property: ClinicRecordProperty.State,
+            select: {
+              equals: ClinicRecordStatus.Awaits,
+            },
+          },
+          {
+            property: ClinicRecordProperty.State,
+            select: {
+              equals: ClinicRecordStatus.InWork,
+            },
+          },
+        ],
       },
+      sorts: [
+        {
+          property: ClinicRecordProperty.DateTimePeriod,
+          direction: 'ascending',
+        },
+      ],
     })
     return (results as Results<ClinicRecordProperties>).map((result) =>
       this.createClinicRecord(result, userId)
@@ -116,8 +146,8 @@ export class ClinicService implements IClinicService {
         [ClinicRecordProperty.DateTimePeriod]: {
           type: 'date',
           date: {
-            start: dateTimeDataToJSON(utcDateTimePeriod.start),
-            end: dateTimeDataToJSON(utcDateTimePeriod.end),
+            start: dateTimeDataToJSON(shiftToMoscowTZ(utcDateTimePeriod.start)),
+            end: dateTimeDataToJSON(shiftToMoscowTZ(utcDateTimePeriod.end)),
             time_zone: 'Europe/Moscow',
           },
         },

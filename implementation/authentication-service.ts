@@ -35,12 +35,12 @@ const AUTHENTICATION_DATA_FACTORIES: {
 }
 
 export class AuthenticationService implements IAuthenticationService {
-  private saveAuthenticationData(data: AuthenticationData): void {
+  private setAuthenticationCookie(value: string, maxAge: number): void {
     this.res.setHeader(
       'Set-Cookie',
-      serialize(AUTHENTICATION_COOKIE_KEY, JSON.stringify(data), {
+      serialize(AUTHENTICATION_COOKIE_KEY, value, {
         httpOnly: true,
-        maxAge: data.ei,
+        maxAge,
       })
     )
   }
@@ -58,7 +58,7 @@ export class AuthenticationService implements IAuthenticationService {
       `${ACCESS_TOKEN_ENDPOINTS[type]}?code=${code}&client_id=${CLIENTS_ID[type]}&client_secret=${CLIENTS_SECRET[type]}&redirect_uri=${REDIRECT_URL}&grant_type=authorization_code`
     )
     const authData = AUTHENTICATION_DATA_FACTORIES[type](data)
-    this.saveAuthenticationData(authData)
+    this.setAuthenticationCookie(JSON.stringify(authData), authData.ei)
   }
 
   async loadAuthenticationData(): Promise<AuthenticationData | null> {
@@ -70,13 +70,6 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async clearAuthenticationData(): Promise<void> {
-    this.res.setHeader(
-      'Set-Cookie',
-      serialize(AUTHENTICATION_COOKIE_KEY, '', {
-        httpOnly: true,
-        maxAge: 0,
-        sameSite: true
-      })
-    )
+    this.setAuthenticationCookie('', 0)
   }
 }

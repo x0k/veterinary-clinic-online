@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import isValid from 'date-fns/isValid'
 
 import {
   ClinicRecord,
+  ClinicRecordCreate,
   ClinicServiceEntity,
   ClinicServiceEntityID,
 } from '@/models/clinic'
@@ -39,6 +40,7 @@ import {
   dateDataToJSON,
   dateToDateData,
   dateToDateTimeData,
+  makeDateTimeShifter,
 } from '@/models/date'
 
 export interface CreateRecordProps {
@@ -48,6 +50,7 @@ export interface CreateRecordProps {
   productionCalendar: ProductionCalendar
   workBreaks: WorkBreaks
   clinicRecords: ClinicRecord[]
+  createRecord: (data: ClinicRecordCreate) => Promise<void>
 }
 
 interface FormFields {
@@ -55,8 +58,7 @@ interface FormFields {
   recordDate: JSONDate
   userName: string
   userPhone: string
-  userEmail: string
-  timePeriod: string
+  recordTime: string
 }
 
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Это поле обязательно для заполнения'
@@ -97,21 +99,25 @@ function TimePeriodSelect({
         : [],
     [getTimePeriodsForService, freeTimePeriods]
   )
+  const periodValues = useMemo(
+    () => periods.map((period) => JSON.stringify(period)),
+    [periods]
+  )
   useEffect(() => {
-    setValue('timePeriod', '')
+    setValue('recordTime', '')
   }, [periods, setValue])
   return (
     <Controller
       control={control}
-      name="timePeriod"
+      name="recordTime"
       rules={{ required: REQUIRED_FIELD_ERROR_MESSAGE }}
       render={({ field, fieldState: { invalid, error } }) => (
         <FormControl isInvalid={invalid}>
-          <FormLabel htmlFor="timePeriod">Время</FormLabel>
-          <RadioGroup {...field}>
+          <FormLabel htmlFor="recordTime">Время</FormLabel>
+          <RadioGroup id="recordTime" {...field}>
             <Box display="flex" flexDirection="column" gap="4">
               {periods.map((p, i) => (
-                <Radio key={i} value={String(i)}>
+                <Radio key={periodValues[i]} value={periodValues[i]}>
                   {timeDataToJSON(p.start)} - {timeDataToJSON(p.end)}
                 </Radio>
               ))}
@@ -131,6 +137,7 @@ export function CreateRecord({
   productionCalendar,
   userData,
   workBreaks,
+  createRecord,
 }: CreateRecordProps): JSX.Element {
   const [today, nextAvailableDay] = useMemo(() => {
     const date = new Date()
@@ -168,15 +175,34 @@ export function CreateRecord({
       service: clinicServices[0].id,
       recordDate: nextAvailableDay,
       userName: userData.name,
-      userEmail: userData.email,
       userPhone: userData.phone,
     },
     mode: 'onChange',
   })
+  const handleCreate = useCallback(
+    ({ recordDate, service, recordTime, userName, userPhone }: FormFields) => {
+      const timePeriod = JSON.parse(recordTime) as TimePeriod
+      const date = new Date(recordDate)
+      const shift = makeDateTimeShifter({ minutes: date.getTimezoneOffset() })
+      const dateData = dateToDateData(date)
+      return createRecord({
+        identity: userData.id,
+        service,
+        userName,
+        userEmail: userData.email ?? '',
+        userPhone,
+        utcDateTimePeriod: {
+          start: shift({ ...dateData, ...timePeriod.start }),
+          end: shift({ ...dateData, ...timePeriod.end }),
+        },
+      })
+    },
+    [createRecord, userData]
+  )
   return (
     <form
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onSubmit={handleSubmit(console.log)}
+      onSubmit={handleSubmit(handleCreate)}
       style={{ width: '100%', height: '100%' }}
     >
       <Box
@@ -196,17 +222,6 @@ export function CreateRecord({
             })}
           />
           <FormErrorMessage>{errors.userName?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={Boolean(errors.userEmail)}>
-          <FormLabel htmlFor="userEmail">Почта</FormLabel>
-          <Input
-            id="userEmail"
-            type="email"
-            {...register('userEmail', {
-              required: REQUIRED_FIELD_ERROR_MESSAGE,
-            })}
-          />
-          <FormErrorMessage>{errors.userPhone?.message}</FormErrorMessage>
         </FormControl>
         <FormControl isInvalid={Boolean(errors.userPhone)}>
           <FormLabel htmlFor="userPhone">Телефон</FormLabel>

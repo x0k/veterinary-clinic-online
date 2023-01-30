@@ -87,6 +87,6 @@ export function makePeriodsAPI<T>({ compare }: PeriodsAPIConfig<T>) {
     sortAndUnitePeriods,
     makePeriodContainsCheck,
     subtractPeriods,
-    subtractPeriodsFromPeriods
+    subtractPeriodsFromPeriods,
   }
 }

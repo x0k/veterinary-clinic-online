@@ -5,6 +5,7 @@ import { NotionRenderer } from 'react-notion-x'
 import { NotionAPI } from 'notion-client'
 import { useColorMode } from '@chakra-ui/react'
 
+import { PAGE_REVALIDATE_INTERVAL } from '@/models/app'
 import { NOTION_INFO_PAGE_ID } from '@/models/notion'
 import { MainLayout } from '@/components/main-layout'
 import { HeaderContainer } from '@/containers/header'
@@ -41,5 +42,5 @@ export async function getStaticProps(): Promise<
   GetStaticPropsResult<InfoPageProps>
 > {
   const recordMap = await notion.getPage(NOTION_INFO_PAGE_ID)
-  return { props: { recordMap } }
+  return { props: { recordMap }, revalidate: PAGE_REVALIDATE_INTERVAL }
 }

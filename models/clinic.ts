@@ -1,6 +1,7 @@
-import { UserId } from './user'
-import { DateTimePeriod } from './schedule'
 import { Brand } from '@/lib/type'
+
+import { UserId } from './user'
+import { DateTimePeriod } from './date'
 
 export type ClinicServiceEntityID = Brand<'clinicServiceEntityId'>
 
@@ -12,10 +13,16 @@ export interface ClinicServiceEntity {
 
 export type ClinicRecordID = Brand<'clinicRecordId'>
 
+export enum ClinicRecordStatus {
+  Awaits = 'awaits',
+  InWork = 'inWork'
+}
+
 export interface ClinicRecord {
   id: ClinicRecordID
   // present only for user record
   userId?: UserId
+  status: ClinicRecordStatus
   dateTimePeriod: DateTimePeriod
 }
 
@@ -29,8 +36,10 @@ export interface ClinicRecordCreate {
 }
 
 export interface Clinic {
+  isRecordsLoading: boolean
   clinicRecords: ClinicRecord[]
-  dismissRecord: (recordId: ClinicRecordID) => void
+  createRecord: (data: ClinicRecordCreate) => Promise<void>
+  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
 }
 
 export interface IClinicService {
@@ -42,5 +51,6 @@ export interface IClinicService {
 
 export interface ClinicRPCConfig {
   fetchActualRecords: () => Promise<ClinicRecord[]>
+  createRecord: (data: ClinicRecordCreate) => Promise<ClinicRecord>
   dismissRecord: (recordId: ClinicRecordID) => Promise<void>
 }

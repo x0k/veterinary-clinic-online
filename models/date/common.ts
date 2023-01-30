@@ -1,3 +1,5 @@
+import add from 'date-fns/add'
+
 export interface TimeData {
   minutes: number
   hours: number
@@ -23,7 +25,7 @@ export function compareDateTime(a: DateTimeData, b: DateTimeData): number {
   return compareDate(a, b) || compareTime(a, b)
 }
 
-export function makeTimeAdder({
+export function makeTimeShifter({
   hours = 0,
   minutes = 0,
 }: Partial<TimeData>): (time: TimeData) => TimeData {
@@ -36,6 +38,15 @@ export function makeTimeAdder({
       hours: time.hours + hours + additionalHours,
       minutes: totalMinutes - additionalHours * 60,
     }
+  }
+}
+
+export function makeDateTimeShifter(
+  duration: Partial<DateTimeData>
+): (data: DateTimeData) => DateTimeData {
+  return (data) => {
+    const d = dateTimeDataToDate(data)
+    return dateToDateTimeData(add(d, duration))
   }
 }
 

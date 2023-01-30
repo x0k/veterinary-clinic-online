@@ -10,7 +10,7 @@ import {
   dateDataToJSON,
   compareDate,
   dateTimePeriodsAPI,
-  makeTimeAdder,
+  makeTimeShifter,
   getTimePeriodDurationInMinutes,
 } from './date'
 
@@ -151,17 +151,17 @@ export function makeFreeTimePeriodsCalculatorForDate({
         let reducedLastPeriod: TimePeriod
         do {
           const lastPeriod = simplifiedPeriods[i--]
-          const reduce = makeTimeAdder({ minutes: mitesToReduce })
+          const shift = makeTimeShifter({ minutes: mitesToReduce })
           reducedLastPeriod = {
             start: lastPeriod.start,
-            end: reduce(lastPeriod.end),
+            end: shift(lastPeriod.end),
           }
           mitesToReduce = getTimePeriodDurationInMinutes(reducedLastPeriod)
         } while (mitesToReduce > 0 && i > 0)
         return {
           date,
           periods:
-            mitesToReduce < 0
+            mitesToReduce <= 0
               ? periods.slice(0, i + 1).concat(reducedLastPeriod)
               : [],
         }
@@ -218,7 +218,7 @@ export function makeFreeTimePeriodsCalculatorForDate({
 export function makeFreeTimePeriodsWithDurationCalculator(
   duration: number
 ): (period: TimePeriod) => TimePeriod[] {
-  const addDuration = makeTimeAdder({ minutes: duration })
+  const addDuration = makeTimeShifter({ minutes: duration })
   function getFreeTimePeriods(period: TimePeriod): TimePeriod[] {
     const { start, end } = period
     if (start.minutes > 0) {
