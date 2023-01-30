@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button, Heading, Text, Center } from '@chakra-ui/react'
-import { FaGoogle, FaVk } from 'react-icons/fa'
+import { FaVk } from 'react-icons/fa'
 
 import {
   AuthenticationType,
@@ -22,13 +22,6 @@ export function AuthorizeContainer(): JSX.Element {
         as={Link}
       >
         ВКонтакте
-      </Button>
-      <Button
-        leftIcon={<FaGoogle />}
-        href={makeAuthenticationLink(AuthenticationType.Google)}
-        as={Link}
-      >
-        Google
       </Button>
       {error && (
         <Text color="red.500">
