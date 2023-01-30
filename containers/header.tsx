@@ -49,7 +49,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         <DrawerContent>
           <DrawerHeader borderBottomWidth="1px">Навигация</DrawerHeader>
           <DrawerBody>
-            <Box display="flex" flexDirection="column" gap="2">
+            <Box display="flex" flexDirection="column" gap="2" fontSize="xl">
               <Links
                 linkClassName="no-decoration inactive-link"
                 activeLinkClassName="no-decoration active-link"
