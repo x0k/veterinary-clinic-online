@@ -6,7 +6,9 @@ import {
   useMemo,
 } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useToast } from '@chakra-ui/react'
 
+import { dateId } from '@/lib/date-id'
 import { noopPromise } from '@/lib/function'
 import {
   Clinic,
@@ -19,12 +21,15 @@ import { queryKey } from '@/models/app'
 import { UserData } from '@/models/user'
 import {
   compareDate,
+  dateTimePeriodsAPI,
   dateToDateTimeData,
   getTimePeriodDurationInMinutes,
+  makeDateTimeShifter,
 } from '@/models/date'
 
 const ClinicContext = createContext<Clinic>({
   isRecordsLoading: false,
+  isRecordsFetching: false,
   clinicRecords: [],
   createRecord: noopPromise,
   dismissRecord: noopPromise,
@@ -46,76 +51,148 @@ export interface ClinicProviderProps {
   children: ReactNode
 }
 
+const shiftToMoscowTZ = makeDateTimeShifter({
+  hours: 3,
+})
+
 export function ClinicProvider({
   userData,
   children,
   handlers,
 }: ClinicProviderProps): JSX.Element {
-  const { data: clinicRecords, isLoading: isRecordsLoading } = useQuery(
-    queryKey.clinicRecords,
-    handlers.fetchRecords,
-    {
-      refetchInterval(data) {
-        if (!data) {
+  const {
+    data: clinicRecords,
+    isLoading: isRecordsLoading,
+    isFetching: isRecordsFetching,
+  } = useQuery(queryKey.clinicRecords, handlers.fetchRecords, {
+    refetchInterval(data) {
+      if (!data) {
+        return false
+      }
+      const userRecord = data.find((r) => r.userId === userData.id)
+      const now = dateToDateTimeData(new Date())
+      if (
+        !userRecord ||
+        userRecord.status === ClinicRecordStatus.InWork ||
+        compareDate(userRecord.dateTimePeriod.start, now) !== 0
+      ) {
+        return false
+      }
+      const minutesToStart = getTimePeriodDurationInMinutes({
+        start: now,
+        end: userRecord.dateTimePeriod.start,
+      })
+      switch (true) {
+        case minutesToStart < -10:
           return false
-        }
-        const userRecord = data.find((r) => r.userId === userData.id)
-        const now = dateToDateTimeData(new Date())
-        if (
-          !userRecord ||
-          userRecord.status === ClinicRecordStatus.InWork ||
-          compareDate(userRecord.dateTimePeriod.start, now) !== 0
-        ) {
+        case minutesToStart < 3:
+          return 10000
+        case minutesToStart < 5:
+          return 30000
+        case minutesToStart < 10:
+          return 90000
+        case minutesToStart < 30:
+          return 300000
+        case minutesToStart < 60:
+          return 600000
+        default:
           return false
-        }
-        const minutesToStart = getTimePeriodDurationInMinutes({
-          start: now,
-          end: userRecord.dateTimePeriod.start,
-        })
-        switch (true) {
-          case minutesToStart < -10:
-            return false
-          case minutesToStart < 3:
-            return 10000
-          case minutesToStart < 5:
-            return 30000
-          case minutesToStart < 10:
-            return 90000
-          case minutesToStart < 30:
-            return 300000
-          case minutesToStart < 60:
-            return 600000
-          default:
-            return false
-        }
-      },
-    }
-  )
+      }
+    },
+  })
   const queryClient = useQueryClient()
+  const toast = useToast({
+    position: 'bottom-right',
+  })
   const { mutateAsync: dismissRecord } = useMutation(handlers.dismissRecord, {
-    onSuccess(_, recordId) {
-      const records = queryClient.getQueryData<ClinicRecord[]>(
+    async onMutate(recordId) {
+      await queryClient.cancelQueries(queryKey.clinicRecords)
+      const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
         queryKey.clinicRecords
       )
-      queryClient.setQueryData(
+      queryClient.setQueryData<ClinicRecord[] | undefined>(
         queryKey.clinicRecords,
-        records?.filter((r) => r.id !== recordId)
+        (records) => records?.filter((r) => r.id !== recordId)
       )
+      return { previousRecords }
+    },
+    onError(error, _, context) {
+      if (context && 'previousRecords' in context) {
+        queryClient.setQueryData(
+          queryKey.clinicRecords,
+          context.previousRecords
+        )
+      }
+      toast({
+        status: 'error',
+        title: 'Ошибка при отмене записи',
+        description: error instanceof Error ? error.message : undefined,
+      })
+    },
+    async onSettled() {
+      await queryClient.invalidateQueries(queryKey.clinicRecords)
     },
   })
   const { mutateAsync: createRecord } = useMutation(handlers.createRecord, {
-    onSuccess() {
-      void queryClient.invalidateQueries(queryKey.clinicRecords)
+    async onMutate({ identity, utcDateTimePeriod }) {
+      await queryClient.cancelQueries(queryKey.clinicRecords)
+      const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
+        queryKey.clinicRecords
+      )
+      queryClient.setQueryData<ClinicRecord[] | undefined>(
+        queryKey.clinicRecords,
+        (records = []) =>
+          records
+            .concat({
+              id: dateId() as ClinicRecordID,
+              status: ClinicRecordStatus.Awaits,
+              userId: identity,
+              dateTimePeriod: {
+                start: shiftToMoscowTZ(utcDateTimePeriod.start),
+                end: shiftToMoscowTZ(utcDateTimePeriod.end),
+              },
+            })
+            .sort((a, b) =>
+              dateTimePeriodsAPI.comparePeriods(
+                a.dateTimePeriod,
+                b.dateTimePeriod
+              )
+            )
+      )
+      return { previousRecords }
+    },
+    onError(error, _, context) {
+      if (context && 'previousRecords' in context) {
+        queryClient.setQueryData(
+          queryKey.clinicRecords,
+          context.previousRecords
+        )
+      }
+      toast({
+        status: 'error',
+        title: 'Ошибка при создании записи',
+        description: error instanceof Error ? error.message : undefined,
+      })
+    },
+    async onSettled() {
+      await queryClient.invalidateQueries(queryKey.clinicRecords)
     },
   })
   const value: Clinic = useMemo(
     () => ({
       isRecordsLoading,
+      isRecordsFetching,
       clinicRecords: clinicRecords ?? [],
       createRecord,
       dismissRecord,
     }),
-    [isRecordsLoading, clinicRecords, dismissRecord, createRecord]
+    [
+      isRecordsLoading,
+      isRecordsFetching,
+      clinicRecords,
+      dismissRecord,
+      createRecord,
+    ]
   )
   return createElement(ClinicContext.Provider, { value }, children)
 }

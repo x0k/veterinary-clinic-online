@@ -24,7 +24,7 @@ export function RecordContainer({
   productionCalendar,
   workBreaks,
 }: RecordContainerProps): JSX.Element | null {
-  const { isRecordsLoading, clinicRecords, dismissRecord, createRecord } =
+  const { isRecordsLoading, isRecordsFetching, clinicRecords, dismissRecord, createRecord } =
     useClinic()
   const userRecordIndex = useMemo(
     () => clinicRecords.findIndex((r) => r.userId === userData.id),
@@ -37,12 +37,14 @@ export function RecordContainer({
     </Center>
   ) : userHasRecord ? (
     <RecordInfo
+      isRecordsFetching={isRecordsFetching}
       record={clinicRecords[userRecordIndex]}
       hasRecordsBefore={userRecordIndex > 0}
       dismissRecord={dismissRecord}
     />
   ) : (
     <CreateRecord
+      isRecordsFetching={isRecordsFetching}
       clinicRecords={clinicRecords}
       clinicServices={clinicServices}
       openingHours={openingHours}

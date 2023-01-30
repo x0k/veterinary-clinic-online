@@ -37,6 +37,7 @@ export interface ClinicRecordCreate {
 
 export interface Clinic {
   isRecordsLoading: boolean
+  isRecordsFetching: boolean
   clinicRecords: ClinicRecord[]
   createRecord: (data: ClinicRecordCreate) => Promise<void>
   dismissRecord: (recordId: ClinicRecordID) => Promise<void>

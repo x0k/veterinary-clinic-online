@@ -1,7 +1,6 @@
 import {
   Button,
   Center,
-  CircularProgress,
   Heading,
   Text,
 } from '@chakra-ui/react'
@@ -20,9 +19,9 @@ import {
   formatDate,
   timeDataToJSON,
 } from '@/models/date'
-import { useMutation } from 'react-query'
 
 export interface RecordInfoProps {
+  isRecordsFetching: boolean
   record: ClinicRecord
   hasRecordsBefore: boolean
   dismissRecord: (recordId: ClinicRecordID) => Promise<void>
@@ -39,21 +38,19 @@ function makeWaitedStateText({ start, end }: DateTimePeriod): string {
 export function RecordInfo({
   record: { id, dateTimePeriod, status },
   hasRecordsBefore,
+  isRecordsFetching,
   dismissRecord,
 }: RecordInfoProps): JSX.Element {
   const inWork = status === ClinicRecordStatus.InWork
   const shouldBeInWork = dateTimePeriodsAPI.makePeriodContainsCheck(
     dateTimePeriod
   )(dateToDateTimeData(new Date()))
-  const { mutate, isLoading } = useMutation(dismissRecord)
   const handleCancel = (): void => {
-    mutate(id)
+    void dismissRecord(id)
   }
   return (
     <Center height="full" flexDirection="column" gap="2">
-      {isLoading ? (
-        <CircularProgress isIndeterminate size="8rem" color="teal.500" />
-      ) : inWork ? (
+      {inWork ? (
         <Heading>Вы в процессе получения услуги!</Heading>
       ) : (
         <>
@@ -61,14 +58,22 @@ export function RecordInfo({
           {!shouldBeInWork ? (
             <>
               <Text>{makeWaitedStateText(dateTimePeriod)}</Text>
-              <Button onClick={handleCancel} colorScheme="red">
+              <Button
+                isLoading={isRecordsFetching}
+                onClick={handleCancel}
+                colorScheme="red"
+              >
                 Отменить запись
               </Button>
             </>
           ) : hasRecordsBefore ? (
             <>
               <Text>Ваша очередь задерживается</Text>
-              <Button onClick={handleCancel} colorScheme="red">
+              <Button
+                isLoading={isRecordsFetching}
+                onClick={handleCancel}
+                colorScheme="red"
+              >
                 Отменить запись
               </Button>
             </>

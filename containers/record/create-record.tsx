@@ -47,6 +47,7 @@ import {
 import { AppRoute } from '@/models/app'
 
 export interface CreateRecordProps {
+  isRecordsFetching: boolean
   userData: UserData
   clinicServices: ClinicServiceEntity[]
   openingHours: OpeningHours
@@ -134,6 +135,7 @@ function TimePeriodSelect({
 }
 
 export function CreateRecord({
+  isRecordsFetching,
   clinicRecords,
   clinicServices,
   openingHours,
@@ -277,7 +279,11 @@ export function CreateRecord({
           getFreeTimePeriodsForDate={getFreeTimePeriodsForDate}
           setValue={setValue}
         />
-        <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
+        <Button
+          type="submit"
+          colorScheme="teal"
+          isLoading={isSubmitting || isRecordsFetching}
+        >
           Записаться
         </Button>
         <Link
