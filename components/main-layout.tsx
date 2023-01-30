@@ -20,7 +20,7 @@ export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
         padding="4"
         fontSize={{
           base: 'xl',
-          md: "3xl"
+          md: '3xl',
         }}
         fontWeight="bold"
         lineHeight="10"
@@ -33,10 +33,7 @@ export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
         marginX="auto"
         maxWidth="3xl"
         paddingX="4"
-        paddingY="2"
-        height={{
-          sm: "calc(100vh - 4.5rem)"
-        }}
+        minHeight="calc(100vh - 4.5rem)"
       >
         {children}
       </Box>

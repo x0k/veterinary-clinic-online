@@ -43,7 +43,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         onClick={onOpen}
         icon={<FaBars />}
       />
-      <Text>{title}</Text>
+      <Text noOfLines={1}>{title}</Text>
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
         <DrawerContent>

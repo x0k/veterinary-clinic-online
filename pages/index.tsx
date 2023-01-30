@@ -58,6 +58,7 @@ const workBreaks: WorkBreaks = [
     },
   },
 ]
+const sampleRate = 30
 
 const clinicHandlers = makeClinicHandlers(makeRPCClient(ApiRoutes.Clinic))
 
@@ -85,6 +86,7 @@ export default function HomePage({
         {isUserAuthenticated(user) ? (
           <ClinicProvider userData={user.userData} handlers={clinicHandlers}>
             <RecordContainer
+              sampleRate={sampleRate}
               userData={user.userData}
               clinicServices={clinicServices}
               openingHours={openingHours}

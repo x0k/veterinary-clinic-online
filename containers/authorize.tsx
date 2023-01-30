@@ -14,7 +14,7 @@ export function AuthorizeContainer(): JSX.Element {
     query: { [AUTHENTICATION_ERROR_QUERY_KEY]: error },
   } = useRouter()
   return (
-    <Center height="full" flexDirection="column" gap="2">
+    <Center minHeight="inherit" flexDirection="column" gap="2">
       <Heading textAlign="center">Войти</Heading>
       <Button
         leftIcon={<FaVk />}

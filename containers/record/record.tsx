@@ -10,6 +10,7 @@ import { RecordInfo } from './record-info'
 import { CreateRecord } from './create-record'
 
 export interface RecordContainerProps {
+  sampleRate: number
   userData: UserData
   openingHours: OpeningHours
   productionCalendar: ProductionCalendar
@@ -18,21 +19,27 @@ export interface RecordContainerProps {
 }
 
 export function RecordContainer({
+  sampleRate,
   userData,
   clinicServices,
   openingHours,
   productionCalendar,
   workBreaks,
 }: RecordContainerProps): JSX.Element | null {
-  const { isRecordsLoading, isRecordsFetching, clinicRecords, dismissRecord, createRecord } =
-    useClinic()
+  const {
+    isRecordsLoading,
+    isRecordsFetching,
+    clinicRecords,
+    dismissRecord,
+    createRecord,
+  } = useClinic()
   const userRecordIndex = useMemo(
     () => clinicRecords.findIndex((r) => r.userId === userData.id),
     [clinicRecords, userData.id]
   )
   const userHasRecord = userRecordIndex > -1
   return isRecordsLoading ? (
-    <Center height="full">
+    <Center minHeight="inherit">
       <CircularProgress isIndeterminate color="teal.500" size="8rem" />
     </Center>
   ) : userHasRecord ? (
@@ -44,6 +51,7 @@ export function RecordContainer({
     />
   ) : (
     <CreateRecord
+      sampleRate={sampleRate}
       isRecordsFetching={isRecordsFetching}
       clinicRecords={clinicRecords}
       clinicServices={clinicServices}

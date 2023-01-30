@@ -49,7 +49,7 @@ export function RecordInfo({
     void dismissRecord(id)
   }
   return (
-    <Center height="full" flexDirection="column" gap="2">
+    <Center minHeight="inherit" flexDirection="column" gap="2">
       {inWork ? (
         <Heading>Вы в процессе получения услуги!</Heading>
       ) : (

@@ -216,14 +216,17 @@ export function makeFreeTimePeriodsCalculatorForDate({
 }
 
 export function makeFreeTimePeriodsWithDurationCalculator(
-  duration: number
+  duration: number,
+  sampleRate: number
 ): (period: TimePeriod) => TimePeriod[] {
-  const addDuration = makeTimeShifter({ minutes: duration })
+  const durationShift = makeTimeShifter({ minutes: duration })
+  const sampleRateShift = makeTimeShifter({ minutes: sampleRate })
   function getFreeTimePeriods(period: TimePeriod): TimePeriod[] {
     const { start, end } = period
-    if (start.minutes > 0) {
+    const rest = start.minutes % sampleRate
+    if (rest !== 0) {
       return getFreeTimePeriods({
-        start: { hours: start.hours + 1, minutes: 0 },
+        start: makeTimeShifter({ minutes: sampleRate - rest })(start),
         end,
       })
     }
@@ -231,10 +234,9 @@ export function makeFreeTimePeriodsWithDurationCalculator(
     if (periodDuration < duration) {
       return []
     }
-    const freePeriod: TimePeriod = { start, end: addDuration(start) }
-    return [freePeriod].concat(
+    return [{ start, end: durationShift(start) }].concat(
       timePeriodsAPI
-        .subtractPeriods(period, freePeriod)
+        .subtractPeriods(period, { start, end: sampleRateShift(start) })
         .flatMap(getFreeTimePeriods)
     )
   }

@@ -48,6 +48,7 @@ import { AppRoute } from '@/models/app'
 
 export interface CreateRecordProps {
   isRecordsFetching: boolean
+  sampleRate: number
   userData: UserData
   clinicServices: ClinicServiceEntity[]
   openingHours: OpeningHours
@@ -68,6 +69,7 @@ interface FormFields {
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Это поле обязательно для заполнения'
 
 interface TimePeriodSelectProps {
+  sampleRate: number
   control: Control<FormFields, any>
   clinicServices: ClinicServiceEntity[]
   getFreeTimePeriodsForDate: (date: Date) => TimePeriod[]
@@ -75,6 +77,7 @@ interface TimePeriodSelectProps {
 }
 
 function TimePeriodSelect({
+  sampleRate,
   setValue,
   control,
   clinicServices,
@@ -93,9 +96,9 @@ function TimePeriodSelect({
       selectedServiceId &&
       clinicServices.find((s) => s.id === selectedServiceId)
     return service
-      ? makeFreeTimePeriodsWithDurationCalculator(service.durationInMinutes)
+      ? makeFreeTimePeriodsWithDurationCalculator(service.durationInMinutes, sampleRate)
       : null
-  }, [selectedServiceId, clinicServices])
+  }, [selectedServiceId, clinicServices, sampleRate])
   const periods = useMemo(
     () =>
       getTimePeriodsForService && freeTimePeriods
@@ -142,6 +145,7 @@ export function CreateRecord({
   productionCalendar,
   userData,
   workBreaks,
+  sampleRate,
   createRecord,
 }: CreateRecordProps): JSX.Element {
   const [today, nextAvailableDay] = useMemo(() => {
@@ -208,7 +212,7 @@ export function CreateRecord({
     <form
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onSubmit={handleSubmit(handleCreate)}
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', minHeight: 'inherit' }}
     >
       <Box
         display="flex"
@@ -216,7 +220,7 @@ export function CreateRecord({
         gap="4"
         maxW="sm"
         marginX="auto"
-        height="full"
+        minHeight="inherit"
       >
         <FormControl isInvalid={Boolean(errors.userName)}>
           <FormLabel htmlFor="userName">Имя</FormLabel>
@@ -274,6 +278,7 @@ export function CreateRecord({
           </FormControl>
         </Box>
         <TimePeriodSelect
+          sampleRate={sampleRate}
           clinicServices={clinicServices}
           control={control}
           getFreeTimePeriodsForDate={getFreeTimePeriodsForDate}
