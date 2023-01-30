@@ -53,8 +53,8 @@ const workBreaks: WorkBreaks = [
     matchExpression: '^[1-5]',
     title: 'Перерыв на обед',
     period: {
-      start: { hours: 13, minutes: 0 },
-      end: { hours: 14, minutes: 0 },
+      start: { hours: 12, minutes: 30 },
+      end: { hours: 13, minutes: 30 },
     },
   },
 ]
