@@ -98,8 +98,8 @@ export const AUTH_ENDPOINTS: Record<AuthenticationType, string> = {
 
 export const AUTH_SCOPES: Record<AuthenticationType, string> = encode({
   [AuthenticationType.Google]:
-    'https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-  [AuthenticationType.VK]: 'email status',
+    'https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/userinfo.email',
+  [AuthenticationType.VK]: 'email',
 })
 
 export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN as string

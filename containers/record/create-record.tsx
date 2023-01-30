@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react'
+import NextLink from 'next/link'
 import {
   Box,
   Button,
@@ -9,6 +10,7 @@ import {
   Radio,
   RadioGroup,
   Select,
+  Link,
 } from '@chakra-ui/react'
 import {
   Control,
@@ -42,6 +44,7 @@ import {
   dateToDateTimeData,
   makeDateTimeShifter,
 } from '@/models/date'
+import { AppRoute } from '@/models/app'
 
 export interface CreateRecordProps {
   userData: UserData
@@ -277,6 +280,14 @@ export function CreateRecord({
         <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
           Записаться
         </Button>
+        <Link
+          as={NextLink}
+          href={AppRoute.Privacy}
+          textAlign="center"
+          target="_blank"
+        >
+          Политика конфиденциальности
+        </Link>
       </Box>
     </form>
   )

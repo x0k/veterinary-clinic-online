@@ -8,7 +8,7 @@ export interface MainLayoutProps {
 
 export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
   return (
-    <div>
+    <>
       <Box
         display="flex"
         flexDirection={{ base: 'column', sm: 'row' }}
@@ -45,6 +45,6 @@ export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
       >
         {children}
       </Box>
-    </div>
+    </>
   )
 }
