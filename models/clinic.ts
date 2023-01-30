@@ -1,7 +1,8 @@
 import { UserId } from './user'
 import { DateTimePeriod } from './schedule'
+import { Brand } from '@/lib/type'
 
-export type ClinicServiceEntityID = string
+export type ClinicServiceEntityID = Brand<'clinicServiceEntityId'>
 
 export interface ClinicServiceEntity {
   id: ClinicServiceEntityID
@@ -9,7 +10,7 @@ export interface ClinicServiceEntity {
   durationInMinutes: number
 }
 
-export type ClinicRecordID = string
+export type ClinicRecordID = Brand<'clinicRecordId'>
 
 export interface ClinicRecord {
   id: ClinicRecordID
@@ -24,20 +25,22 @@ export interface ClinicRecordCreate {
   userEmail: string
   userPhone: string
   service: ClinicServiceEntityID
-  dateTimePeriod: DateTimePeriod
+  utcDateTimePeriod: DateTimePeriod
 }
 
-export interface ClinicData {
+export interface Clinic {
   clinicRecords: ClinicRecord[]
+  dismissRecord: (recordId: ClinicRecordID) => void
 }
 
 export interface IClinicService {
   fetchServices: () => Promise<ClinicServiceEntity[]>
-  fetchRecords: (userId: UserId) => Promise<ClinicRecord[]>
+  fetchActualRecords: (userId?: UserId) => Promise<ClinicRecord[]>
   createRecord: (create: ClinicRecordCreate) => Promise<ClinicRecord>
   removeRecord: (id: ClinicRecordID) => Promise<void>
 }
 
 export interface ClinicRPCConfig {
-  fetchRecords: () => Promise<ClinicRecord[]>
+  fetchActualRecords: () => Promise<ClinicRecord[]>
+  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
 }

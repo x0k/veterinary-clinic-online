@@ -1,14 +1,11 @@
 import { useMemo } from 'react'
 
 import { ClinicServiceEntity } from '@/models/clinic'
-import {
-  makeDayFreeTimePeriodsCalculator,
-  OpeningHours,
-  ProductionCalendar,
-  WorkBreaks,
-} from '@/models/schedule'
+import { OpeningHours, ProductionCalendar, WorkBreaks } from '@/models/schedule'
 import { UserData } from '@/models/user'
 import { useClinic } from '@/domains/clinic'
+import { RecordInfo } from './record-info'
+import { CreateRecord } from './create-record'
 
 export interface RecordContainerProps {
   userData: UserData
@@ -25,24 +22,28 @@ export function RecordContainer({
   productionCalendar,
   workBreaks,
 }: RecordContainerProps): JSX.Element | null {
-  const { clinicRecords } = useClinic()
-  const busyPeriods = useMemo(
-    () => clinicRecords.map((r) => r.dateTimePeriod),
-    [clinicRecords]
-  )
-  const getFreeTimePeriodsForDate = useMemo(
-    () =>
-      makeDayFreeTimePeriodsCalculator({
-        openingHours,
-        busyPeriods,
-        productionCalendar,
-        workBreaks,
-      }),
-    [openingHours, busyPeriods, productionCalendar, workBreaks]
-  )
-  const userRecord = useMemo(
-    () => clinicRecords.find((r) => r.userId === userData.id),
+  const { clinicRecords, dismissRecord } = useClinic()
+  const userRecordIndex = useMemo(
+    () => clinicRecords.findIndex((r) => r.userId === userData.id),
     [clinicRecords, userData.id]
   )
-  return null
+  const userHasRecord = userRecordIndex > -1
+  return userHasRecord ? (
+    <RecordInfo
+      record={clinicRecords[userRecordIndex]}
+      hasRecordsBefore={userRecordIndex > 0}
+      dismissRecord={() => {
+        dismissRecord(clinicRecords[userRecordIndex].id)
+      }}
+    />
+  ) : (
+    <CreateRecord
+      clinicRecords={clinicRecords}
+      clinicServices={clinicServices}
+      openingHours={openingHours}
+      productionCalendar={productionCalendar}
+      userData={userData}
+      workBreaks={workBreaks}
+    />
+  )
 }

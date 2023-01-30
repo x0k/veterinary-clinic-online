@@ -4,6 +4,7 @@ import Head from 'next/head'
 import axios from 'axios'
 import { Client } from '@notionhq/client'
 
+import { makeRPCClient } from '@/lib/axios-simple-rpc-client'
 import {
   makeProductionCalendarWithoutSaturdayWeekend,
   OpeningHours,
@@ -13,6 +14,7 @@ import {
   WorkBreaks,
 } from '@/models/schedule'
 import { ClinicServiceEntity } from '@/models/clinic'
+import { ApiRoutes } from '@/models/app'
 import { NOTION_AUTH } from '@/models/notion'
 import { useUser } from '@/domains/user'
 import { MainLayout } from '@/components/main-layout'
@@ -21,6 +23,8 @@ import { AuthorizeContainer } from '@/containers/authorize'
 import { RecordContainer } from '@/containers/record'
 import { ClinicService } from '@/implementation/clinic-service'
 import { isUserAuthenticated } from '@/models/user'
+import { ClinicProvider } from '@/domains/clinic'
+import { makeClinicHandlers } from '@/adapters/clinic-handlers'
 
 export interface HomePageProps {
   productionCalendarData: ProductionCalendarData
@@ -55,6 +59,8 @@ const workBreaks: WorkBreaks = [
   },
 ]
 
+const clinicHandlers = makeClinicHandlers(makeRPCClient(ApiRoutes.Clinic))
+
 export default function HomePage({
   productionCalendarData,
   clinicServices,
@@ -77,13 +83,15 @@ export default function HomePage({
       </Head>
       <MainLayout header={<HeaderContainer />}>
         {isUserAuthenticated(user) ? (
-          <RecordContainer
-            userData={user.userData}
-            clinicServices={clinicServices}
-            openingHours={openingHours}
-            productionCalendar={productionCalendar}
-            workBreaks={workBreaks}
-          />
+          <ClinicProvider handlers={clinicHandlers}>
+            <RecordContainer
+              userData={user.userData}
+              clinicServices={clinicServices}
+              openingHours={openingHours}
+              productionCalendar={productionCalendar}
+              workBreaks={workBreaks}
+            />
+          </ClinicProvider>
         ) : (
           <AuthorizeContainer />
         )}

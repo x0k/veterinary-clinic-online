@@ -5,21 +5,24 @@ import {
   useContext,
   useMemo,
 } from 'react'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 
-import { ClinicData, ClinicRecord } from '@/models/clinic'
-import { useQuery } from 'react-query'
+import { noop } from '@/lib/function'
+import { Clinic, ClinicRecord, ClinicRecordID } from '@/models/clinic'
 import { queryKey } from '@/models/app'
 
-const ClinicContext = createContext<ClinicData>({
+const ClinicContext = createContext<Clinic>({
   clinicRecords: [],
+  dismissRecord: noop,
 })
 
-export function useClinic(): ClinicData {
+export function useClinic(): Clinic {
   return useContext(ClinicContext)
 }
 
 export interface ClinicHandlers {
   fetchRecords: () => Promise<ClinicRecord[]>
+  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
 }
 
 export interface ClinicProviderProps {
@@ -33,16 +36,26 @@ export function ClinicProvider({
 }: ClinicProviderProps): JSX.Element {
   const { data: clinicRecords } = useQuery(
     queryKey.clinicRecords,
-    handlers.fetchRecords,
-    {
-      initialData: [],
-    }
+    handlers.fetchRecords
   )
-  const value: ClinicData = useMemo(
+  const queryClient = useQueryClient()
+  const { mutate: dismissRecord } = useMutation(handlers.dismissRecord, {
+    onSuccess(_, recordId) {
+      const records = queryClient.getQueryData<ClinicRecord[]>(
+        queryKey.clinicRecords
+      )
+      queryClient.setQueryData(
+        queryKey.clinicRecords,
+        records?.filter((r) => r.id !== recordId)
+      )
+    },
+  })
+  const value: Clinic = useMemo(
     () => ({
-      clinicRecords: clinicRecords as ClinicRecord[],
+      clinicRecords: clinicRecords ?? [],
+      dismissRecord,
     }),
-    [clinicRecords]
+    [clinicRecords, dismissRecord]
   )
   return createElement(ClinicContext.Provider, { value }, children)
 }

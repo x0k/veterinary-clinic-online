@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Box, Button, Heading, Text } from '@chakra-ui/react'
+import { Button, Heading, Text, Center } from '@chakra-ui/react'
+import { FaGoogle, FaVk } from 'react-icons/fa'
 
 import {
   AuthenticationType,
@@ -13,31 +14,27 @@ export function AuthorizeContainer(): JSX.Element {
     query: { [AUTHENTICATION_ERROR_QUERY_KEY]: error },
   } = useRouter()
   return (
-    <Box
-      display="flex"
-      height="full"
-      flexDirection="column"
-      alignItems="stretch"
-      justifyContent="center"
-      gap="2"
-      maxW="sm"
-      marginX="auto"
-    >
+    <Center height="full" flexDirection="column" gap="2">
       <Heading textAlign="center">Войти</Heading>
-      <Button href={makeAuthenticationLink(AuthenticationType.VK)} as={Link}>
-        VK
+      <Button
+        leftIcon={<FaVk />}
+        href={makeAuthenticationLink(AuthenticationType.VK)}
+        as={Link}
+      >
+        ВКонтакте
       </Button>
       <Button
+        leftIcon={<FaGoogle />}
         href={makeAuthenticationLink(AuthenticationType.Google)}
         as={Link}
       >
         Google
       </Button>
       {error && (
-        <Text textAlign="center" color="red.500">
+        <Text color="red.500">
           {error}
         </Text>
       )}
-    </Box>
+    </Center>
   )
 }

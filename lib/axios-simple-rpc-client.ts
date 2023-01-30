@@ -5,17 +5,17 @@ import {
   SIMPLE_RPC_PROCEDURE_NAME_HTTP_HEADER,
 } from '@/lib/simple-rpc'
 
-export type RPCClient<Config extends RPCConfig<Config>> = <
-  P extends keyof Config & string
->(
-  procedureName: P,
-  ...params: Parameters<Config[P]>
-) => Promise<Awaited<ReturnType<Config[P]>>>
+export interface RPCClient<Config extends RPCConfig<Config>> {
+  call: <P extends keyof Config & string>(
+    procedureName: P,
+    ...params: Parameters<Config[P]>
+  ) => Promise<Awaited<ReturnType<Config[P]>>>
+}
 
 export function makeRPCClient<Config extends RPCConfig<Config>>(
   url: string
 ): RPCClient<Config> {
-  return async function call<P extends keyof Config & string>(
+  async function call<P extends keyof Config & string>(
     procedureName: P,
     ...params: Parameters<Config[P]>
   ): Promise<Awaited<ReturnType<Config[P]>>> {
@@ -30,4 +30,5 @@ export function makeRPCClient<Config extends RPCConfig<Config>>(
     )
     return data
   }
+  return { call }
 }

@@ -28,14 +28,18 @@ export function HeaderContainer(): JSX.Element {
         Информация
       </Link>
       <Box flexGrow="1" />
-      <IconButton
-        aria-label="Color mode switch"
-        onClick={toggleColorMode}
-        icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
-      />
-      {isUserAuthenticated(user) && (
-        <Button onClick={user.logout}>Выйти</Button>
-      )}
+      <Box display="flex" flexDirection="row-reverse" gap="2">
+        <IconButton
+          aria-label="Color mode switch"
+          onClick={toggleColorMode}
+          icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
+        />
+        {isUserAuthenticated(user) && (
+          <Button flexGrow="1" onClick={user.logout}>
+            Выйти
+          </Button>
+        )}
+      </Box>
     </Links>
   )
 }

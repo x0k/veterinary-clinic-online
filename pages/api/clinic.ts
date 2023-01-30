@@ -10,11 +10,14 @@ import { UserService } from '@/implementation/user-service'
 const clinicService = new ClinicService(new NotionClient({ auth: NOTION_AUTH }))
 
 export default makeRPCHandler<ClinicRPCConfig>({
-  fetchRecords: async (ctx) => {
+  fetchActualRecords: async (ctx) => {
     const userService = new UserService(
       new AuthenticationService(ctx.request, ctx.response)
     )
     const userData = await userService.fetchUserData()
-    return await clinicService.fetchRecords(userData?.id)
+    return await clinicService.fetchActualRecords(userData?.id)
+  },
+  dismissRecord: async (ctx, recordId) => {
+    await clinicService.removeRecord(recordId)
   },
 })

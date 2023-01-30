@@ -39,6 +39,13 @@ export enum ClinicRecordProperty {
   UserId = 'identity'
 }
 
+export enum ClinicRecordStatus {
+  Awaits = 'Ожидает',
+  InWork = 'В работе',
+  Done = 'Выполнено',
+  NotAppear = 'Не пришел'
+}
+
 export interface ClinicRecordProperties {
   [ClinicRecordProperty.Title]: TitleProperty,
   [ClinicRecordProperty.Service]: RelationProperty,

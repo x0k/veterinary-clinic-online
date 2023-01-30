@@ -28,7 +28,6 @@ const handler: NextApiHandler = async (req, res) => {
     await authService.authenticate(state, code)
     res.redirect('/')
   } catch (error) {
-    console.log(error)
     res.redirect(
       makeErrorPath(
         error instanceof Error ? error.message : 'Неизвестная ошибка'

@@ -1,25 +1,18 @@
 import format from 'date-fns/format'
 
-import { makePeriodsAPI, Period } from '@/lib/period'
-
-export interface TimeData {
-  minutes: number
-  hours: number
-}
-
-export interface DateData {
-  year: number
-  month: number
-  date: number
-}
-
-export type DateTimeData = DateData & TimeData
-
-export type TimePeriod = Period<TimeData>
-
-export type DateTimePeriod = Period<DateTimeData>
-
-export type JSONDate = string & { __brand: 'date' }
+import {
+  JSONDate,
+  TimePeriod,
+  DateTimePeriod,
+  dateToDateData,
+  DateTimeData,
+  timePeriodsAPI,
+  dateDataToJSON,
+  compareDate,
+  dateTimePeriodsAPI,
+  makeTimeAdder,
+  getTimePeriodDurationInMinutes,
+} from './date'
 
 export enum DayType {
   Weekend = 1,
@@ -71,78 +64,7 @@ export function makeProductionCalendarWithoutSaturdayWeekend(
   return new Map(entriesWithoutSaturdayWeekend)
 }
 
-export interface FreePeriodsCalculatorConfig {
-  openingHours: OpeningHours
-  productionCalendar: ProductionCalendar
-  workBreaks: WorkBreaks
-  busyPeriods: BusyPeriods
-}
-
-function compareTime(a: TimeData, b: TimeData): number {
-  return a.hours - b.hours || a.minutes - b.minutes
-}
-
-function compareDate(a: DateData, b: DateData): number {
-  return a.year - b.year || a.month - b.month || a.date - b.date
-}
-
-function compareDateTime(a: DateTimeData, b: DateTimeData): number {
-  return compareDate(a, b) || compareTime(a, b)
-}
-
-const timePeriodsAPI = makePeriodsAPI({ compare: compareTime })
-const dateTimePeriodsAPI = makePeriodsAPI({ compare: compareDateTime })
-
-function makeTimeAdder({
-  hours = 0,
-  minutes = 0,
-}: Partial<TimeData>): (time: TimeData) => TimeData {
-  return (time) => {
-    const totalMinutes = time.minutes + minutes
-    const additionalHours = (totalMinutes > 0 ? Math.floor : Math.ceil)(
-      totalMinutes / 60
-    )
-    return {
-      hours: time.hours + hours + additionalHours,
-      minutes: totalMinutes - additionalHours * 60,
-    }
-  }
-}
-
-function dataDataToJSONDate({ year, month, date }: DateData): JSONDate {
-  return `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(
-    2,
-    '0'
-  )}` as JSONDate
-}
-
-const DEFAULT_DATE_FORMAT = 'd YYYY-MM-DDTHH:mm:ss'
-
-export function getTimePeriodDurationInMinutes({
-  start,
-  end,
-}: TimePeriod): number {
-  return (end.hours - start.hours) * 60 + (end.minutes - start.minutes)
-}
-
-export function dateToDateData(date: Date): DateData {
-  return {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-    date: date.getDate(),
-  }
-}
-
-export function dateToTimeData(date: Date): TimeData {
-  return {
-    hours: date.getHours(),
-    minutes: date.getMinutes(),
-  }
-}
-
-export function dateToDateTimeData(date: Date): DateTimeData {
-  return Object.assign(dateToDateData(date), dateToTimeData(date))
-}
+const DEFAULT_DATE_FORMAT = 'd yyyy-MM-ddTHH:mm:ss'
 
 function dateToDayDateTimePeriod(date: Date): DateTimePeriod {
   const dateData = dateToDateData(date)
@@ -160,13 +82,22 @@ function dateToDayDateTimePeriod(date: Date): DateTimePeriod {
   }
 }
 
-export function makeDayFreeTimePeriodsCalculator({
+export interface FreePeriodsCalculatorConfig {
+  openingHours: OpeningHours
+  productionCalendar: ProductionCalendar
+  workBreaks: WorkBreaks
+  busyPeriods: BusyPeriods
+  currentDateTime: DateTimeData
+}
+
+export function makeFreeTimePeriodsCalculatorForDate({
   openingHours,
   productionCalendar,
   busyPeriods,
   workBreaks,
+  currentDateTime,
 }: FreePeriodsCalculatorConfig): (date: Date) => TimePeriod[] {
-  const { subtractPeriodsFromPeriods, sortAndUnitePeriods, isValidPeriod } =
+  const { subtractPeriods, subtractPeriodsFromPeriods, sortAndUnitePeriods } =
     timePeriodsAPI
   const getOpeningHours = (date: Date): DateTimePeriods => {
     const period = openingHours[date.getDay() as WeekDay]
@@ -175,11 +106,35 @@ export function makeDayFreeTimePeriodsCalculator({
       periods: period ? [period] : [],
     }
   }
+  const applyCurrentDateTime: DateTimePeriodsMapper = (data) => {
+    const { date, periods } = data
+    const compareResult = compareDate(dateToDateData(date), currentDateTime)
+    if (compareResult < 0) {
+      return {
+        date,
+        periods: [],
+      }
+    }
+    if (compareResult > 0) {
+      return data
+    }
+    const period: TimePeriod = {
+      start: {
+        hours: 0,
+        minutes: 0,
+      },
+      end: currentDateTime,
+    }
+    return {
+      date,
+      periods: sortAndUnitePeriods(
+        periods.flatMap((p) => subtractPeriods(p, period))
+      ),
+    }
+  }
   const applyProductionCalendar: DateTimePeriodsMapper = (data) => {
     const { date, periods } = data
-    const dayType = productionCalendar.get(
-      dataDataToJSONDate(dateToDateData(date))
-    )
+    const dayType = productionCalendar.get(dateDataToJSON(dateToDateData(date)))
     switch (dayType) {
       case undefined:
         return data
@@ -191,23 +146,25 @@ export function makeDayFreeTimePeriodsCalculator({
           return data
         }
         const simplifiedPeriods = sortAndUnitePeriods(periods)
-        const lastPeriodIndex = simplifiedPeriods.length - 1
-        const lastPeriod = simplifiedPeriods[lastPeriodIndex]
-        const reducedLastPeriod: TimePeriod = {
-          start: lastPeriod.start,
-          end: {
-            hours: lastPeriod.end.hours - 1,
-            minutes: lastPeriod.end.minutes,
-          },
+        let mitesToReduce = -60
+        let i = simplifiedPeriods.length - 1
+        let reducedLastPeriod: TimePeriod
+        do {
+          const lastPeriod = simplifiedPeriods[i--]
+          const reduce = makeTimeAdder({ minutes: mitesToReduce })
+          reducedLastPeriod = {
+            start: lastPeriod.start,
+            end: reduce(lastPeriod.end),
+          }
+          mitesToReduce = getTimePeriodDurationInMinutes(reducedLastPeriod)
+        } while (mitesToReduce > 0 && i > 0)
+        return {
+          date,
+          periods:
+            mitesToReduce < 0
+              ? periods.slice(0, i + 1).concat(reducedLastPeriod)
+              : [],
         }
-        return isValidPeriod(reducedLastPeriod)
-          ? {
-              date,
-              periods: periods.map((item, i) =>
-                i === lastPeriodIndex ? reducedLastPeriod : item
-              ),
-            }
-          : data
       }
       default:
         throw new TypeError(`Unknown day type: "${String(dayType)}"`)
@@ -252,7 +209,9 @@ export function makeDayFreeTimePeriodsCalculator({
   }
   return (date: Date) =>
     applyBusyPeriods(
-      applyWorkBreaks(applyProductionCalendar(getOpeningHours(date)))
+      applyWorkBreaks(
+        applyProductionCalendar(applyCurrentDateTime(getOpeningHours(date)))
+      )
     ).periods
 }
 
