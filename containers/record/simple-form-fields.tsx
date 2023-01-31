@@ -49,7 +49,7 @@ export function SimpleFormFields({
         />
         <FormErrorMessage>{errors.userPhone?.message}</FormErrorMessage>
       </FormControl>
-      <Box display={{ sm: 'flex' }} gap="4">
+      <Box display="flex" gap="4">
         <FormControl isInvalid={Boolean(errors.service)} flexGrow="1">
           <FormLabel htmlFor="service">Услуга</FormLabel>
           <Select

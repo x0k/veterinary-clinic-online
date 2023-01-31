@@ -73,7 +73,7 @@ export function TimePeriodSelect({
         <>
           {selectedClinicService.description && (
             <Box>
-              <Text>Подробности</Text>
+              <Text>Дополнительная информация</Text>
               <Text color="GrayText">{selectedClinicService.description}</Text>
             </Box>
           )}
