@@ -11,6 +11,7 @@ export interface UserData {
 
 export enum UserStatus {
   Authenticated = 'authenticated',
+  Invalidated = 'invalidated',
   Unauthenticated = 'unauthenticated',
 }
 
@@ -24,16 +25,26 @@ export interface AuthenticatedUser
   logout: () => void
 }
 
+export interface InvalidatedUser extends AbstractUser<UserStatus.Invalidated> {}
+
 export interface UnauthenticatedUser
   extends AbstractUser<UserStatus.Unauthenticated> {}
 
-export type User = AuthenticatedUser | UnauthenticatedUser
+export type User = AuthenticatedUser | InvalidatedUser | UnauthenticatedUser
 
 export interface IUserService {
   fetchUserData: () => Promise<UserData | null>
   logout: () => Promise<void>
 }
 
-export function isUserAuthenticated(user: User): user is AuthenticatedUser {
+export function isAuthenticatedUser(user: User): user is AuthenticatedUser {
   return user.state === UserStatus.Authenticated
+}
+
+export function isUnauthenticatedUser(user: User): user is UnauthenticatedUser {
+  return user.state === UserStatus.Unauthenticated
+}
+
+export function isInvalidatedUser(user: User): user is InvalidatedUser {
+  return user.state === UserStatus.Invalidated
 }

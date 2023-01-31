@@ -16,10 +16,11 @@ import {
 import { ClinicServiceEntity } from '@/models/clinic'
 import { ApiRoutes, PAGE_REVALIDATE_INTERVAL } from '@/models/app'
 import { NOTION_AUTH } from '@/models/notion'
-import { isUserAuthenticated } from '@/models/user'
+import { isAuthenticatedUser, isInvalidatedUser } from '@/models/user'
 import { useUser } from '@/domains/user'
 import { ClinicProvider } from '@/domains/clinic'
 import { MainLayout } from '@/components/main-layout'
+import { BigLoader } from '@/components/big-loader'
 import { HeaderContainer } from '@/containers/header'
 import { AuthorizeContainer } from '@/containers/authorize'
 import { RecordContainer } from '@/containers/record'
@@ -83,7 +84,7 @@ export default function HomePage({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <MainLayout header={<HeaderContainer title="Запись" />}>
-        {isUserAuthenticated(user) ? (
+        {isAuthenticatedUser(user) ? (
           <ClinicProvider userData={user.userData} handlers={clinicHandlers}>
             <RecordContainer
               sampleRate={sampleRate}
@@ -94,6 +95,8 @@ export default function HomePage({
               workBreaks={workBreaks}
             />
           </ClinicProvider>
+        ) : isInvalidatedUser(user) ? (
+          <BigLoader />
         ) : (
           <AuthorizeContainer />
         )}
@@ -112,6 +115,6 @@ export async function getStaticProps(): Promise<
   const clinicServices = await clinicService.fetchServices()
   return {
     props: { productionCalendarData, clinicServices },
-    revalidate: PAGE_REVALIDATE_INTERVAL
+    revalidate: PAGE_REVALIDATE_INTERVAL,
   }
 }

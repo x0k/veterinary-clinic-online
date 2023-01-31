@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { Center, CircularProgress } from '@chakra-ui/react'
 
 import { ClinicServiceEntity } from '@/models/clinic'
 import { OpeningHours, ProductionCalendar, WorkBreaks } from '@/models/schedule'
 import { UserData } from '@/models/user'
 import { useClinic } from '@/domains/clinic'
+import { BigLoader } from '@/components/big-loader'
 
 import { RecordInfo } from './record-info'
 import { CreateRecord } from './create-record'
@@ -33,9 +33,7 @@ export function RecordContainer({
   )
   const userHasRecord = userRecordIndex > -1
   return isRecordsLoading ? (
-    <Center minHeight="inherit">
-      <CircularProgress isIndeterminate color="teal.500" size="8rem" />
-    </Center>
+    <BigLoader />
   ) : userHasRecord ? (
     <RecordInfo
       record={clinicRecords[userRecordIndex]}

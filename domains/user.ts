@@ -6,6 +6,7 @@ import {
   useMemo,
 } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useToast } from '@chakra-ui/react'
 
 import { queryKey } from '@/models/app'
 import { User, UserData, UserStatus } from '@/models/user'
@@ -32,18 +33,42 @@ export function UserProvider({
   handlers,
   children,
 }: UserProviderProps): JSX.Element {
-  const { data: userData } = useQuery(queryKey.user, handlers.fetchUser, {
-    initialData: null,
-  })
+  const { data: userData, isLoading } = useQuery(
+    queryKey.user,
+    handlers.fetchUser,
+    {
+      initialData: null,
+    }
+  )
   const queryClient = useQueryClient()
+  const toast = useToast()
   const { mutate: logout } = useMutation(handlers.logout, {
-    onSuccess() {
+    async onMutate() {
+      await queryClient.cancelQueries(queryKey.user)
+      const lastUser =
+        queryClient.getQueryData<User | null>(queryKey.user) ?? null
       queryClient.setQueryData(queryKey.user, null)
+      return { lastUser }
+    },
+    onError(error, _, context) {
+      if (context) {
+        queryClient.setQueryData(queryKey.clinicRecords, context.lastUser)
+      }
+      toast({
+        status: 'error',
+        title: 'Ошибка при выходе',
+        description: error instanceof Error ? error.message : undefined,
+      })
+    },
+    async onSettled() {
+      await queryClient.invalidateQueries(queryKey.user)
     },
   })
   const value: User = useMemo(
     () =>
-      userData
+      isLoading
+        ? { state: UserStatus.Invalidated }
+        : userData
         ? {
             state: UserStatus.Authenticated,
             userData,
@@ -52,7 +77,7 @@ export function UserProvider({
         : {
             state: UserStatus.Unauthenticated,
           },
-    [userData, logout]
+    [isLoading, userData, logout]
   )
   return createElement(UserContext.Provider, { value }, children)
 }

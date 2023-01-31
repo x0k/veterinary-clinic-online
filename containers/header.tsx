@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import {
@@ -18,10 +19,9 @@ import {
 import { FaMoon, FaSun, FaSignOutAlt, FaBars } from 'react-icons/fa'
 
 import { AppRoute } from '@/models/app'
-import { isUserAuthenticated } from '@/models/user'
+import { isAuthenticatedUser } from '@/models/user'
 import { useUser } from '@/domains/user'
 import { Links } from '@/components/links'
-import { ReactNode } from 'react'
 
 export interface HeaderContainerProps {
   title: ReactNode
@@ -75,7 +75,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         onClick={toggleColorMode}
         icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
       />
-      {isUserAuthenticated(user) && (
+      {isAuthenticatedUser(user) && (
         <IconButton
           aria-label="Sign out"
           onClick={user.logout}
@@ -104,7 +104,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         onClick={toggleColorMode}
         icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
       />
-      {isUserAuthenticated(user) && (
+      {isAuthenticatedUser(user) && (
         <Button onClick={user.logout}>Выйти</Button>
       )}
     </Links>
