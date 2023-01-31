@@ -35,10 +35,7 @@ export function UserProvider({
 }: UserProviderProps): JSX.Element {
   const { data: userData, isLoading } = useQuery(
     queryKey.user,
-    handlers.fetchUser,
-    {
-      initialData: null,
-    }
+    handlers.fetchUser
   )
   const queryClient = useQueryClient()
   const toast = useToast()
