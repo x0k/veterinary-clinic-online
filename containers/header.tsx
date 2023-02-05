@@ -37,6 +37,15 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
     { fallback: 'sm' }
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const signInButton = isUnauthenticatedUser(user) && (
+    <Button
+      rightIcon={<FaVk />}
+      href={makeAuthenticationLink(AuthenticationType.VK)}
+      as={NextLink}
+    >
+      Войти
+    </Button>
+  )
   return isMobile ? (
     <>
       <IconButton
@@ -83,14 +92,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
           icon={<FaSignOutAlt />}
         />
       )}
-      {isUnauthenticatedUser(user) && (
-        <IconButton
-          aria-label="Sign in"
-          as={NextLink}
-          icon={<FaVk />}
-          href={makeAuthenticationLink(AuthenticationType.VK)}
-        />
-      )}
+      {signInButton}
     </>
   ) : (
     <>
@@ -118,15 +120,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
       {isAuthenticatedUser(user) && (
         <Button onClick={user.logout}>Выйти</Button>
       )}
-      {isUnauthenticatedUser(user) && (
-        <Button
-          rightIcon={<FaVk />}
-          href={makeAuthenticationLink(AuthenticationType.VK)}
-          as={NextLink}
-        >
-          Войти
-        </Button>
-      )}
+      {signInButton}
     </>
   )
 }
