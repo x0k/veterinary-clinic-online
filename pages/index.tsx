@@ -22,10 +22,10 @@ import { ClinicProvider } from '@/domains/clinic'
 import { MainLayout } from '@/components/main-layout'
 import { BigLoader } from '@/components/big-loader'
 import { HeaderContainer } from '@/containers/header'
-import { AuthorizeContainer } from '@/containers/authorize'
 import { RecordContainer } from '@/containers/record'
 import { ClinicService } from '@/implementation/clinic-service'
 import { makeClinicHandlers } from '@/adapters/clinic-handlers'
+import { OpeningHoursContainer } from '@/containers/opening-hours'
 
 export interface HomePageProps {
   productionCalendarData: ProductionCalendarData
@@ -98,7 +98,14 @@ export default function HomePage({
         ) : isInvalidatedUser(user) ? (
           <BigLoader />
         ) : (
-          <AuthorizeContainer />
+          <ClinicProvider handlers={clinicHandlers}>
+            <OpeningHoursContainer
+              openingHours={openingHours}
+              productionCalendar={productionCalendar}
+              sampleRate={sampleRate}
+              workBreaks={workBreaks}
+            />
+          </ClinicProvider>
         )}
       </MainLayout>
     </>

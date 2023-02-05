@@ -46,7 +46,7 @@ export interface ClinicHandlers {
 }
 
 export interface ClinicProviderProps {
-  userData: UserData
+  userData?: UserData
   handlers: ClinicHandlers
   children: ReactNode
 }
@@ -66,7 +66,7 @@ export function ClinicProvider({
     isFetching: isRecordsFetching,
   } = useQuery(queryKey.clinicRecords, handlers.fetchRecords, {
     refetchInterval(data) {
-      if (!data) {
+      if (!data || !userData) {
         return false
       }
       const userRecord = data.find((r) => r.userId === userData.id)

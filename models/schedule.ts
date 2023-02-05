@@ -64,7 +64,7 @@ export function makeProductionCalendarWithoutSaturdayWeekend(
   return new Map(entriesWithoutSaturdayWeekend)
 }
 
-const DEFAULT_DATE_FORMAT = 'd yyyy-MM-ddTHH:mm:ss'
+const DEFAULT_DATE_FORMAT = "i yyyy-MM-dd'T'HH:mm:ss"
 
 function dateToDayDateTimePeriod(date: Date): DateTimePeriod {
   const dateData = dateToDateData(date)
@@ -241,4 +241,31 @@ export function makeFreeTimePeriodsWithDurationCalculator(
     )
   }
   return getFreeTimePeriods
+}
+
+export function makeNextAvailableDayCalculator(
+  productionCalendar: ProductionCalendar
+): (today: Date | JSONDate) => JSONDate {
+  return (today) => {
+    const date = new Date(today)
+    let nextAvailableDay: JSONDate
+    let dayType: DayType | undefined
+    do {
+      date.setDate(date.getDate() + 1)
+      nextAvailableDay = dateDataToJSON(dateToDateData(date))
+      dayType = productionCalendar.get(nextAvailableDay)
+    } while (dayType === DayType.Holiday || dayType === DayType.Weekend)
+    return nextAvailableDay
+  }
+}
+
+export function getMissingTimePeriods(periods: TimePeriod[]): TimePeriod[] {
+  if (periods.length < 2) {
+    return []
+  }
+  const result: TimePeriod[] = []
+  for (let i = 1; i < periods.length; i++) {
+    result.push({ start: periods[i - 1].end, end: periods[i].start })
+  }
+  return result
 }

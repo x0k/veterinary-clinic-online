@@ -1,23 +1,18 @@
 import { useCallback, useMemo } from 'react'
 import NextLink from 'next/link'
-import {
-  Box,
-  Button,
-  Link,
-} from '@chakra-ui/react'
+import { Box, Button, Link } from '@chakra-ui/react'
 import { useForm } from 'react-hook-form'
 
 import { ClinicServiceEntity } from '@/models/clinic'
 import { UserData } from '@/models/user'
 import {
-  DayType,
   makeFreeTimePeriodsCalculatorForDate,
+  makeNextAvailableDayCalculator,
   OpeningHours,
   ProductionCalendar,
   WorkBreaks,
 } from '@/models/schedule'
 import {
-  JSONDate,
   TimePeriod,
   dateDataToJSON,
   dateToDateData,
@@ -52,13 +47,8 @@ export function CreateRecord({
   const [today, nextAvailableDay] = useMemo(() => {
     const date = new Date()
     const today = dateDataToJSON(dateToDateData(date))
-    let nextAvailableDay: JSONDate
-    let dayType: DayType | undefined
-    do {
-      date.setDate(date.getDate() + 1)
-      nextAvailableDay = dateDataToJSON(dateToDateData(date))
-      dayType = productionCalendar.get(nextAvailableDay)
-    } while (dayType === DayType.Holiday || dayType === DayType.Weekend)
+    const nextAvailableDay =
+      makeNextAvailableDayCalculator(productionCalendar)(date)
     return [today, nextAvailableDay]
   }, [])
   const busyPeriods = useMemo(
@@ -124,6 +114,7 @@ export function CreateRecord({
         maxW="sm"
         marginX="auto"
         minHeight="inherit"
+        py="4"
       >
         <SimpleFormFields
           today={today}
