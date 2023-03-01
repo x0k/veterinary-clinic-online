@@ -6,8 +6,10 @@ import { useForm } from 'react-hook-form'
 import { ClinicServiceEntity } from '@/models/clinic'
 import { UserData } from '@/models/user'
 import {
+  makeBusyPeriodsCalculator,
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
+  makeWorkBreaksCalculator,
   OpeningHours,
   ProductionCalendar,
   WorkBreaks,
@@ -18,6 +20,7 @@ import {
   dateToDateData,
   dateToDateTimeData,
   makeDateTimeShifter,
+  timePeriodsAPI,
 } from '@/models/date'
 import { AppRoute } from '@/models/app'
 import { useClinic } from '@/domains/clinic'
@@ -55,17 +58,24 @@ export function CreateRecord({
     () => clinicRecords.map((r) => r.dateTimePeriod),
     [clinicRecords]
   )
-  const getFreeTimePeriodsForDate = useMemo(
-    () =>
-      makeFreeTimePeriodsCalculatorForDate({
-        openingHours,
-        busyPeriods,
-        productionCalendar,
-        workBreaks,
-        currentDateTime: dateToDateTimeData(new Date()),
-      }),
-    [openingHours, busyPeriods, productionCalendar, workBreaks]
-  )
+  const getFreeTimePeriodsForDate = useMemo(() => {
+    const getFreeTimePeriods = makeFreeTimePeriodsCalculatorForDate({
+      openingHours,
+      productionCalendar,
+      currentDateTime: dateToDateTimeData(new Date()),
+    })
+    const getBusyPeriods = makeBusyPeriodsCalculator(busyPeriods)
+    const getWorkBreaks = makeWorkBreaksCalculator(workBreaks)
+    return (date: Date) =>
+      timePeriodsAPI.sortAndUnitePeriods(
+        timePeriodsAPI.subtractPeriodsFromPeriods(
+          getFreeTimePeriods(date),
+          getWorkBreaks(date)
+            .map((wb) => wb.period)
+            .concat(getBusyPeriods(date))
+        )
+      )
+  }, [openingHours, busyPeriods, productionCalendar, workBreaks])
   const {
     handleSubmit,
     register,

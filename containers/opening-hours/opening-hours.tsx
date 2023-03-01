@@ -4,9 +4,10 @@ import isValid from 'date-fns/isValid'
 import NextLink from 'next/link'
 
 import {
-  getMissingTimePeriods,
+  makeBusyPeriodsCalculator,
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
+  makeWorkBreaksCalculator,
   OpeningHours,
   ProductionCalendar,
   WorkBreaks,
@@ -45,13 +46,9 @@ const TIME_PERIOD_BG_COLORS: Record<
   [TimePeriodType.Free]: 'teal',
 }
 
-const TIME_PERIOD_TITLES: Record<TimePeriodType, string> = {
-  [TimePeriodType.Free]: 'Свободно',
-  [TimePeriodType.Busy]: 'Занято',
-}
-
 type TimePeriodWithType = TimePeriod & {
   type: TimePeriodType
+  title: string
 }
 
 interface TimePeriodsProps {
@@ -73,18 +70,16 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
           display="flex"
           justifyContent="center"
           alignItems="center"
-          marginLeft="3rem"
+          marginX="3rem"
         >
           <Text position="absolute" top="0" left="-3rem">
             {timeDataToJSON(period.start)}
           </Text>
-          {i === periods.length - 1 && (
-            <Text position="absolute" bottom="0" left="-3rem">
-              {timeDataToJSON(period.end)}
-            </Text>
-          )}
-          <Text fontSize="3xl" color="white">
-            {TIME_PERIOD_TITLES[period.type]}
+          <Text position="absolute" bottom="0" right="-3rem">
+            {timeDataToJSON(period.end)}
+          </Text>
+          <Text fontSize="2xl" color="white">
+            {period.title}
           </Text>
         </Box>
       ))}
@@ -99,20 +94,22 @@ export function OpeningHoursContainer({
   workBreaks,
 }: OpeningHoursContainerProps): JSX.Element {
   const { isRecordsLoading, clinicRecords } = useClinic()
-  const busyPeriods = useMemo(
-    () => clinicRecords.map((r) => r.dateTimePeriod),
+  const getBusyPeriods = useMemo(
+    () => makeBusyPeriodsCalculator(clinicRecords.map((r) => r.dateTimePeriod)),
     [clinicRecords]
+  )
+  const getWorkBreaks = useMemo(
+    () => makeWorkBreaksCalculator(workBreaks),
+    [workBreaks]
   )
   const getFreeTimePeriodsForDate = useMemo(
     () =>
       makeFreeTimePeriodsCalculatorForDate({
         openingHours,
-        busyPeriods,
         productionCalendar,
-        workBreaks,
         currentDateTime: dateToDateTimeData(new Date()),
       }),
-    [openingHours, busyPeriods, productionCalendar, workBreaks]
+    [openingHours, productionCalendar]
   )
   const today = useMemo(() => dateDataToJSON(dateToDateData(new Date())), [])
   const [selectedDate, setDate] = useState(() =>
@@ -123,14 +120,31 @@ export function OpeningHoursContainer({
     if (!isValid(date)) {
       return null
     }
-    const freePeriods = getFreeTimePeriodsForDate(date)
-    const missingPeriods = getMissingTimePeriods(freePeriods)
+    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map((workBreak) => ({
+      ...workBreak.period,
+      type: TimePeriodType.Busy,
+      title: workBreak.title,
+    }))
+    const busyPeriods: TimePeriodWithType[] = timePeriodsAPI
+      .sortAndUnitePeriods(getBusyPeriods(date))
+      .map((period) => ({
+        ...period,
+        type: TimePeriodType.Busy,
+        title: 'Занято',
+      }))
+    const freePeriods = timePeriodsAPI.sortAndUnitePeriods(
+      timePeriodsAPI.subtractPeriodsFromPeriods(
+        getFreeTimePeriodsForDate(date),
+        workBreaks.concat(busyPeriods)
+      )
+    )
+
     const periods: TimePeriodWithType[] = freePeriods
-      .map((p) => ({ ...p, type: TimePeriodType.Free }))
-      .concat(missingPeriods.map((p) => ({ ...p, type: TimePeriodType.Busy })))
+      .map((p) => ({ ...p, type: TimePeriodType.Free, title: 'Свободно' }))
+      .concat(workBreaks, busyPeriods)
       .sort(timePeriodsAPI.comparePeriods)
     return periods
-  }, [getFreeTimePeriodsForDate, selectedDate])
+  }, [getBusyPeriods, getWorkBreaks, getFreeTimePeriodsForDate, selectedDate])
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
@@ -169,7 +183,7 @@ export function OpeningHoursContainer({
         <TimePeriodsComponent periods={periods} />
       ) : (
         <Text textAlign="center" textColor="red">
-          Укажите валидную дату
+          Введите правильную дату
         </Text>
       )}
     </Box>

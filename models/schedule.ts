@@ -12,6 +12,7 @@ import {
   dateTimePeriodsAPI,
   makeTimeShifter,
   getTimePeriodDurationInMinutes,
+  DateData,
 } from './date'
 
 export enum DayType {
@@ -44,7 +45,7 @@ export type WorkBreaks = WorkBreak[]
 export type BusyPeriods = DateTimePeriod[]
 
 export interface DateTimePeriods {
-  date: Date
+  date: DateData
   periods: TimePeriod[]
 }
 
@@ -85,30 +86,26 @@ function dateToDayDateTimePeriod(date: Date): DateTimePeriod {
 export interface FreePeriodsCalculatorConfig {
   openingHours: OpeningHours
   productionCalendar: ProductionCalendar
-  workBreaks: WorkBreaks
-  busyPeriods: BusyPeriods
   currentDateTime: DateTimeData
 }
 
 export function makeFreeTimePeriodsCalculatorForDate({
   openingHours,
   productionCalendar,
-  busyPeriods,
-  workBreaks,
   currentDateTime,
 }: FreePeriodsCalculatorConfig): (date: Date) => TimePeriod[] {
-  const { subtractPeriods, subtractPeriodsFromPeriods, sortAndUnitePeriods } =
+  const { subtractPeriods, sortAndUnitePeriods } =
     timePeriodsAPI
   const getOpeningHours = (date: Date): DateTimePeriods => {
     const period = openingHours[date.getDay() as WeekDay]
     return {
-      date,
+      date: dateToDateData(date),
       periods: period ? [period] : [],
     }
   }
   const applyCurrentDateTime: DateTimePeriodsMapper = (data) => {
     const { date, periods } = data
-    const compareResult = compareDate(dateToDateData(date), currentDateTime)
+    const compareResult = compareDate(date, currentDateTime)
     if (compareResult < 0) {
       return {
         date,
@@ -134,7 +131,7 @@ export function makeFreeTimePeriodsCalculatorForDate({
   }
   const applyProductionCalendar: DateTimePeriodsMapper = (data) => {
     const { date, periods } = data
-    const dayType = productionCalendar.get(dateDataToJSON(dateToDateData(date)))
+    const dayType = productionCalendar.get(dateDataToJSON(date))
     switch (dayType) {
       case undefined:
         return data
@@ -166,53 +163,14 @@ export function makeFreeTimePeriodsCalculatorForDate({
               : [],
         }
       }
-      default:
-        throw new TypeError(`Unknown day type: "${String(dayType)}"`)
+      default: {
+        const neverType: never = dayType
+        throw new TypeError(`Unknown day type: "${String(neverType)}"`)
+      }
     }
-  }
-  const applyWorkBreaks: DateTimePeriodsMapper = (data) => {
-    const { date, periods } = data
-    const defaultDate = format(date, DEFAULT_DATE_FORMAT)
-    const breaks = workBreaks
-      .filter(({ matchExpression, dateFormat }) =>
-        new RegExp(matchExpression).test(
-          dateFormat ? format(date, dateFormat) : defaultDate
-        )
-      )
-      .map(({ period }) => period)
-    return breaks.length
-      ? {
-          date,
-          periods: sortAndUnitePeriods(
-            subtractPeriodsFromPeriods(periods, breaks)
-          ),
-        }
-      : data
-  }
-  const applyBusyPeriods: DateTimePeriodsMapper = (data) => {
-    if (busyPeriods.length === 0) {
-      return data
-    }
-    const { date, periods } = data
-    const dayPeriod = dateToDayDateTimePeriod(date)
-    const validBusyPeriods = busyPeriods
-      .map((p) => dateTimePeriodsAPI.intersectPeriods(p, dayPeriod))
-      .filter(dateTimePeriodsAPI.isValidPeriod)
-    return validBusyPeriods.length
-      ? {
-          date,
-          periods: sortAndUnitePeriods(
-            subtractPeriodsFromPeriods(periods, validBusyPeriods)
-          ),
-        }
-      : data
   }
   return (date: Date) =>
-    applyBusyPeriods(
-      applyWorkBreaks(
-        applyProductionCalendar(applyCurrentDateTime(getOpeningHours(date)))
-      )
-    ).periods
+    applyProductionCalendar(applyCurrentDateTime(getOpeningHours(date))).periods
 }
 
 export function makeFreeTimePeriodsWithDurationCalculator(
@@ -259,13 +217,26 @@ export function makeNextAvailableDayCalculator(
   }
 }
 
-export function getMissingTimePeriods(periods: TimePeriod[]): TimePeriod[] {
-  if (periods.length < 2) {
-    return []
+export function makeWorkBreaksCalculator(
+  workBreaks: WorkBreaks
+): (date: Date) => WorkBreak[] {
+  return (date) => {
+    const defaultDate = format(date, DEFAULT_DATE_FORMAT)
+    return workBreaks.filter(({ matchExpression, dateFormat }) =>
+      new RegExp(matchExpression).test(
+        dateFormat ? format(date, dateFormat) : defaultDate
+      )
+    )
   }
-  const result: TimePeriod[] = []
-  for (let i = 1; i < periods.length; i++) {
-    result.push({ start: periods[i - 1].end, end: periods[i].start })
+}
+
+export function makeBusyPeriodsCalculator(
+  busyPeriods: BusyPeriods
+): (date: Date) => BusyPeriods {
+  return (date) => {
+    const dayPeriod = dateToDayDateTimePeriod(date)
+    return busyPeriods
+      .map((p) => dateTimePeriodsAPI.intersectPeriods(p, dayPeriod))
+      .filter(dateTimePeriodsAPI.isValidPeriod)
   }
-  return result
 }
