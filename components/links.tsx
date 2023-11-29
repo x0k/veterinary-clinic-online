@@ -1,4 +1,4 @@
-import { ReactNode, Children, isValidElement } from 'react'
+import { type ReactNode, Children, isValidElement } from 'react'
 
 export interface LinksProps {
   children: ReactNode

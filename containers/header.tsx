@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import {

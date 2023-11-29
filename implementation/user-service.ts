@@ -1,12 +1,12 @@
 import { getPerson } from '@/lib/google'
 import { getUserInfo } from '@/lib/vk'
 import {
-  AbstractAuthenticationData,
-  AuthenticationData,
+  type AbstractAuthenticationData,
+  type AuthenticationData,
   AuthenticationType,
-  IAuthenticationService,
+  type IAuthenticationService,
 } from '@/models/auth'
-import { IUserService, UserData, UserId } from '@/models/user'
+import { type IUserService, type UserData, type UserId } from '@/models/user'
 
 const USER_DATA_FACTORIES: {
   [T in AuthenticationType]: (

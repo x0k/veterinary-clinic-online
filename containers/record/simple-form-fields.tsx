@@ -6,12 +6,12 @@ import {
   Select,
   Box,
 } from '@chakra-ui/react'
-import { FieldErrors, UseFormRegister } from 'react-hook-form'
+import { type FieldErrors, type UseFormRegister } from 'react-hook-form'
 
-import { ClinicServiceEntity } from '@/models/clinic'
-import { JSONDate } from '@/models/date'
+import { type ClinicServiceEntity } from '@/models/clinic'
+import { type JSONDate } from '@/models/date'
 
-import { FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
+import { type FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
 
 export interface SimpleFormFieldsProps {
   today: JSONDate

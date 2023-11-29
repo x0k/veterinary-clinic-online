@@ -1,18 +1,18 @@
 import format from 'date-fns/format'
 
 import {
-  JSONDate,
-  TimePeriod,
-  DateTimePeriod,
+  type JSONDate,
+  type TimePeriod,
+  type DateTimePeriod,
   dateToDateData,
-  DateTimeData,
+  type DateTimeData,
   timePeriodsAPI,
   dateDataToJSON,
   compareDate,
   dateTimePeriodsAPI,
   makeTimeShifter,
   getTimePeriodDurationInMinutes,
-  DateData,
+  type DateData,
 } from './date'
 
 export enum DayType {

@@ -1,7 +1,7 @@
 import { Client as NotionClient } from '@notionhq/client'
 
 import { makeRPCHandler } from '@/lib/next-simple-rpc-handler'
-import { ClinicRPCConfig } from '@/models/clinic'
+import { type ClinicRPCConfig } from '@/models/clinic'
 import { NOTION_AUTH } from '@/models/notion'
 import { ClinicService } from '@/implementation/clinic-service'
 import { AuthenticationService } from '@/implementation/authentication-service'

@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 
-import { ClinicServiceEntity } from '@/models/clinic'
-import { OpeningHours, ProductionCalendar, WorkBreaks } from '@/models/schedule'
-import { UserData } from '@/models/user'
+import { type ClinicServiceEntity } from '@/models/clinic'
+import { type OpeningHours, type ProductionCalendar, type WorkBreaks } from '@/models/schedule'
+import { type UserData } from '@/models/user'
 import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
 

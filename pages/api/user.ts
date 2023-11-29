@@ -1,5 +1,5 @@
 import { makeRPCHandler } from '@/lib/next-simple-rpc-handler'
-import { IUserService } from '@/models/user'
+import { type IUserService } from '@/models/user'
 import { AuthenticationService } from '@/implementation/authentication-service'
 import { UserService } from '@/implementation/user-service'
 

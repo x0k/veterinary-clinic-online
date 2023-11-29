@@ -1,7 +1,7 @@
 import {
   createContext,
   createElement,
-  ReactNode,
+  type ReactNode,
   useContext,
   useMemo,
 } from 'react'
@@ -11,14 +11,14 @@ import { useToast } from '@chakra-ui/react'
 import { dateId } from '@/lib/date-id'
 import { noopPromise } from '@/lib/function'
 import {
-  Clinic,
-  ClinicRecord,
-  ClinicRecordCreate,
-  ClinicRecordID,
+  type Clinic,
+  type ClinicRecord,
+  type ClinicRecordCreate,
+  type ClinicRecordID,
   ClinicRecordStatus,
 } from '@/models/clinic'
 import { queryKey } from '@/models/app'
-import { UserData } from '@/models/user'
+import { type UserData } from '@/models/user'
 import {
   compareDate,
   dateTimePeriodsAPI,

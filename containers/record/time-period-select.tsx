@@ -8,13 +8,13 @@ import {
   Box,
   Text,
 } from '@chakra-ui/react'
-import { Control, UseFormSetValue, useWatch, Controller } from 'react-hook-form'
+import { type Control, type UseFormSetValue, useWatch, Controller } from 'react-hook-form'
 import { isValid } from 'date-fns'
 
-import { ClinicServiceEntity } from '@/models/clinic'
-import { TimePeriod, timeDataToJSON } from '@/models/date'
+import { type ClinicServiceEntity } from '@/models/clinic'
+import { type TimePeriod, timeDataToJSON } from '@/models/date'
 import { makeFreeTimePeriodsWithDurationCalculator } from '@/models/schedule'
-import { FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
+import { type FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
 
 export interface TimePeriodSelectProps {
   sampleRate: number

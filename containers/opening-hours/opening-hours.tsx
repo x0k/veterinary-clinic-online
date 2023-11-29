@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BackgroundProps, Box, Input, Text, Link } from '@chakra-ui/react'
+import { type BackgroundProps, Box, Input, Text, Link } from '@chakra-ui/react'
 import isValid from 'date-fns/isValid'
 import NextLink from 'next/link'
 
@@ -8,18 +8,18 @@ import {
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
   makeWorkBreaksCalculator,
-  OpeningHours,
-  ProductionCalendar,
-  WorkBreaks,
+  type OpeningHours,
+  type ProductionCalendar,
+  type WorkBreaks,
 } from '@/models/schedule'
 import {
   dateDataToJSON,
   dateToDateData,
   dateToDateTimeData,
   getTimePeriodDurationInMinutes,
-  JSONDate,
+  type JSONDate,
   timeDataToJSON,
-  TimePeriod,
+  type TimePeriod,
   timePeriodsAPI,
 } from '@/models/date'
 import { AuthenticationType, makeAuthenticationLink } from '@/models/auth'

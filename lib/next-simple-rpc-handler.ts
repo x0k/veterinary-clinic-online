@@ -1,8 +1,8 @@
-import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
+import { type NextApiHandler, type NextApiRequest, type NextApiResponse } from 'next'
 
 import { isString } from '@/lib/guards'
 import {
-  RPCConfig,
+  type RPCConfig,
   SIMPLE_RPC_PROCEDURE_NAME_HTTP_HEADER,
 } from '@/lib/simple-rpc'
 
