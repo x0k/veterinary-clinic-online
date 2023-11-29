@@ -12,7 +12,7 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@notionhq/client": "^1.0.4",
+    "@notionhq/client": "^2.2.13",
     "@sentry/nextjs": "^7.83.0",
     "@types/node": "20.10.0",
     "@types/react": "18.2.39",
