@@ -2,7 +2,7 @@ export enum AppRoute {
   Home = '/',
   Info = '/info',
   Services = '/services',
-  Privacy = '/privacy'
+  Privacy = '/privacy',
 }
 
 export const APP_ROUTES = Object.values(AppRoute)
@@ -19,4 +19,5 @@ export const queryKey = {
   clinicRecords: 'clinicRecords',
 }
 
-export const PAGE_REVALIDATE_INTERVAL = 24 * 60 * 60
+export const SERVICES_REVALIDATE_INTERVAL = 24 * 60 * 60
+export const CALENDAR_REVALIDATE_INTERVAL = 30 * 24 * 60 * 60

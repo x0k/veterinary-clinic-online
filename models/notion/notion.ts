@@ -9,13 +9,9 @@ const {
 } = process.env
 
 export const NOTION_AUTH = NOTION_CLIENT_SECRET as string
-
 export const NOTION_INFO_PAGE_ID = notionInfoPageId as string
-
 export const NOTION_SERVICES_PAGE_ID = notionServicesPageId as string
-
 export const NOTION_RECORDS_PAGE_ID = notionRecordsPageId as string
-
 export const NOTION_PRIVACY_POLICY_PAGE_ID = notionPrivacyPolicyPageId as string
 
 export function isRichTextTextItem(item: RichTextItemResponse): item is RichTextTextItem {

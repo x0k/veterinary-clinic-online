@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { type BackgroundProps, Box, Input, Text, Link } from '@chakra-ui/react'
+import { type BackgroundProps, Box, Input, Text} from '@chakra-ui/react'
+import { Link } from '@chakra-ui/next-js'
 import isValid from 'date-fns/isValid'
-import NextLink from 'next/link'
 
 import {
   makeBusyPeriodsCalculator,
@@ -174,7 +174,6 @@ export function OpeningHoursContainer({
         <Link
           fontWeight="bold"
           href={makeAuthenticationLink(AuthenticationType.VK)}
-          as={NextLink}
         >
           войти
         </Link>
