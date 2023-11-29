@@ -1,10 +1,10 @@
 import { Button, Center, Heading, Text } from '@chakra-ui/react'
 
-import { ClinicRecord, ClinicRecordStatus } from '@/models/clinic'
+import { type ClinicRecord, ClinicRecordStatus } from '@/models/clinic'
 import {
   compareDate,
   dateTimeDataToDate,
-  DateTimePeriod,
+  type DateTimePeriod,
   dateTimePeriodsAPI,
   dateToDateTimeData,
   formatDate,

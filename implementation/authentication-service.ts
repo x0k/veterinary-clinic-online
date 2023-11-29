@@ -1,18 +1,18 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { type NextApiRequest, type NextApiResponse } from 'next'
 import { serialize } from 'cookie'
 import axios from 'axios'
 
 import {
-  AbstractAuthenticationData,
+  type AbstractAuthenticationData,
   ACCESS_TOKEN_ENDPOINTS,
-  AuthenticationData,
+  type AuthenticationData,
   AuthenticationType,
   AUTHENTICATION_COOKIE_KEY,
   CLIENTS_ID,
   CLIENTS_SECRET,
-  IAuthenticationService,
+  type IAuthenticationService,
   REDIRECT_URL,
-  SuccessAuthenticationResponses,
+  type SuccessAuthenticationResponses,
 } from '@/models/auth'
 
 const AUTHENTICATION_DATA_FACTORIES: {

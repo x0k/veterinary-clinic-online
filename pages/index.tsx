@@ -1,19 +1,19 @@
 import { useMemo } from 'react'
-import { GetStaticPropsResult } from 'next'
+import { type GetStaticPropsResult } from 'next'
 import Head from 'next/head'
 import axios from 'axios'
 import { Client } from '@notionhq/client'
 
 import { makeRPCClient } from '@/lib/axios-simple-rpc-client'
-import { TimePeriod } from '@/models/date'
+import { type TimePeriod } from '@/models/date'
 import {
   makeProductionCalendarWithoutSaturdayWeekend,
-  OpeningHours,
-  ProductionCalendarData,
+  type OpeningHours,
+  type ProductionCalendarData,
   PRODUCTION_CALENDAR_URL,
-  WorkBreaks,
+  type WorkBreaks,
 } from '@/models/schedule'
-import { ClinicServiceEntity } from '@/models/clinic'
+import { type ClinicServiceEntity } from '@/models/clinic'
 import { ApiRoutes, PAGE_REVALIDATE_INTERVAL } from '@/models/app'
 import { NOTION_AUTH } from '@/models/notion'
 import { isAuthenticatedUser, isInvalidatedUser } from '@/models/user'

@@ -3,19 +3,19 @@ import NextLink from 'next/link'
 import { Box, Button, Link } from '@chakra-ui/react'
 import { useForm } from 'react-hook-form'
 
-import { ClinicServiceEntity } from '@/models/clinic'
-import { UserData } from '@/models/user'
+import { type ClinicServiceEntity } from '@/models/clinic'
+import { type UserData } from '@/models/user'
 import {
   makeBusyPeriodsCalculator,
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
   makeWorkBreaksCalculator,
-  OpeningHours,
-  ProductionCalendar,
-  WorkBreaks,
+  type OpeningHours,
+  type ProductionCalendar,
+  type WorkBreaks,
 } from '@/models/schedule'
 import {
-  TimePeriod,
+  type TimePeriod,
   dateDataToJSON,
   dateToDateData,
   dateToDateTimeData,
@@ -25,7 +25,7 @@ import {
 import { AppRoute } from '@/models/app'
 import { useClinic } from '@/domains/clinic'
 
-import { FormFields } from './model'
+import { type FormFields } from './model'
 import { SimpleFormFields } from './simple-form-fields'
 import { TimePeriodSelect } from './time-period-select'
 

@@ -1,7 +1,7 @@
-import { Brand } from '@/lib/type'
+import { type Brand } from '@/lib/type'
 
-import { UserId } from './user'
-import { DateTimePeriod } from './date'
+import { type UserId } from './user'
+import { type DateTimePeriod } from './date'
 
 export type ClinicServiceEntityID = Brand<'clinicServiceEntityId'>
 

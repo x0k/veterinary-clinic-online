@@ -17,8 +17,8 @@
  */
 
 import * as Sentry from '@sentry/nextjs'
-import { NextPageContext } from 'next'
-import NextErrorComponent, { ErrorProps } from 'next/error'
+import { type NextPageContext } from 'next'
+import NextErrorComponent, { type ErrorProps } from 'next/error'
 
 const CustomErrorComponent = (props: ErrorProps): JSX.Element => {
   // If you're using a Nextjs version prior to 12.2.1, uncomment this to

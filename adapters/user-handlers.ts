@@ -1,6 +1,6 @@
-import { RPCClient } from '@/lib/axios-simple-rpc-client'
-import { IUserService } from '@/models/user'
-import { UserHandlers } from '@/domains/user'
+import { type RPCClient } from '@/lib/axios-simple-rpc-client'
+import { type IUserService } from '@/models/user'
+import { type UserHandlers } from '@/domains/user'
 
 export function makeUserHandlers({
   call,

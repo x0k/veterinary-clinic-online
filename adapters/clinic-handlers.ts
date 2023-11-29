@@ -1,6 +1,6 @@
-import { RPCClient } from '@/lib/axios-simple-rpc-client'
-import { ClinicRPCConfig } from '@/models/clinic'
-import { ClinicHandlers } from '@/domains/clinic'
+import { type RPCClient } from '@/lib/axios-simple-rpc-client'
+import { type ClinicRPCConfig } from '@/models/clinic'
+import { type ClinicHandlers } from '@/domains/clinic'
 
 export function makeClinicHandlers({
   call,

@@ -1,6 +1,6 @@
-import { makePeriodsAPI, Period } from '@/lib/period'
+import { makePeriodsAPI, type Period } from '@/lib/period'
 
-import { compareDateTime, compareTime, DateTimeData, TimeData } from './common'
+import { compareDateTime, compareTime, type DateTimeData, type TimeData } from './common'
 
 export type TimePeriod = Period<TimeData>
 

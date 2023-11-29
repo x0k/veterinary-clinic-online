@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import {
-  RPCConfig,
+  type RPCConfig,
   SIMPLE_RPC_PROCEDURE_NAME_HTTP_HEADER,
 } from '@/lib/simple-rpc'
 

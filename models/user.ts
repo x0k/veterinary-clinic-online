@@ -1,4 +1,4 @@
-import { Brand } from '@/lib/type'
+import { type Brand } from '@/lib/type'
 
 export type UserId = Brand<'userId'>
 

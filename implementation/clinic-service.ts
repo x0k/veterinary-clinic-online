@@ -1,28 +1,28 @@
-import { Client as NotionClient } from '@notionhq/client'
+import { type Client as NotionClient } from '@notionhq/client'
 
 import { isSomething } from '@/lib/guards'
 import {
-  ClinicRecord,
-  ClinicRecordCreate,
-  ClinicRecordID,
-  ClinicServiceEntity,
-  ClinicServiceEntityID,
-  IClinicService,
+  type ClinicRecord,
+  type ClinicRecordCreate,
+  type ClinicRecordID,
+  type ClinicServiceEntity,
+  type ClinicServiceEntityID,
+  type IClinicService,
   ClinicRecordStatus as InnerRecordStatus,
 } from '@/models/clinic'
 import {
-  ClinicRecordProperties,
+  type ClinicRecordProperties,
   ClinicRecordProperty,
   ClinicRecordStatus,
-  ClinicServiceEntityProperties,
+  type ClinicServiceEntityProperties,
   ClinicServiceEntityProperty,
   getRichTextValue,
-  NotionFullQueryResult,
+  type NotionFullQueryResult,
   NOTION_RECORDS_PAGE_ID,
   NOTION_SERVICES_PAGE_ID,
-  Results,
+  type Results,
 } from '@/models/notion'
-import { UserId } from '@/models/user'
+import { type UserId } from '@/models/user'
 import {
   dateTimeDataToJSON,
   dateToDateTimeData,

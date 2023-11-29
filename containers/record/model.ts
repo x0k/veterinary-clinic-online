@@ -1,5 +1,5 @@
-import { ClinicServiceEntityID } from '@/models/clinic'
-import { JSONDate } from '@/models/date'
+import { type ClinicServiceEntityID } from '@/models/clinic'
+import { type JSONDate } from '@/models/date'
 
 export interface FormFields {
   service: ClinicServiceEntityID

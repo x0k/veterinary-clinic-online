@@ -1,4 +1,4 @@
-import { DateProperty, EmailProperty, NumberProperty, PhoneNumberProperty, RelationProperty, RichTextItemResponse, RichTextProperty, RichTextTextItem, SelectProperty, TitleProperty } from './vendor'
+import { type DateProperty, type EmailProperty, type NumberProperty, type PhoneNumberProperty, type RelationProperty, type RichTextItemResponse, type RichTextProperty, type RichTextTextItem, type SelectProperty, type TitleProperty } from './vendor'
 
 const {
   NOTION_CLIENT_SECRET,

@@ -1,5 +1,5 @@
-import { Brand } from '@/lib/type'
-import { DateData, DateTimeData, TimeData } from './common'
+import { type Brand } from '@/lib/type'
+import { type DateData, type DateTimeData, type TimeData } from './common'
 
 export type JSONTime = Brand<'JSONTime'>
 

@@ -1,7 +1,7 @@
 import {
   createContext,
   createElement,
-  ReactNode,
+  type ReactNode,
   useContext,
   useMemo,
 } from 'react'
@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { useToast } from '@chakra-ui/react'
 
 import { queryKey } from '@/models/app'
-import { User, UserData, UserStatus } from '@/models/user'
+import { type User, type UserData, UserStatus } from '@/models/user'
 
 const UserContext = createContext<User>({
   state: UserStatus.Unauthenticated,

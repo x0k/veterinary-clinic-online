@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { GetStaticPropsResult } from 'next'
+import { type GetStaticPropsResult } from 'next'
 import type { ExtendedRecordMap } from 'notion-types'
 import { NotionRenderer } from 'react-notion-x'
 import { NotionAPI } from 'notion-client'
