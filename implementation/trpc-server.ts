@@ -1,32 +1,44 @@
+import { initTRPC, TRPCError } from '@trpc/server'
+
 import {
   clinicRecordCreateSchema,
   clinicRecordIdSchema,
   type IClinicService,
 } from '@/models/clinic'
+import type { AuthenticationData, IAuthenticationService } from '@/models/auth'
 import type { IUserService } from '@/models/user'
-import { initTRPC } from '@trpc/server'
 
 export interface RouterContext {
   clinicService: IClinicService
+  authService: IAuthenticationService
   userService: IUserService
+  authData?: AuthenticationData
 }
 
 const t = initTRPC.context<RouterContext>().create()
 
-// this is our RPC API
+const isAuthenticated = t.middleware(async ({ ctx, next }) => {
+  const authData = await ctx.authService.loadAuthenticationData()
+  if (!authData) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' })
+  }
+  return await next({ ctx: { ...ctx, authData } })
+})
+
+const pub = t.procedure
+const priv = t.procedure.use(isAuthenticated)
+
 export const appRouter = t.router({
-  fetchUserData: t.procedure.query(({ ctx }) =>
-    ctx.userService.fetchUserData()
-  ),
-  logout: t.procedure.mutation(({ ctx }) => ctx.userService.logout()),
-  fetchActualRecords: t.procedure.query(async ({ ctx }) => {
+  fetchUserData: pub.query(({ ctx }) => ctx.userService.fetchUserData()),
+  logout: priv.mutation(({ ctx }) => ctx.userService.logout()),
+  fetchActualRecords: pub.query(async ({ ctx }) => {
     const userData = await ctx.userService.fetchUserData()
     return await ctx.clinicService.fetchActualRecords(userData?.id)
   }),
-  createRecord: t.procedure
+  createRecord: priv
     .input(clinicRecordCreateSchema)
     .mutation(({ ctx, input }) => ctx.clinicService.createRecord(input)),
-  dismissRecord: t.procedure
+  dismissRecord: priv
     .input(clinicRecordIdSchema)
     .mutation(({ ctx, input }) => ctx.clinicService.removeRecord(input)),
 })

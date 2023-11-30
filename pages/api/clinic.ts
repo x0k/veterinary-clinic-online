@@ -4,7 +4,7 @@ import { makeRPCHandler } from '@/lib/next-simple-rpc-handler'
 import { type ClinicRPCConfig } from '@/models/clinic'
 import { NOTION_AUTH } from '@/models/notion'
 import { ClinicService } from '@/implementation/clinic-service'
-import { AuthenticationService } from '@/implementation/authentication-service'
+import { AuthenticationService } from '@/implementation/next-api-authentication-service'
 import { UserService } from '@/implementation/user-service'
 
 const clinicService = new ClinicService(new NotionClient({ auth: NOTION_AUTH }))

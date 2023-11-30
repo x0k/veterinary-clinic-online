@@ -5,7 +5,7 @@ import {
   AUTHENTICATION_ERROR_QUERY_KEY,
   isAuthenticationType,
 } from '@/models/auth'
-import { AuthenticationService } from '@/implementation/authentication-service'
+import { AuthenticationService } from '@/implementation/next-api-authentication-service'
 
 function makeErrorPath(error: string): string {
   return `/?${AUTHENTICATION_ERROR_QUERY_KEY}=${error}`
