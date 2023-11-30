@@ -1,9 +1,7 @@
 'use client'
 import { useMemo } from 'react'
 
-import { makeRPCClient } from '@/lib/axios-simple-rpc-client'
 import { BigLoader } from '@/components/big-loader'
-import { ApiRoutes } from '@/models/app'
 import { type ClinicServiceEntity } from '@/models/clinic'
 import { type TimePeriod } from '@/models/date'
 import {
@@ -17,7 +15,8 @@ import { ClinicProvider } from '@/domains/clinic'
 import { useUser } from '@/domains/user'
 import { OpeningHoursContainer } from '@/containers/opening-hours'
 import { RecordContainer } from '@/containers/record'
-import { makeClinicHandlers } from '@/adapters/clinic-handlers'
+
+import { trpc } from './init-client'
 
 const weekdayTimePeriod: TimePeriod = {
   start: { hours: 9, minutes: 30 },
@@ -47,7 +46,6 @@ const workBreaks: WorkBreaks = [
   },
 ]
 const sampleRate = 30
-const clinicHandlers = makeClinicHandlers(makeRPCClient(ApiRoutes.Clinic))
 
 export interface ClientContentProps {
   productionCalendarData: ProductionCalendarData
@@ -64,7 +62,7 @@ export function ClientContent({
     [productionCalendarData]
   )
   return isAuthenticatedUser(user) ? (
-    <ClinicProvider userData={user.userData} handlers={clinicHandlers}>
+    <ClinicProvider userData={user.userData} trpc={trpc}>
       <RecordContainer
         sampleRate={sampleRate}
         userData={user.userData}
@@ -77,7 +75,7 @@ export function ClientContent({
   ) : isInvalidatedUser(user) ? (
     <BigLoader />
   ) : (
-    <ClinicProvider handlers={clinicHandlers}>
+    <ClinicProvider trpc={trpc}>
       <OpeningHoursContainer
         openingHours={openingHours}
         productionCalendar={productionCalendar}

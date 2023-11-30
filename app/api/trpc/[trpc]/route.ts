@@ -1,22 +1,16 @@
 import { cookies } from 'next/headers'
-import { Client as NotionClient } from '@notionhq/client'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
-import { NOTION_AUTH } from '@/models/notion'
+import { ApiRoutes } from '@/models/app'
 import { type RouterContext, appRouter } from '@/implementation/trpc-server'
-import { ClinicService } from '@/implementation/clinic-service'
 import { UserService } from '@/implementation/user-service'
 import { AuthenticationService } from '@/implementation/authentication-service'
 
-const clinicService = new ClinicService(
-  new NotionClient({
-    auth: NOTION_AUTH,
-  })
-)
+import { clinicService } from '@/app/init-server'
 
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({
-    endpoint: '/api/trpc',
+    endpoint: ApiRoutes.TRPC,
     req: request,
     router: appRouter,
     createContext: (): RouterContext => {

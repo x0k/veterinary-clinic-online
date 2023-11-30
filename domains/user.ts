@@ -5,51 +5,48 @@ import {
   useContext,
   useMemo,
 } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@chakra-ui/react'
 
-import { queryKey } from '@/models/app'
-import { type User, type UserData, UserStatus } from '@/models/user'
+import { type User, UserStatus } from '@/models/user'
+
+import { type createTRPCReact, getQueryKey } from '@trpc/react-query'
+import type { AppRouter } from '@/implementation/trpc-server'
 
 const UserContext = createContext<User>({
   state: UserStatus.Unauthenticated,
 })
-
-export interface UserHandlers {
-  fetchUser: () => Promise<UserData | null>
-  logout: () => Promise<void>
-}
 
 export function useUser(): User {
   return useContext(UserContext)
 }
 
 export interface UserProviderProps {
-  handlers: UserHandlers
   children: ReactNode
+  trpc: ReturnType<typeof createTRPCReact<AppRouter>>
 }
 
 export function UserProvider({
-  handlers,
   children,
+  trpc,
 }: UserProviderProps): JSX.Element {
-  const { data: userData, isLoading } = useQuery(
-    queryKey.user,
-    handlers.fetchUser
-  )
+  const { data: userData, isLoading } = trpc.fetchUserData.useQuery()
   const queryClient = useQueryClient()
   const toast = useToast()
-  const { mutate: logout } = useMutation(handlers.logout, {
+  const { mutate: logout } = trpc.logout.useMutation({
     async onMutate() {
-      await queryClient.cancelQueries(queryKey.user)
-      const lastUser =
-        queryClient.getQueryData<User | null>(queryKey.user) ?? null
-      queryClient.setQueryData(queryKey.user, null)
+      const userKey = getQueryKey(trpc.fetchUserData)
+      await queryClient.cancelQueries(userKey)
+      const lastUser = queryClient.getQueryData<User | null>(userKey) ?? null
+      queryClient.setQueryData(userKey, null)
       return { lastUser }
     },
     onError(error, _, context) {
       if (context) {
-        queryClient.setQueryData(queryKey.clinicRecords, context.lastUser)
+        queryClient.setQueryData(
+          getQueryKey(trpc.fetchActualRecords),
+          context.lastUser
+        )
       }
       toast({
         status: 'error',
@@ -58,7 +55,7 @@ export function UserProvider({
       })
     },
     async onSettled() {
-      await queryClient.invalidateQueries(queryKey.user)
+      await queryClient.invalidateQueries(getQueryKey(trpc.fetchUserData))
     },
   })
   const value: User = useMemo(
@@ -66,14 +63,16 @@ export function UserProvider({
       isLoading
         ? { state: UserStatus.Invalidated }
         : userData
-        ? {
-            state: UserStatus.Authenticated,
-            userData,
-            logout,
-          }
-        : {
-            state: UserStatus.Unauthenticated,
-          },
+          ? {
+              state: UserStatus.Authenticated,
+              userData,
+              logout: () => {
+                logout()
+              },
+            }
+          : {
+              state: UserStatus.Unauthenticated,
+            },
     [isLoading, userData, logout]
   )
   return createElement(UserContext.Provider, { value }, children)

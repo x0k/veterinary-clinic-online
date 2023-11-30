@@ -29,7 +29,7 @@ export interface HeaderContainerProps {
 }
 
 export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
-  const pathname = usePathname() || ''
+  const pathname = usePathname() ?? ''
   const user = useUser()
   const { colorMode, toggleColorMode } = useColorMode()
   const isMobile = useBreakpointValue(

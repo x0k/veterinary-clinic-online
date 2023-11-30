@@ -5,20 +5,19 @@ import {
   useContext,
   useMemo,
 } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@chakra-ui/react'
+import { type createTRPCReact, getQueryKey } from '@trpc/react-query'
 
 import { dateId } from '@/lib/date-id'
 import { noopPromise } from '@/lib/function'
 import {
   type Clinic,
   type ClinicRecord,
-  type ClinicRecordCreate,
   type ClinicRecordID,
   ClinicRecordStatus,
 } from '@/models/clinic'
-import { queryKey } from '@/models/app'
-import { type UserData } from '@/models/user'
+import { type UserId, type UserData } from '@/models/user'
 import {
   compareDate,
   dateTimePeriodsAPI,
@@ -26,6 +25,8 @@ import {
   getTimePeriodDurationInMinutes,
   makeDateTimeShifter,
 } from '@/models/date'
+
+import type { AppRouter } from '@/implementation/trpc-server'
 
 const ClinicContext = createContext<Clinic>({
   isRecordsLoading: false,
@@ -39,16 +40,10 @@ export function useClinic(): Clinic {
   return useContext(ClinicContext)
 }
 
-export interface ClinicHandlers {
-  fetchRecords: () => Promise<ClinicRecord[]>
-  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
-  createRecord: (data: ClinicRecordCreate) => Promise<void>
-}
-
 export interface ClinicProviderProps {
   userData?: UserData
-  handlers: ClinicHandlers
   children: ReactNode
+  trpc: ReturnType<typeof createTRPCReact<AppRouter>>
 }
 
 const shiftToMoscowTZ = makeDateTimeShifter({
@@ -58,13 +53,13 @@ const shiftToMoscowTZ = makeDateTimeShifter({
 export function ClinicProvider({
   userData,
   children,
-  handlers,
+  trpc,
 }: ClinicProviderProps): JSX.Element {
   const {
     data: clinicRecords,
     isLoading: isRecordsLoading,
     isFetching: isRecordsFetching,
-  } = useQuery(queryKey.clinicRecords, handlers.fetchRecords, {
+  } = trpc.fetchActualRecords.useQuery(undefined, {
     refetchInterval(data) {
       if (!data || !userData) {
         return false
@@ -105,14 +100,14 @@ export function ClinicProvider({
     position: 'bottom-right',
   })
   const { mutateAsync: dismissRecord, isLoading: isDismissRecordLoading } =
-    useMutation(handlers.dismissRecord, {
+    trpc.dismissRecord.useMutation({
       async onMutate(recordId) {
-        await queryClient.cancelQueries(queryKey.clinicRecords)
-        const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
-          queryKey.clinicRecords
-        )
+        const recordsKey = getQueryKey(trpc.fetchActualRecords)
+        await queryClient.cancelQueries(recordsKey)
+        const previousRecords =
+          queryClient.getQueryData<ClinicRecord[]>(recordsKey)
         queryClient.setQueryData<ClinicRecord[] | undefined>(
-          queryKey.clinicRecords,
+          recordsKey,
           (records) => records?.filter((r) => r.id !== recordId)
         )
         return { previousRecords }
@@ -120,7 +115,7 @@ export function ClinicProvider({
       onError(error, _, context) {
         if (context && 'previousRecords' in context) {
           queryClient.setQueryData(
-            queryKey.clinicRecords,
+            getQueryKey(trpc.fetchActualRecords),
             context.previousRecords
           )
         }
@@ -131,24 +126,26 @@ export function ClinicProvider({
         })
       },
       async onSettled() {
-        await queryClient.invalidateQueries(queryKey.clinicRecords)
+        await queryClient.invalidateQueries(
+          getQueryKey(trpc.fetchActualRecords)
+        )
       },
     })
   const { mutateAsync: createRecord, isLoading: isCreateRecordLoading } =
-    useMutation(handlers.createRecord, {
+    trpc.createRecord.useMutation({
       async onMutate({ identity, utcDateTimePeriod }) {
-        await queryClient.cancelQueries(queryKey.clinicRecords)
-        const previousRecords = queryClient.getQueryData<ClinicRecord[]>(
-          queryKey.clinicRecords
-        )
+        const recordsKey = getQueryKey(trpc.fetchActualRecords)
+        await queryClient.cancelQueries(recordsKey)
+        const previousRecords =
+          queryClient.getQueryData<ClinicRecord[]>(recordsKey)
         queryClient.setQueryData<ClinicRecord[] | undefined>(
-          queryKey.clinicRecords,
+          recordsKey,
           (records = []) =>
             records
               .concat({
                 id: dateId() as ClinicRecordID,
                 status: ClinicRecordStatus.Awaits,
-                userId: identity,
+                userId: identity as UserId,
                 dateTimePeriod: {
                   start: shiftToMoscowTZ(utcDateTimePeriod.start),
                   end: shiftToMoscowTZ(utcDateTimePeriod.end),
@@ -166,7 +163,7 @@ export function ClinicProvider({
       onError(error, _, context) {
         if (context && 'previousRecords' in context) {
           queryClient.setQueryData(
-            queryKey.clinicRecords,
+            getQueryKey(trpc.fetchActualRecords),
             context.previousRecords
           )
         }
@@ -177,7 +174,9 @@ export function ClinicProvider({
         })
       },
       async onSettled() {
-        await queryClient.invalidateQueries(queryKey.clinicRecords)
+        await queryClient.invalidateQueries(
+          getQueryKey(trpc.fetchActualRecords)
+        )
       },
     })
   const value: Clinic = useMemo(

@@ -37,7 +37,9 @@ export const appRouter = t.router({
   }),
   createRecord: priv
     .input(clinicRecordCreateSchema)
-    .mutation(({ ctx, input }) => ctx.clinicService.createRecord(input)),
+    .mutation(async ({ ctx, input }) => {
+      await ctx.clinicService.createRecord(input)
+    }),
   dismissRecord: priv
     .input(clinicRecordIdSchema)
     .mutation(({ ctx, input }) => ctx.clinicService.removeRecord(input)),
