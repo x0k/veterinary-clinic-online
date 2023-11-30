@@ -28,6 +28,7 @@
     "eslint-config-next": "14.0.3",
     "framer-motion": "^10.16.7",
     "next": "14.0.3",
+    "next-auth": "^4.24.5",
     "notion-client": "^6.16.0",
     "notion-types": "^6.16.0",
     "react": "18.2.0",
