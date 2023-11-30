@@ -74,7 +74,10 @@ export interface Authentication {
 }
 
 export interface IAuthenticationService {
-  authenticate: <T extends AuthenticationType>(type: T, code: string) => Promise<void>
+  authenticate: <T extends AuthenticationType>(
+    type: T,
+    code: string
+  ) => Promise<void>
   loadAuthenticationData: () => Promise<AuthenticationData | null>
   clearAuthenticationData: () => Promise<void>
 }
@@ -102,7 +105,9 @@ export const AUTH_SCOPES: Record<AuthenticationType, string> = encode({
   [AuthenticationType.VK]: 'email',
 })
 
-export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN as string
+export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+  : (process.env.NEXT_PUBLIC_REDIRECT_ORIGIN as string)
 
 export const REDIRECT_URL = encodeURIComponent(
   `${REDIRECT_ORIGIN}/api/callback`
@@ -116,7 +121,7 @@ export const CLIENTS_ID: Record<AuthenticationType, string> = encode({
 
 export const ACCESS_TOKEN_ENDPOINTS: Record<AuthenticationType, string> = {
   [AuthenticationType.Google]: 'https://oauth2.googleapis.com/token',
-  [AuthenticationType.VK]: 'https://oauth.vk.com/access_token'
+  [AuthenticationType.VK]: 'https://oauth.vk.com/access_token',
 }
 
 export const CLIENTS_SECRET: Record<AuthenticationType, string> = {
