@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Button, Heading, Text, Center } from '@chakra-ui/react'
+import { Link } from '@chakra-ui/next-js'
 import { FaVk } from 'react-icons/fa'
 
 import {

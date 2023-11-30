@@ -1,6 +1,6 @@
+'use client'
 import { type ReactNode } from 'react'
-import NextLink from 'next/link'
-import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 import {
   Box,
   Button,
@@ -10,12 +10,12 @@ import {
   DrawerHeader,
   DrawerOverlay,
   IconButton,
-  Link,
   useBreakpointValue,
   useColorMode,
   useDisclosure,
   Text,
 } from '@chakra-ui/react'
+import { Link } from '@chakra-ui/next-js'
 import { FaMoon, FaSun, FaSignOutAlt, FaBars, FaVk } from 'react-icons/fa'
 
 import { AppRoute } from '@/models/app'
@@ -29,7 +29,7 @@ export interface HeaderContainerProps {
 }
 
 export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
-  const router = useRouter()
+  const pathname = usePathname() ?? ''
   const user = useUser()
   const { colorMode, toggleColorMode } = useColorMode()
   const isMobile = useBreakpointValue(
@@ -41,7 +41,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
     <Button
       rightIcon={<FaVk />}
       href={makeAuthenticationLink(AuthenticationType.VK)}
-      as={NextLink}
+      as={Link}
     >
       Войти
     </Button>
@@ -63,17 +63,13 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
               <Links
                 linkClassName="no-decoration inactive-link"
                 activeLinkClassName="no-decoration active-link"
-                pathname={router.pathname}
+                pathname={pathname}
               >
-                <Link as={NextLink} href={AppRoute.Home} data-exact>
+                <Link href={AppRoute.Home} data-exact>
                   Запись
                 </Link>
-                <Link as={NextLink} href={AppRoute.Services}>
-                  Услуги
-                </Link>
-                <Link as={NextLink} href={AppRoute.Info}>
-                  Информация
-                </Link>
+                <Link href={AppRoute.Services}>Услуги</Link>
+                <Link href={AppRoute.Info}>Информация</Link>
               </Links>
             </Box>
           </DrawerBody>
@@ -99,17 +95,13 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
       <Links
         linkClassName="no-decoration inactive-link"
         activeLinkClassName="no-decoration active-link"
-        pathname={router.pathname}
+        pathname={pathname}
       >
-        <Link as={NextLink} href={AppRoute.Home} data-exact>
+        <Link href={AppRoute.Home} data-exact>
           Запись
         </Link>
-        <Link as={NextLink} href={AppRoute.Services}>
-          Услуги
-        </Link>
-        <Link as={NextLink} href={AppRoute.Info}>
-          Информация
-        </Link>
+        <Link href={AppRoute.Services}>Услуги</Link>
+        <Link href={AppRoute.Info}>Информация</Link>
       </Links>
       <Box flexGrow="1" />
       <IconButton

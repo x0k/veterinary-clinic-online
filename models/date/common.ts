@@ -1,15 +1,29 @@
 import add from 'date-fns/add'
+import { z } from 'zod'
+
+export const timeDataSchema = z.object({
+  minutes: z.number(),
+  hours: z.number(),
+})
 
 export interface TimeData {
   minutes: number
   hours: number
 }
 
+export const dateDataSchema = z.object({
+  date: z.number(),
+  month: z.number(),
+  year: z.number(),
+})
+
 export interface DateData {
   year: number
   month: number
   date: number
 }
+
+export const DateTimeDataSchema = z.intersection(dateDataSchema, timeDataSchema)
 
 export type DateTimeData = DateData & TimeData
 

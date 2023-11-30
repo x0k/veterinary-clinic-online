@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import NextLink from 'next/link'
-import { Box, Button, Link } from '@chakra-ui/react'
+import { Box, Button } from '@chakra-ui/react'
+import { Link } from '@chakra-ui/next-js'
 import { useForm } from 'react-hook-form'
 
 import { type ClinicServiceEntity } from '@/models/clinic'
@@ -147,7 +147,6 @@ export function CreateRecord({
           Записаться
         </Button>
         <Link
-          as={NextLink}
           href={AppRoute.Privacy}
           textAlign="center"
           target="_blank"

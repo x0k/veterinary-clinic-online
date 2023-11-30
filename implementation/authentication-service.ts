@@ -1,18 +1,15 @@
-import { type NextApiRequest, type NextApiResponse } from 'next'
-import { serialize } from 'cookie'
-import axios from 'axios'
-
+import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
 import {
-  type AbstractAuthenticationData,
-  ACCESS_TOKEN_ENDPOINTS,
-  type AuthenticationData,
   AuthenticationType,
-  AUTHENTICATION_COOKIE_KEY,
+  type SuccessAuthenticationResponses,
+  type AuthenticationData,
+  type AbstractAuthenticationData,
+  type IAuthenticationService,
+  ACCESS_TOKEN_ENDPOINTS,
   CLIENTS_ID,
   CLIENTS_SECRET,
-  type IAuthenticationService,
   REDIRECT_URL,
-  type SuccessAuthenticationResponses,
+  AUTHENTICATION_COOKIE_KEY,
 } from '@/models/auth'
 
 const AUTHENTICATION_DATA_FACTORIES: {
@@ -36,37 +33,39 @@ const AUTHENTICATION_DATA_FACTORIES: {
 
 export class AuthenticationService implements IAuthenticationService {
   private setAuthenticationCookie(value: string, maxAge: number): void {
-    this.res.setHeader(
-      'Set-Cookie',
-      serialize(AUTHENTICATION_COOKIE_KEY, value, {
-        httpOnly: true,
-        maxAge,
-      })
-    )
+    this.cookies.set(AUTHENTICATION_COOKIE_KEY, value, {
+      httpOnly: true,
+      maxAge,
+    })
   }
 
-  constructor(
-    private readonly req: NextApiRequest,
-    private readonly res: NextApiResponse
-  ) {}
+  constructor(private readonly cookies: ReadonlyRequestCookies) {}
 
   async authenticate<T extends AuthenticationType>(
     type: T,
     code: string
   ): Promise<void> {
-    const { data } = await axios.post<SuccessAuthenticationResponses[T]>(
-      `${ACCESS_TOKEN_ENDPOINTS[type]}?code=${code}&client_id=${CLIENTS_ID[type]}&client_secret=${CLIENTS_SECRET[type]}&redirect_uri=${REDIRECT_URL}&grant_type=authorization_code`
+    const req = await fetch(
+      `${ACCESS_TOKEN_ENDPOINTS[type]}?code=${code}&client_id=${CLIENTS_ID[type]}&client_secret=${CLIENTS_SECRET[type]}&redirect_uri=${REDIRECT_URL}&grant_type=authorization_code`,
+      {
+        method: 'POST',
+      }
     )
+    const data = await req.json()
     const authData = AUTHENTICATION_DATA_FACTORIES[type](data)
     this.setAuthenticationCookie(JSON.stringify(authData), authData.ei)
   }
 
   async loadAuthenticationData(): Promise<AuthenticationData | null> {
-    const value = this.req.cookies[AUTHENTICATION_COOKIE_KEY]
-    if (!value) {
+    const cookie = this.cookies.get(AUTHENTICATION_COOKIE_KEY)
+    if (!cookie) {
       return null
     }
-    return JSON.parse(value)
+    try {
+      return JSON.parse(cookie.value)
+    } catch {
+      return null
+    }
   }
 
   async clearAuthenticationData(): Promise<void> {

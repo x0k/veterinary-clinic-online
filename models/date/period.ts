@@ -1,8 +1,27 @@
+import { z } from 'zod'
+
 import { makePeriodsAPI, type Period } from '@/lib/period'
 
-import { compareDateTime, compareTime, type DateTimeData, type TimeData } from './common'
+import {
+  compareDateTime,
+  compareTime,
+  timeDataSchema,
+  type DateTimeData,
+  type TimeData,
+  DateTimeDataSchema,
+} from './common'
+
+export const timePeriodSchema = z.object({
+  start: timeDataSchema,
+  end: timeDataSchema,
+})
 
 export type TimePeriod = Period<TimeData>
+
+export const dateTimePeriodSchema = z.object({
+  start: DateTimeDataSchema,
+  end: DateTimeDataSchema,
+})
 
 export type DateTimePeriod = Period<DateTimeData>
 

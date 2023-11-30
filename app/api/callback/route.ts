@@ -1,4 +1,6 @@
-import { type NextApiHandler } from 'next'
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import type { NextRequest } from 'next/server'
 
 import { isString } from '@/lib/guards'
 import {
@@ -11,29 +13,25 @@ function makeErrorPath(error: string): string {
   return `/?${AUTHENTICATION_ERROR_QUERY_KEY}=${error}`
 }
 
-const handler: NextApiHandler = async (req, res) => {
+export async function GET(req: NextRequest): Promise<never> {
   const {
-    query: { code, error, error_description: errorDescription, state },
-  } = req
+    code,
+    error = 'Неизвестная ошибка',
+    error_description: errorDescription,
+    state,
+  } = Object.fromEntries(req.nextUrl.searchParams)
   if (!isString(code) || !isAuthenticationType(state)) {
-    res.redirect(
-      makeErrorPath(
-        (errorDescription as string) ?? error ?? 'Неизвестная ошибка'
-      )
-    )
-    return
+    redirect(makeErrorPath(errorDescription ?? error))
   }
-  const authService = new AuthenticationService(req, res)
+  const authService = new AuthenticationService(cookies())
   try {
     await authService.authenticate(state, code)
-    res.redirect('/')
+    redirect('/')
   } catch (error) {
-    res.redirect(
+    redirect(
       makeErrorPath(
         error instanceof Error ? error.message : 'Неизвестная ошибка'
       )
     )
   }
 }
-
-export default handler

@@ -1,7 +1,10 @@
+import { z } from 'zod'
+
 import { type Brand } from '@/lib/type'
+import { fakeGuard } from '@/lib/guards'
 
 import { type UserId } from './user'
-import { type DateTimePeriod } from './date'
+import { dateTimePeriodSchema, type DateTimePeriod } from './date'
 
 export type ClinicServiceEntityID = Brand<'clinicServiceEntityId'>
 
@@ -15,9 +18,11 @@ export interface ClinicServiceEntity {
 
 export type ClinicRecordID = Brand<'clinicRecordId'>
 
+export const clinicRecordIdSchema = z.string().refine(fakeGuard<ClinicRecordID>)
+
 export enum ClinicRecordStatus {
   Awaits = 'awaits',
-  InWork = 'inWork'
+  InWork = 'inWork',
 }
 
 export interface ClinicRecord {
@@ -27,6 +32,15 @@ export interface ClinicRecord {
   status: ClinicRecordStatus
   dateTimePeriod: DateTimePeriod
 }
+
+export const clinicRecordCreateSchema = z.object({
+  identity: z.string().refine(fakeGuard<UserId>),
+  userName: z.string(),
+  userEmail: z.string(),
+  userPhone: z.string(),
+  service: z.string().refine(fakeGuard<ClinicServiceEntityID>),
+  utcDateTimePeriod: dateTimePeriodSchema,
+})
 
 export interface ClinicRecordCreate {
   identity: UserId
