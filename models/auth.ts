@@ -105,9 +105,7 @@ export const AUTH_SCOPES: Record<AuthenticationType, string> = encode({
   [AuthenticationType.VK]: 'email',
 })
 
-export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  : (process.env.NEXT_PUBLIC_REDIRECT_ORIGIN as string)
+export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN
 
 export const REDIRECT_URL = encodeURIComponent(
   `${REDIRECT_ORIGIN}/api/callback`

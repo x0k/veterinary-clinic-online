@@ -7,13 +7,13 @@ export enum AppRoute {
 
 export const APP_ROUTES = Object.values(AppRoute)
 
-export enum ApiRoutes {
+export enum ApiRoute {
   Clinic = '/api/clinic',
   User = '/api/user',
   TRPC = '/api/trpc',
 }
 
-export const API_ROUTS = Object.values(ApiRoutes)
+export const API_ROUTS = Object.values(ApiRoute)
 
 export const queryKey = {
   user: ['user'],

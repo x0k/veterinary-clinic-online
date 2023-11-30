@@ -11,6 +11,7 @@
 # next.js
 /.next/
 /out/
+certificates
 
 # production
 /build
@@ -37,6 +38,4 @@ next-env.d.ts
 
 # Sentry
 .sentryclirc
-
-# Sentry
 next.config.original.js

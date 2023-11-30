@@ -41,6 +41,7 @@ export class AuthenticationService implements IAuthenticationService {
       serialize(AUTHENTICATION_COOKIE_KEY, value, {
         httpOnly: true,
         maxAge,
+        path: '/',
       })
     )
   }

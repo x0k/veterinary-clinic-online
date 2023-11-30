@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
-import { ApiRoutes } from '@/models/app'
+import { ApiRoute } from '@/models/app'
 import { type RouterContext, appRouter } from '@/implementation/trpc-server'
 import { UserService } from '@/implementation/user-service'
 import { AuthenticationService } from '@/implementation/authentication-service'
@@ -10,7 +10,7 @@ import { clinicService } from '@/app/init-server'
 
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({
-    endpoint: ApiRoutes.TRPC,
+    endpoint: ApiRoute.TRPC,
     req: request,
     router: appRouter,
     createContext: (): RouterContext => {

@@ -61,7 +61,11 @@ export class AuthenticationService implements IAuthenticationService {
     if (!cookie) {
       return null
     }
-    return JSON.parse(cookie.value)
+    try {
+      return JSON.parse(cookie.value)
+    } catch {
+      return null
+    }
   }
 
   async clearAuthenticationData(): Promise<void> {
