@@ -53,3 +53,7 @@ export function makeIsArrayOf<I, T extends I>(guard: (value: I) => value is T) {
 export function isDate(value: unknown): value is Date {
   return value instanceof Date
 }
+
+export function fakeGuard<T>(value: unknown): value is T {
+  return true
+}
