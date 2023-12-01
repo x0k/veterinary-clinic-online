@@ -38,7 +38,7 @@ enum TimePeriodType {
 
 const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
   [TimePeriodType.Busy]: 'bg-error',
-  [TimePeriodType.Free]: 'bg-success',
+  [TimePeriodType.Free]: 'bg-primary',
 }
 
 type TimePeriodWithType = TimePeriod & {
@@ -71,7 +71,7 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
           <span className="absolute bottom-0 -right-12">
             {timeDataToJSON(period.end)}
           </span>
-          <span className="text-2xl text-white">{period.title}</span>
+          <span className="text-2xl text-black">{period.title}</span>
         </div>
       ))}
     </>
@@ -123,7 +123,7 @@ export function OpeningHoursContainer({
       .map((period) => ({
         ...period,
         type: TimePeriodType.Busy,
-        title: 'Занято',
+        title: 'Запись',
       }))
     const freePeriods = timePeriodsAPI.sortAndUnitePeriods(
       timePeriodsAPI.subtractPeriodsFromPeriods(

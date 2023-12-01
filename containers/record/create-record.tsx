@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { Button } from '@chakra-ui/react'
-import { Link } from '@chakra-ui/next-js'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 
 import { type ClinicServiceEntity } from '@/models/clinic'
 import { type UserData } from '@/models/user'
@@ -130,15 +129,17 @@ export function CreateRecord({
           control={control}
           getFreeTimePeriodsForDate={getFreeTimePeriodsForDate}
           setValue={setValue}
+          errors={errors}
+          register={register}
         />
-        <Button
+        <button
           type="submit"
-          colorScheme="teal"
-          isLoading={isSubmitting || isRecordsFetching}
+          disabled={isSubmitting || isRecordsFetching}
+          className="btn btn-primary w-full text-lg"
         >
           Записаться
-        </Button>
-        <Link href={AppRoute.Privacy} textAlign="center" target="_blank">
+        </button>
+        <Link href={AppRoute.Privacy} className="text-center link link-hover" target="_blank">
           Политика конфиденциальности
         </Link>
       </div>

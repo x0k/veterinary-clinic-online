@@ -3,6 +3,7 @@ import { type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
 
 import { AppRoute } from '@/models/app'
 import { isAuthenticatedUser, isUnauthenticatedUser } from '@/models/user'
@@ -19,9 +20,9 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
   return (
     <div className="drawer">
       <input id="app-drawer" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
+      <div className="drawer-content flex flex-col bg-base-100">
         {/* Navbar */}
-        <div className="w-full navbar gap-2">
+        <div className="navbar gap-2 max-w-3xl mx-auto">
           <div className="flex-none sm:hidden">
             <label
               htmlFor="app-drawer"
@@ -43,10 +44,10 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
               </svg>
             </label>
           </div>
-          <div className="hidden sm:flex flex-1 flex-row gap-2 text-xl md:text-3xl font-bold">
+          <div className="hidden sm:flex flex-1 flex-row gap-2 text-xl sm:text-3xl font-bold">
             <Links
               linkClassName="link link-hover text-neutral-content"
-              activeLinkClassName="link link-hover"
+              activeLinkClassName="link link-hover text-white"
               pathname={pathname}
             >
               <Link href={AppRoute.Home} data-exact>
@@ -56,26 +57,30 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
               <Link href={AppRoute.Info}>Информация</Link>
             </Links>
           </div>
-          <div className="sm:hidden flex-1 text-xl font-bold">{title}</div>
+          <div className="sm:hidden flex-1 text-xl font-bold text-white">
+            {title}
+          </div>
           <div className="flex-none">
             {isAuthenticatedUser(user) && (
               <button
-                className="btn btn-neutral btn-sm md:btn-md"
+                className="btn btn-ghost btn-sm sm:btn-md"
                 onClick={() => {
                   void signOut()
                 }}
               >
                 Выйти
+                <FaSignOutAlt />
               </button>
             )}
             {isUnauthenticatedUser(user) && (
               <button
-                className="btn btn-neutral btn-sm md:btn-md"
+                className="btn btn-ghost btn-sm sm:btn-md"
                 onClick={() => {
                   void signIn()
                 }}
               >
                 Войти
+                <FaSignInAlt />
               </button>
             )}
           </div>

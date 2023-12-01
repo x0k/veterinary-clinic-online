@@ -6,14 +6,6 @@
   scrollbar-gutter: stable both-edges;
 }
 
-.active-link {
-  color: var(--chakra-colors-chakra-body-text) !important;
-}
-
-.inactive-link {
-  color: var(--chakra-colors-chakra-placeholder-color) !important;
-}
-
 /* Notion styles override */
 
 .notion-table {
