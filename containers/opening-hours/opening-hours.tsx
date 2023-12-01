@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { type BackgroundProps, Box, Input, Text} from '@chakra-ui/react'
-import { Link } from '@chakra-ui/next-js'
+import { type BackgroundProps, Box, Input, Text, Button} from '@chakra-ui/react'
+import { signIn } from 'next-auth/react'
 import isValid from 'date-fns/isValid'
 
 import {
@@ -22,7 +22,6 @@ import {
   type TimePeriod,
   timePeriodsAPI,
 } from '@/models/date'
-import { AuthenticationType, makeAuthenticationLink } from '@/models/auth'
 import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
 
@@ -171,12 +170,15 @@ export function OpeningHoursContainer({
       </Box>
       <Text textAlign="center">
         Чтобы записаться необходимо{' '}
-        <Link
+        <Button
           fontWeight="bold"
-          href={makeAuthenticationLink(AuthenticationType.VK)}
+          variant="link"
+          onClick={() => {
+            void signIn()
+          }}
         >
           войти
-        </Link>
+        </Button>
       </Text>
       {periods ? (
         <TimePeriodsComponent periods={periods} />

@@ -5,13 +5,9 @@ import {
   useContext,
   useMemo,
 } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@chakra-ui/react'
+import { signOut, useSession } from 'next-auth/react'
 
-import { type User, UserStatus } from '@/models/user'
-
-import { type createTRPCReact, getQueryKey } from '@trpc/react-query'
-import type { AppRouter } from '@/implementation/trpc-server'
+import { type User, UserStatus, type UserData } from '@/models/user'
 
 const UserContext = createContext<User>({
   state: UserStatus.Unauthenticated,
@@ -23,57 +19,26 @@ export function useUser(): User {
 
 export interface UserProviderProps {
   children: ReactNode
-  trpc: ReturnType<typeof createTRPCReact<AppRouter>>
 }
 
-export function UserProvider({
-  children,
-  trpc,
-}: UserProviderProps): JSX.Element {
-  const { data: userData, isLoading } = trpc.fetchUserData.useQuery()
-  const queryClient = useQueryClient()
-  const toast = useToast()
-  const { mutate: logout } = trpc.logout.useMutation({
-    async onMutate() {
-      const userKey = getQueryKey(trpc.fetchUserData)
-      await queryClient.cancelQueries(userKey)
-      const lastUser = queryClient.getQueryData<User | null>(userKey) ?? null
-      queryClient.setQueryData(userKey, null)
-      return { lastUser }
-    },
-    onError(error, _, context) {
-      if (context) {
-        queryClient.setQueryData(
-          getQueryKey(trpc.fetchActualRecords),
-          context.lastUser
-        )
-      }
-      toast({
-        status: 'error',
-        title: 'Ошибка при выходе',
-        description: error instanceof Error ? error.message : undefined,
-      })
-    },
-    async onSettled() {
-      await queryClient.invalidateQueries(getQueryKey(trpc.fetchUserData))
-    },
-  })
+export function UserProvider({ children }: UserProviderProps): JSX.Element {
+  const session = useSession()
   const value: User = useMemo(
     () =>
-      isLoading
+      session.status === 'loading'
         ? { state: UserStatus.Invalidated }
-        : userData
+        : session.data?.user
           ? {
               state: UserStatus.Authenticated,
-              userData,
+              userData: session.data.user as UserData,
               logout: () => {
-                logout()
+                void signOut()
               },
             }
           : {
               state: UserStatus.Unauthenticated,
             },
-    [isLoading, userData, logout]
+    [session.data?.user, session.status]
   )
   return createElement(UserContext.Provider, { value }, children)
 }

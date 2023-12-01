@@ -1,3 +1,5 @@
+import type { Session } from 'next-auth'
+
 import { type Brand } from '@/lib/type'
 
 export type UserId = Brand<'userId'>
@@ -33,7 +35,7 @@ export interface UnauthenticatedUser
 export type User = AuthenticatedUser | InvalidatedUser | UnauthenticatedUser
 
 export interface IUserService {
-  fetchUserData: () => Promise<UserData | null>
+  fetchUserData: (session: Session) => Promise<UserData>
   logout: () => Promise<void>
 }
 
