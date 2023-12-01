@@ -17,10 +17,10 @@ import {
 } from '@chakra-ui/react'
 import { Link } from '@chakra-ui/next-js'
 import { FaMoon, FaSun, FaSignOutAlt, FaBars, FaVk } from 'react-icons/fa'
+import { signIn, signOut } from 'next-auth/react'
 
 import { AppRoute } from '@/models/app'
 import { isAuthenticatedUser, isUnauthenticatedUser } from '@/models/user'
-import { makeAuthenticationLink, AuthenticationType } from '@/models/auth'
 import { useUser } from '@/domains/user'
 import { Links } from '@/components/links'
 
@@ -40,8 +40,9 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
   const signInButton = isUnauthenticatedUser(user) && (
     <Button
       rightIcon={<FaVk />}
-      href={makeAuthenticationLink(AuthenticationType.VK)}
-      as={Link}
+      onClick={() => {
+        void signIn()
+      }}
     >
       Войти
     </Button>
@@ -84,7 +85,9 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
       {isAuthenticatedUser(user) && (
         <IconButton
           aria-label="Sign out"
-          onClick={user.logout}
+          onClick={() => {
+            void signOut()
+          }}
           icon={<FaSignOutAlt />}
         />
       )}
@@ -110,7 +113,13 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
       />
       {isAuthenticatedUser(user) && (
-        <Button onClick={user.logout}>Выйти</Button>
+        <Button
+          onClick={() => {
+            void signOut()
+          }}
+        >
+          Выйти
+        </Button>
       )}
       {signInButton}
     </>

@@ -26,7 +26,6 @@ export async function GET(req: NextRequest): Promise<never> {
   const authService = new AuthenticationService(cookies())
   try {
     await authService.authenticate(state, code)
-    redirect('/')
   } catch (error) {
     redirect(
       makeErrorPath(
@@ -34,4 +33,5 @@ export async function GET(req: NextRequest): Promise<never> {
       )
     )
   }
+  redirect('/')
 }

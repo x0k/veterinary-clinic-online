@@ -1,12 +1,15 @@
+import { type Session } from 'next-auth'
+
 import { getPerson } from '@/lib/google'
 import { getUserInfo } from '@/lib/vk'
 import {
   type AbstractAuthenticationData,
   type AuthenticationData,
   AuthenticationType,
-  type IAuthenticationService,
 } from '@/models/auth'
 import { type IUserService, type UserData, type UserId } from '@/models/user'
+
+import { signOut } from '@/app/init-auth'
 
 const USER_DATA_FACTORIES: {
   [T in AuthenticationType]: (
@@ -42,16 +45,13 @@ const USER_DATA_FACTORIES: {
 }
 
 export class UserService implements IUserService {
-  constructor(private readonly authService: IAuthenticationService) {}
-
-  async fetchUserData(): Promise<UserData | null> {
-    const authData = await this.authService.loadAuthenticationData()
-    return (
-      authData && (await USER_DATA_FACTORIES[authData.t](authData as never))
-    )
+  async fetchUserData(session: Session): Promise<UserData> {
+    console.log(JSON.stringify(session))
+    return session.user as UserData
+    // return await USER_DATA_FACTORIES[session.t](session as never)
   }
 
   async logout(): Promise<void> {
-    await this.authService.clearAuthenticationData()
+    await signOut()
   }
 }

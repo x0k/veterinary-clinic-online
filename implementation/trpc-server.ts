@@ -5,34 +5,41 @@ import {
   clinicRecordIdSchema,
   type IClinicService,
 } from '@/models/clinic'
-import type { AuthenticationData, IAuthenticationService } from '@/models/auth'
 import type { IUserService } from '@/models/user'
+
+import { auth } from '@/app/init-auth'
 
 export interface RouterContext {
   clinicService: IClinicService
-  authService: IAuthenticationService
   userService: IUserService
-  authData?: AuthenticationData
 }
 
 const t = initTRPC.context<RouterContext>().create()
 
-const isAuthenticated = t.middleware(async ({ ctx, next }) => {
-  const authData = await ctx.authService.loadAuthenticationData()
-  if (!authData) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' })
-  }
-  return await next({ ctx: { ...ctx, authData } })
+const withSession = t.middleware(async ({ ctx, next }) => {
+  const session = await auth()
+  return await next({ ctx: { ...ctx, session } })
 })
 
-const pub = t.procedure
+const isAuthenticated = t.middleware(async ({ ctx, next }) => {
+  const session = await auth()
+  if (!session) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' })
+  }
+  return await next({ ctx: { ...ctx, session } })
+})
+
+const pub = t.procedure.use(withSession)
 const priv = t.procedure.use(isAuthenticated)
 
 export const appRouter = t.router({
-  fetchUserData: pub.query(({ ctx }) => ctx.userService.fetchUserData()),
+  fetchUserData: pub.query(async ({ ctx }) => {
+    return ctx.session && (await ctx.userService.fetchUserData(ctx.session))
+  }),
   logout: priv.mutation(({ ctx }) => ctx.userService.logout()),
   fetchActualRecords: pub.query(async ({ ctx }) => {
-    const userData = await ctx.userService.fetchUserData()
+    const userData =
+      ctx.session && (await ctx.userService.fetchUserData(ctx.session))
     return await ctx.clinicService.fetchActualRecords(userData?.id)
   }),
   createRecord: priv

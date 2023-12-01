@@ -99,11 +99,10 @@ export const AUTH_ENDPOINTS: Record<AuthenticationType, string> = {
   [AuthenticationType.VK]: 'https://oauth.vk.com/authorize',
 }
 
-export const AUTH_SCOPES: Record<AuthenticationType, string> = encode({
-  [AuthenticationType.Google]:
-    'https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/userinfo.email',
+export const AUTH_SCOPES: Record<AuthenticationType, string> = {
+  [AuthenticationType.Google]: 'openid profile email',
   [AuthenticationType.VK]: 'email',
-})
+}
 
 export const REDIRECT_ORIGIN = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN
 
@@ -165,6 +164,6 @@ export function isErrorAuthenticationResponse(
   )
 }
 
-export function makeAuthenticationLink(type: AuthenticationType): string {
-  return `${AUTH_ENDPOINTS[type]}?client_id=${CLIENTS_ID[type]}&redirect_uri=${REDIRECT_URL}&scope=${AUTH_SCOPES[type]}&response_type=code&state=${type}`
-}
+// export function makeAuthenticationLink(type: AuthenticationType): string {
+//   return `${AUTH_ENDPOINTS[type]}?client_id=${CLIENTS_ID[type]}&redirect_uri=${REDIRECT_URL}&scope=${AUTH_SCOPES[type]}&response_type=code&state=${type}`
+// }

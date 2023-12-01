@@ -22,7 +22,6 @@ import {
   type TimePeriod,
   timePeriodsAPI,
 } from '@/models/date'
-import { AuthenticationType, makeAuthenticationLink } from '@/models/auth'
 import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
 
@@ -173,7 +172,7 @@ export function OpeningHoursContainer({
         Чтобы записаться необходимо{' '}
         <Link
           fontWeight="bold"
-          href={makeAuthenticationLink(AuthenticationType.VK)}
+          href={""}
         >
           войти
         </Link>
