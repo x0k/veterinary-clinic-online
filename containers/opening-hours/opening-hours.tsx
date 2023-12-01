@@ -1,9 +1,5 @@
 import { useMemo, useState } from 'react'
-import {
-  Input,
-  Text,
-  Button,
-} from '@chakra-ui/react'
+import { Input, Text, Button } from '@chakra-ui/react'
 import { signIn } from 'next-auth/react'
 import isValid from 'date-fns/isValid'
 
@@ -41,11 +37,8 @@ enum TimePeriodType {
   Busy = 'busy',
 }
 
-const TIME_PERIOD_BG_COLORS: Record<
-  TimePeriodType,
-  string
-> = {
-  [TimePeriodType.Busy]: 'bg-rose-700',
+const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
+  [TimePeriodType.Busy]: 'bg-red-600',
   [TimePeriodType.Free]: 'bg-teal-700',
 }
 
@@ -151,7 +144,7 @@ export function OpeningHoursContainer({
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
-    <div className="flex flex-col gap-4 grow py-4">
+    <div className="flex flex-col gap-4 grow py-4 w-full max-w-sm shrink-0">
       <div className="flex items-baseline gap-2">
         <Text flexGrow="1">График работы на </Text>
         <Input
