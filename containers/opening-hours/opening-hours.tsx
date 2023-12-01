@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react'
-import { type BackgroundProps, Box, Input, Text, Button} from '@chakra-ui/react'
+import {
+  Input,
+  Text,
+  Button,
+} from '@chakra-ui/react'
 import { signIn } from 'next-auth/react'
 import isValid from 'date-fns/isValid'
 
@@ -39,10 +43,10 @@ enum TimePeriodType {
 
 const TIME_PERIOD_BG_COLORS: Record<
   TimePeriodType,
-  BackgroundProps['bgColor']
+  string
 > = {
-  [TimePeriodType.Busy]: 'red',
-  [TimePeriodType.Free]: 'teal',
+  [TimePeriodType.Busy]: 'bg-rose-700',
+  [TimePeriodType.Free]: 'bg-teal-700',
 }
 
 type TimePeriodWithType = TimePeriod & {
@@ -60,16 +64,14 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
   return (
     <>
       {periods.map((period, i) => (
-        <Box
+        <div
           key={i}
-          bgColor={TIME_PERIOD_BG_COLORS[period.type]}
-          height={`${getTimePeriodDurationInMinutes(period) * scale}rem`}
-          position="relative"
-          borderRadius="md"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          marginX="3rem"
+          className={`relative rounded-md flex justify-center items-center mx-12 ${
+            TIME_PERIOD_BG_COLORS[period.type]
+          }`}
+          style={{
+            height: `${getTimePeriodDurationInMinutes(period) * scale}rem`,
+          }}
         >
           <Text position="absolute" top="0" left="-3rem">
             {timeDataToJSON(period.start)}
@@ -80,7 +82,7 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
           <Text fontSize="2xl" color="white">
             {period.title}
           </Text>
-        </Box>
+        </div>
       ))}
     </>
   )
@@ -119,11 +121,13 @@ export function OpeningHoursContainer({
     if (!isValid(date)) {
       return null
     }
-    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map((workBreak) => ({
-      ...workBreak.period,
-      type: TimePeriodType.Busy,
-      title: workBreak.title,
-    }))
+    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map(
+      (workBreak) => ({
+        ...workBreak.period,
+        type: TimePeriodType.Busy,
+        title: workBreak.title,
+      })
+    )
     const busyPeriods: TimePeriodWithType[] = timePeriodsAPI
       .sortAndUnitePeriods(getBusyPeriods(date))
       .map((period) => ({
@@ -147,16 +151,8 @@ export function OpeningHoursContainer({
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
-    <Box
-      display="flex"
-      flexDirection="column"
-      gap="4"
-      minHeight="inherit"
-      maxWidth="sm"
-      marginX="auto"
-      py="4"
-    >
-      <Box display="flex" alignItems="baseline" gap="2">
+    <div className="flex flex-col gap-4 grow py-4">
+      <div className="flex items-baseline gap-2">
         <Text flexGrow="1">График работы на </Text>
         <Input
           type="date"
@@ -167,7 +163,7 @@ export function OpeningHoursContainer({
           }}
           min={today}
         />
-      </Box>
+      </div>
       <Text textAlign="center">
         Чтобы записаться необходимо{' '}
         <Button
@@ -187,6 +183,6 @@ export function OpeningHoursContainer({
           Введите правильную дату
         </Text>
       )}
-    </Box>
+    </div>
   )
 }

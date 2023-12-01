@@ -15,7 +15,7 @@ export default function RootLayout({
 }: PropsWithChildren): JSX.Element {
   return (
     <html lang="ru">
-      <body>
+      <body className='scrollbar-gutter'>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <Providers>{children}</Providers>
       </body>

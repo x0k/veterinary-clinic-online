@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import { Box, Button } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
 import { Link } from '@chakra-ui/next-js'
 import { useForm } from 'react-hook-form'
 
@@ -115,17 +115,9 @@ export function CreateRecord({
     <form
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onSubmit={handleSubmit(handleCreate)}
-      style={{ width: '100%', minHeight: 'inherit' }}
+      className="w-full grow flex flex-col"
     >
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="4"
-        maxW="sm"
-        marginX="auto"
-        minHeight="inherit"
-        py="4"
-      >
+      <div className="flex flex-col gap-4 max-w-sm mx-auto grow py-4">
         <SimpleFormFields
           today={today}
           clinicServices={clinicServices}
@@ -146,14 +138,10 @@ export function CreateRecord({
         >
           Записаться
         </Button>
-        <Link
-          href={AppRoute.Privacy}
-          textAlign="center"
-          target="_blank"
-        >
+        <Link href={AppRoute.Privacy} textAlign="center" target="_blank">
           Политика конфиденциальности
         </Link>
-      </Box>
+      </div>
     </form>
   )
 }

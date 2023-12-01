@@ -2,7 +2,6 @@
 import { type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import {
-  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -59,7 +58,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         <DrawerContent>
           <DrawerHeader borderBottomWidth="1px">Навигация</DrawerHeader>
           <DrawerBody>
-            <Box display="flex" flexDirection="column" gap="2" fontSize="xl">
+            <div className="flex flex-col gap-2 text-xl">
               <Links
                 linkClassName="no-decoration inactive-link"
                 activeLinkClassName="no-decoration active-link"
@@ -71,11 +70,11 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
                 <Link href={AppRoute.Services}>Услуги</Link>
                 <Link href={AppRoute.Info}>Информация</Link>
               </Links>
-            </Box>
+            </div>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-      <Box flexGrow="1" />
+      <div className="grow" />
       <IconButton
         aria-label="Color mode switch"
         onClick={toggleColorMode}
@@ -105,7 +104,7 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
         <Link href={AppRoute.Services}>Услуги</Link>
         <Link href={AppRoute.Info}>Информация</Link>
       </Links>
-      <Box flexGrow="1" />
+      <div className="grow" />
       <IconButton
         aria-label="Color mode switch"
         onClick={toggleColorMode}

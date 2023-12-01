@@ -1,9 +1,9 @@
-import { Center, CircularProgress } from '@chakra-ui/react'
+import { CircularProgress } from '@chakra-ui/react'
 
 export function BigLoader(): JSX.Element {
   return (
-    <Center minHeight="inherit">
+    <div className="grow flex flex-col justify-center">
       <CircularProgress isIndeterminate color="teal.500" size="8rem" />
-    </Center>
+    </div>
   )
 }

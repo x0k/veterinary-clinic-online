@@ -4,7 +4,6 @@ import {
   Input,
   FormErrorMessage,
   Select,
-  Box,
 } from '@chakra-ui/react'
 import { type FieldErrors, type UseFormRegister } from 'react-hook-form'
 
@@ -49,8 +48,12 @@ export function SimpleFormFields({
         />
         <FormErrorMessage>{errors.userPhone?.message}</FormErrorMessage>
       </FormControl>
-      <Box display="flex" gap="4">
-        <FormControl isRequired isInvalid={Boolean(errors.service)} flexGrow="1">
+      <div className="flex gap-4">
+        <FormControl
+          isRequired
+          isInvalid={Boolean(errors.service)}
+          flexGrow="1"
+        >
           <FormLabel htmlFor="service">Услуга</FormLabel>
           <Select
             id="service"
@@ -82,7 +85,7 @@ export function SimpleFormFields({
           />
           <FormErrorMessage>{errors.recordDate?.message}</FormErrorMessage>
         </FormControl>
-      </Box>
+      </div>
     </>
   )
 }

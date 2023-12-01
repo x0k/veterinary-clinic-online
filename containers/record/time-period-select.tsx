@@ -5,10 +5,14 @@ import {
   RadioGroup,
   Radio,
   FormErrorMessage,
-  Box,
   Text,
 } from '@chakra-ui/react'
-import { type Control, type UseFormSetValue, useWatch, Controller } from 'react-hook-form'
+import {
+  type Control,
+  type UseFormSetValue,
+  useWatch,
+  Controller,
+} from 'react-hook-form'
 import { isValid } from 'date-fns'
 
 import { type ClinicServiceEntity } from '@/models/clinic'
@@ -73,18 +77,18 @@ export function TimePeriodSelect({
       {selectedClinicService && (
         <>
           {selectedClinicService.description && (
-            <Box>
+            <div>
               <Text>Дополнительная информация</Text>
               <Text color="GrayText">{selectedClinicService.description}</Text>
-            </Box>
+            </div>
           )}
           {selectedClinicService.costDescription && (
-            <Box>
+            <div>
               <Text>Стоимость</Text>
               <Text color="GrayText">
                 {selectedClinicService.costDescription}
               </Text>
-            </Box>
+            </div>
           )}
         </>
       )}
@@ -96,13 +100,13 @@ export function TimePeriodSelect({
           <FormControl isRequired isInvalid={invalid}>
             <FormLabel htmlFor="recordTime">Время</FormLabel>
             <RadioGroup id="recordTime" {...field}>
-              <Box display="flex" flexDirection="column" gap="4">
+              <div className="flex flex-col gap-4">
                 {periods.map((p, i) => (
                   <Radio key={periodValues[i]} value={periodValues[i]}>
                     {timeDataToJSON(p.start)} - {timeDataToJSON(p.end)}
                   </Radio>
                 ))}
-              </Box>
+              </div>
             </RadioGroup>
             <FormErrorMessage>{error?.message}</FormErrorMessage>
           </FormControl>
