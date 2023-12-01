@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { Input, Text, Button } from '@chakra-ui/react'
 import { signIn } from 'next-auth/react'
 import isValid from 'date-fns/isValid'
 
@@ -38,8 +37,8 @@ enum TimePeriodType {
 }
 
 const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
-  [TimePeriodType.Busy]: 'bg-red-600',
-  [TimePeriodType.Free]: 'bg-teal-700',
+  [TimePeriodType.Busy]: 'bg-error',
+  [TimePeriodType.Free]: 'bg-success',
 }
 
 type TimePeriodWithType = TimePeriod & {
@@ -66,15 +65,13 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
             height: `${getTimePeriodDurationInMinutes(period) * scale}rem`,
           }}
         >
-          <Text position="absolute" top="0" left="-3rem">
+          <span className="absolute top-0 -left-12">
             {timeDataToJSON(period.start)}
-          </Text>
-          <Text position="absolute" bottom="0" right="-3rem">
+          </span>
+          <span className="absolute bottom-0 -right-12">
             {timeDataToJSON(period.end)}
-          </Text>
-          <Text fontSize="2xl" color="white">
-            {period.title}
-          </Text>
+          </span>
+          <span className="text-2xl text-white">{period.title}</span>
         </div>
       ))}
     </>
@@ -146,10 +143,10 @@ export function OpeningHoursContainer({
   ) : (
     <div className="flex flex-col gap-4 grow py-4 w-full max-w-sm shrink-0">
       <div className="flex items-baseline gap-2">
-        <Text flexGrow="1">График работы на </Text>
-        <Input
+        <span className="grow">График работы на </span>
+        <input
           type="date"
-          maxWidth="max-content"
+          className="max-w-max input input-bordered input-sm"
           value={selectedDate}
           onChange={(e) => {
             setDate(e.target.value as JSONDate)
@@ -157,24 +154,21 @@ export function OpeningHoursContainer({
           min={today}
         />
       </div>
-      <Text textAlign="center">
+      <p className="text-center">
         Чтобы записаться необходимо{' '}
-        <Button
-          fontWeight="bold"
-          variant="link"
+        <button
+          className='btn btn-link btn-sm'
           onClick={() => {
             void signIn()
           }}
         >
           войти
-        </Button>
-      </Text>
+        </button>
+      </p>
       {periods ? (
         <TimePeriodsComponent periods={periods} />
       ) : (
-        <Text textAlign="center" textColor="red">
-          Введите правильную дату
-        </Text>
+        <p className="text-center text-error">Введите правильную дату</p>
       )}
     </div>
   )

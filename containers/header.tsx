@@ -1,22 +1,8 @@
 'use client'
 import { type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import {
-  Button,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  IconButton,
-  useBreakpointValue,
-  useColorMode,
-  useDisclosure,
-  Text,
-} from '@chakra-ui/react'
-import { Link } from '@chakra-ui/next-js'
-import { FaMoon, FaSun, FaSignOutAlt, FaBars } from 'react-icons/fa'
 import { signIn, signOut } from 'next-auth/react'
+import Link from 'next/link'
 
 import { AppRoute } from '@/models/app'
 import { isAuthenticatedUser, isUnauthenticatedUser } from '@/models/user'
@@ -30,96 +16,91 @@ export interface HeaderContainerProps {
 export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
   const pathname = usePathname() ?? ''
   const user = useUser()
-  const { colorMode, toggleColorMode } = useColorMode()
-  const isMobile = useBreakpointValue(
-    { base: true, sm: false },
-    { fallback: 'sm' }
-  )
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const signInButton = isUnauthenticatedUser(user) && (
-    <Button
-      onClick={() => {
-        void signIn()
-      }}
-    >
-      Войти
-    </Button>
-  )
-  return isMobile ? (
-    <>
-      <IconButton
-        aria-label="Open main navigation"
-        onClick={onOpen}
-        icon={<FaBars />}
-      />
-      <Text noOfLines={1}>{title}</Text>
-      <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">Навигация</DrawerHeader>
-          <DrawerBody>
-            <div className="flex flex-col gap-2 text-xl">
-              <Links
-                linkClassName="no-decoration inactive-link"
-                activeLinkClassName="no-decoration active-link"
-                pathname={pathname}
+  return (
+    <div className="drawer">
+      <input id="app-drawer" type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content flex flex-col">
+        {/* Navbar */}
+        <div className="w-full navbar gap-2">
+          <div className="flex-none sm:hidden">
+            <label
+              htmlFor="app-drawer"
+              aria-label="open sidebar"
+              className="btn btn-square btn-ghost"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="inline-block w-6 h-6 stroke-current"
               >
-                <Link href={AppRoute.Home} data-exact>
-                  Запись
-                </Link>
-                <Link href={AppRoute.Services}>Услуги</Link>
-                <Link href={AppRoute.Info}>Информация</Link>
-              </Links>
-            </div>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-      <div className="grow" />
-      <IconButton
-        aria-label="Color mode switch"
-        onClick={toggleColorMode}
-        icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
-      />
-      {isAuthenticatedUser(user) && (
-        <IconButton
-          aria-label="Sign out"
-          onClick={() => {
-            void signOut()
-          }}
-          icon={<FaSignOutAlt />}
-        />
-      )}
-      {signInButton}
-    </>
-  ) : (
-    <>
-      <Links
-        linkClassName="no-decoration inactive-link"
-        activeLinkClassName="no-decoration active-link"
-        pathname={pathname}
-      >
-        <Link href={AppRoute.Home} data-exact>
-          Запись
-        </Link>
-        <Link href={AppRoute.Services}>Услуги</Link>
-        <Link href={AppRoute.Info}>Информация</Link>
-      </Links>
-      <div className="grow" />
-      <IconButton
-        aria-label="Color mode switch"
-        onClick={toggleColorMode}
-        icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
-      />
-      {isAuthenticatedUser(user) && (
-        <Button
-          onClick={() => {
-            void signOut()
-          }}
-        >
-          Выйти
-        </Button>
-      )}
-      {signInButton}
-    </>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </label>
+          </div>
+          <div className="hidden sm:flex flex-1 flex-row gap-2 text-xl md:text-3xl font-bold">
+            <Links
+              linkClassName="link link-hover text-neutral-content"
+              activeLinkClassName="link link-hover"
+              pathname={pathname}
+            >
+              <Link href={AppRoute.Home} data-exact>
+                Запись
+              </Link>
+              <Link href={AppRoute.Services}>Услуги</Link>
+              <Link href={AppRoute.Info}>Информация</Link>
+            </Links>
+          </div>
+          <div className="sm:hidden flex-1 text-xl font-bold">{title}</div>
+          <div className="flex-none">
+            {isAuthenticatedUser(user) && (
+              <button
+                className="btn btn-neutral btn-sm md:btn-md"
+                onClick={() => {
+                  void signOut()
+                }}
+              >
+                Выйти
+              </button>
+            )}
+            {isUnauthenticatedUser(user) && (
+              <button
+                className="btn btn-neutral btn-sm md:btn-md"
+                onClick={() => {
+                  void signIn()
+                }}
+              >
+                Войти
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Page content here */}
+      </div>
+      <div className="drawer-side">
+        <label
+          htmlFor="app-drawer"
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        ></label>
+        <ul className="menu p-4 w-80 min-h-full bg-base-200">
+          {/* Sidebar content here */}
+          <li>
+            <a href={AppRoute.Home}>Запись</a>
+          </li>
+          <li>
+            <a href={AppRoute.Services}>Услуги</a>
+          </li>
+          <li>
+            <a href={AppRoute.Info}>Информация</a>
+          </li>
+        </ul>
+      </div>
+    </div>
   )
 }
