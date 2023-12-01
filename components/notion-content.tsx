@@ -1,10 +1,9 @@
 'use client'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
+import Link from 'next/link'
 import type { ExtendedRecordMap } from 'notion-types'
 import { type NotionComponents, NotionRenderer } from 'react-notion-x'
-import { useColorMode } from '@chakra-ui/react'
-import { Link } from '@chakra-ui/next-js'
 import 'react-notion-x/src/styles.css'
 
 export interface ContentProps {
@@ -29,11 +28,9 @@ export function NotionContent({
   recordMap,
   pageUrlPrefix,
 }: ContentProps): JSX.Element {
-  const { colorMode } = useColorMode()
-  const isDarkMode = colorMode === 'dark'
   return (
     <NotionRenderer
-      darkMode={isDarkMode}
+      darkMode
       recordMap={recordMap}
       components={notionComponents}
       mapPageUrl={pageUrlPrefix ? (id) => `${pageUrlPrefix}/${id}` : undefined}

@@ -1,14 +1,9 @@
-.active-link {
-  color: var(--chakra-colors-chakra-body-text) !important;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.inactive-link {
-  color: var(--chakra-colors-chakra-placeholder-color) !important;
-}
-
-.no-spacing {
-  padding: 0 !important;
-  margin: 0 !important;
+.scrollbar-gutter {
+  scrollbar-gutter: stable both-edges;
 }
 
 /* Notion styles override */

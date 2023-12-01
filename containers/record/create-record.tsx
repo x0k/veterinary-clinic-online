@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { Box, Button } from '@chakra-ui/react'
-import { Link } from '@chakra-ui/next-js'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 
 import { type ClinicServiceEntity } from '@/models/clinic'
 import { type UserData } from '@/models/user'
@@ -115,17 +114,9 @@ export function CreateRecord({
     <form
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onSubmit={handleSubmit(handleCreate)}
-      style={{ width: '100%', minHeight: 'inherit' }}
+      className="w-full grow flex flex-col"
     >
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap="4"
-        maxW="sm"
-        marginX="auto"
-        minHeight="inherit"
-        py="4"
-      >
+      <div className="flex flex-col gap-4 max-w-sm mx-auto grow py-4">
         <SimpleFormFields
           today={today}
           clinicServices={clinicServices}
@@ -138,22 +129,20 @@ export function CreateRecord({
           control={control}
           getFreeTimePeriodsForDate={getFreeTimePeriodsForDate}
           setValue={setValue}
+          errors={errors}
+          register={register}
         />
-        <Button
+        <button
           type="submit"
-          colorScheme="teal"
-          isLoading={isSubmitting || isRecordsFetching}
+          disabled={isSubmitting || isRecordsFetching}
+          className="btn btn-primary w-full text-lg"
         >
           Записаться
-        </Button>
-        <Link
-          href={AppRoute.Privacy}
-          textAlign="center"
-          target="_blank"
-        >
+        </button>
+        <Link href={AppRoute.Privacy} className="text-center link link-hover" target="_blank">
           Политика конфиденциальности
         </Link>
-      </Box>
+      </div>
     </form>
   )
 }

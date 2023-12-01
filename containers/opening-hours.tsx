@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { type BackgroundProps, Box, Input, Text, Button} from '@chakra-ui/react'
 import { signIn } from 'next-auth/react'
 import isValid from 'date-fns/isValid'
 
@@ -37,12 +36,9 @@ enum TimePeriodType {
   Busy = 'busy',
 }
 
-const TIME_PERIOD_BG_COLORS: Record<
-  TimePeriodType,
-  BackgroundProps['bgColor']
-> = {
-  [TimePeriodType.Busy]: 'red',
-  [TimePeriodType.Free]: 'teal',
+const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
+  [TimePeriodType.Busy]: 'bg-error',
+  [TimePeriodType.Free]: 'bg-primary',
 }
 
 type TimePeriodWithType = TimePeriod & {
@@ -60,27 +56,23 @@ function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
   return (
     <>
       {periods.map((period, i) => (
-        <Box
+        <div
           key={i}
-          bgColor={TIME_PERIOD_BG_COLORS[period.type]}
-          height={`${getTimePeriodDurationInMinutes(period) * scale}rem`}
-          position="relative"
-          borderRadius="md"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          marginX="3rem"
+          className={`relative rounded-md flex justify-center items-center mx-12 ${
+            TIME_PERIOD_BG_COLORS[period.type]
+          }`}
+          style={{
+            height: `${getTimePeriodDurationInMinutes(period) * scale}rem`,
+          }}
         >
-          <Text position="absolute" top="0" left="-3rem">
+          <span className="absolute top-0 -left-12">
             {timeDataToJSON(period.start)}
-          </Text>
-          <Text position="absolute" bottom="0" right="-3rem">
+          </span>
+          <span className="absolute bottom-0 -right-12">
             {timeDataToJSON(period.end)}
-          </Text>
-          <Text fontSize="2xl" color="white">
-            {period.title}
-          </Text>
-        </Box>
+          </span>
+          <span className="text-2xl text-black">{period.title}</span>
+        </div>
       ))}
     </>
   )
@@ -119,17 +111,19 @@ export function OpeningHoursContainer({
     if (!isValid(date)) {
       return null
     }
-    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map((workBreak) => ({
-      ...workBreak.period,
-      type: TimePeriodType.Busy,
-      title: workBreak.title,
-    }))
+    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map(
+      (workBreak) => ({
+        ...workBreak.period,
+        type: TimePeriodType.Busy,
+        title: workBreak.title,
+      })
+    )
     const busyPeriods: TimePeriodWithType[] = timePeriodsAPI
       .sortAndUnitePeriods(getBusyPeriods(date))
       .map((period) => ({
         ...period,
         type: TimePeriodType.Busy,
-        title: 'Занято',
+        title: 'Запись',
       }))
     const freePeriods = timePeriodsAPI.sortAndUnitePeriods(
       timePeriodsAPI.subtractPeriodsFromPeriods(
@@ -147,46 +141,35 @@ export function OpeningHoursContainer({
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
-    <Box
-      display="flex"
-      flexDirection="column"
-      gap="4"
-      minHeight="inherit"
-      maxWidth="sm"
-      marginX="auto"
-      py="4"
-    >
-      <Box display="flex" alignItems="baseline" gap="2">
-        <Text flexGrow="1">График работы на </Text>
-        <Input
+    <div className="flex flex-col gap-4 grow py-4 w-full max-w-sm shrink-0">
+      <div className="flex items-baseline gap-2">
+        <span className="grow">График работы на </span>
+        <input
           type="date"
-          maxWidth="max-content"
+          className="max-w-max input input-bordered input-sm"
           value={selectedDate}
           onChange={(e) => {
             setDate(e.target.value as JSONDate)
           }}
           min={today}
         />
-      </Box>
-      <Text textAlign="center">
+      </div>
+      <p className="text-center">
         Чтобы записаться необходимо{' '}
-        <Button
-          fontWeight="bold"
-          variant="link"
+        <button
+          className='btn btn-link btn-sm'
           onClick={() => {
             void signIn()
           }}
         >
           войти
-        </Button>
-      </Text>
+        </button>
+      </p>
       {periods ? (
         <TimePeriodsComponent periods={periods} />
       ) : (
-        <Text textAlign="center" textColor="red">
-          Введите правильную дату
-        </Text>
+        <p className="text-center text-error">Введите правильную дату</p>
       )}
-    </Box>
+    </div>
   )
 }

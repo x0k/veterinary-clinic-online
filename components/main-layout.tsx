@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react'
-import { Box } from '@chakra-ui/react'
 
 export interface MainLayoutProps {
   header: ReactNode
@@ -8,35 +7,11 @@ export interface MainLayoutProps {
 
 export function MainLayout({ header, children }: MainLayoutProps): JSX.Element {
   return (
-    <>
-      <Box
-        display="flex"
-        top="0"
-        position="sticky"
-        marginX="auto"
-        width="full"
-        maxWidth="3xl"
-        gap="2"
-        padding="4"
-        fontSize={{
-          base: 'xl',
-          md: '3xl',
-        }}
-        fontWeight="bold"
-        lineHeight="10"
-        bgColor="chakra-body-bg"
-        zIndex="sticky"
-      >
+    <div className="min-h-screen bg-inherit flex flex-col scrollbar-gutter">
+      <div className="w-full top-0 sticky z-10 bg-inherit">
         {header}
-      </Box>
-      <Box
-        marginX="auto"
-        maxWidth="3xl"
-        paddingX="4"
-        minHeight="calc(100vh - 4.5rem)"
-      >
-        {children}
-      </Box>
-    </>
+      </div>
+      <div className="px-4 grow flex flex-col items-center">{children}</div>
+    </div>
   )
 }

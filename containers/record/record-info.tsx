@@ -1,5 +1,3 @@
-import { Button, Center, Heading, Text } from '@chakra-ui/react'
-
 import { type ClinicRecord, ClinicRecordStatus } from '@/models/clinic'
 import {
   compareDate,
@@ -38,39 +36,39 @@ export function RecordInfo({
     void dismissRecord(id)
   }
   return (
-    <Center minHeight="inherit" flexDirection="column" gap="2">
+    <div className="grow flex flex-col justify-center items-center gap-2">
       {inWork ? (
-        <Heading>Вы в процессе получения услуги!</Heading>
+        <p className="text-3xl font-bold">Вы в процессе получения услуги!</p>
       ) : (
         <>
-          <Heading size="xl">Вы записаны</Heading>
+          <p className="text-3xl font-bold">Вы записаны</p>
           {!shouldBeInWork ? (
             <>
-              <Text>{makeWaitedStateText(dateTimePeriod)}</Text>
-              <Button
-                isLoading={isRecordsFetching}
+              <p>{makeWaitedStateText(dateTimePeriod)}</p>
+              <button
+                className="btn btn-error"
+                disabled={isRecordsFetching}
                 onClick={handleCancel}
-                colorScheme="red"
               >
                 Отменить запись
-              </Button>
+              </button>
             </>
           ) : hasRecordsBefore ? (
             <>
-              <Text>Ваша очередь задерживается</Text>
-              <Button
-                isLoading={isRecordsFetching}
+              <p>Ваша очередь задерживается</p>
+              <button
+                className="btn btn-error"
+                disabled={isRecordsFetching}
                 onClick={handleCancel}
-                colorScheme="red"
               >
                 Отменить запись
-              </Button>
+              </button>
             </>
           ) : (
-            <Text>Настала ваша очередь!</Text>
+            <p>Настала ваша очередь!</p>
           )}
         </>
       )}
-    </Center>
+    </div>
   )
 }

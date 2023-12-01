@@ -6,7 +6,6 @@ import {
   useMemo,
 } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@chakra-ui/react'
 import { type createTRPCReact, getQueryKey } from '@trpc/react-query'
 
 import { dateId } from '@/lib/date-id'
@@ -96,9 +95,6 @@ export function ClinicProvider({
     },
   })
   const queryClient = useQueryClient()
-  const toast = useToast({
-    position: 'bottom-right',
-  })
   const { mutateAsync: dismissRecord, isLoading: isDismissRecordLoading } =
     trpc.dismissRecord.useMutation({
       async onMutate(recordId) {
@@ -119,11 +115,12 @@ export function ClinicProvider({
             context.previousRecords
           )
         }
-        toast({
-          status: 'error',
-          title: 'Ошибка при отмене записи',
-          description: error instanceof Error ? error.message : undefined,
-        })
+        console.error(error)
+        // toast({
+        //   status: 'error',
+        //   title: 'Ошибка при отмене записи',
+        //   description: error instanceof Error ? error.message : undefined,
+        // })
       },
       async onSettled() {
         await queryClient.invalidateQueries(
@@ -167,11 +164,12 @@ export function ClinicProvider({
             context.previousRecords
           )
         }
-        toast({
-          status: 'error',
-          title: 'Ошибка при создании записи',
-          description: error instanceof Error ? error.message : undefined,
-        })
+        console.error(error)
+        // toast({
+        //   status: 'error',
+        //   title: 'Ошибка при создании записи',
+        //   description: error instanceof Error ? error.message : undefined,
+        // })
       },
       async onSettled() {
         await queryClient.invalidateQueries(

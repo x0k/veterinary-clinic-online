@@ -1,11 +1,3 @@
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  Select,
-  Box,
-} from '@chakra-ui/react'
 import { type FieldErrors, type UseFormRegister } from 'react-hook-form'
 
 import { type ClinicServiceEntity } from '@/models/clinic'
@@ -28,61 +20,96 @@ export function SimpleFormFields({
 }: SimpleFormFieldsProps): JSX.Element {
   return (
     <>
-      <FormControl isRequired isInvalid={Boolean(errors.userName)}>
-        <FormLabel htmlFor="userName">Имя</FormLabel>
-        <Input
+      <label className="form-control w-full">
+        <div className="label">
+          <span className="label-text">Имя</span>
+        </div>
+        <input
+          aria-invalid={Boolean(errors.userName)}
           id="userName"
+          className="input input-bordered invalid:input-error w-full"
+          type="text"
           {...register('userName', {
             required: REQUIRED_FIELD_ERROR_MESSAGE,
           })}
         />
-        <FormErrorMessage>{errors.userName?.message}</FormErrorMessage>
-      </FormControl>
-      <FormControl isRequired isInvalid={Boolean(errors.userPhone)}>
-        <FormLabel htmlFor="userPhone">Телефон</FormLabel>
-        <Input
-          id="userPhone"
+        {errors.userName && (
+          <div className="label">
+            <span className="label-text-alt text-error">
+              {errors.userName.message}
+            </span>
+          </div>
+        )}
+      </label>
+      <label className="form-control w-full">
+        <div className="label">
+          <span className="label-text">Телефон</span>
+        </div>
+        <input
+          aria-invalid={Boolean(errors.userPhone)}
+          id="userName"
+          className="input input-bordered invalid:input-error w-full"
           type="tel"
           {...register('userPhone', {
             required: REQUIRED_FIELD_ERROR_MESSAGE,
           })}
         />
-        <FormErrorMessage>{errors.userPhone?.message}</FormErrorMessage>
-      </FormControl>
-      <Box display="flex" gap="4">
-        <FormControl isRequired isInvalid={Boolean(errors.service)} flexGrow="1">
-          <FormLabel htmlFor="service">Услуга</FormLabel>
-          <Select
+        {errors.userPhone && (
+          <div className="label">
+            <span className="label-text-alt text-error">
+              {errors.userPhone.message}
+            </span>
+          </div>
+        )}
+      </label>
+      <div className="flex gap-4">
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Услуга</span>
+          </div>
+          <select
+            aria-invalid={Boolean(errors.service)}
             id="service"
-            {...register('service', {
-              required: REQUIRED_FIELD_ERROR_MESSAGE,
-            })}
+            required
+            className="select select-bordered w-full invalid:select-error"
+            {...register('service', { required: REQUIRED_FIELD_ERROR_MESSAGE })}
           >
             {clinicServices.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.title}
               </option>
             ))}
-          </Select>
-          <FormErrorMessage>{errors.service?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl isRequired isInvalid={Boolean(errors.recordDate)}>
-          <FormLabel htmlFor="recordDate">Дата</FormLabel>
-          <Input
+          </select>
+          <div className="label">
+            <span className="label-text-alt text-error">
+              {errors.service?.message}
+            </span>
+          </div>
+        </label>
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Дата</span>
+          </div>
+          <input
+            aria-invalid={Boolean(errors.recordDate)}
+            className="input input-bordered invalid:input-error w-full"
             id="recordDate"
             type="date"
-            min={today}
             {...register('recordDate', {
               required: REQUIRED_FIELD_ERROR_MESSAGE,
               min: {
                 value: today,
-                message: 'Не записывайтесь на прошедшие даты',
+                message: 'Прошедшая дата',
               },
             })}
           />
-          <FormErrorMessage>{errors.recordDate?.message}</FormErrorMessage>
-        </FormControl>
-      </Box>
+          <div className="label">
+            <span className="label-text-alt text-error">
+              {errors.recordDate?.message}
+            </span>
+          </div>
+        </label>
+      </div>
     </>
   )
 }
