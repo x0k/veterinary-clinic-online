@@ -28,7 +28,7 @@ export function SimpleFormFields({
 }: SimpleFormFieldsProps): JSX.Element {
   return (
     <>
-      <FormControl isInvalid={Boolean(errors.userName)}>
+      <FormControl isRequired isInvalid={Boolean(errors.userName)}>
         <FormLabel htmlFor="userName">Имя</FormLabel>
         <Input
           id="userName"
@@ -38,7 +38,7 @@ export function SimpleFormFields({
         />
         <FormErrorMessage>{errors.userName?.message}</FormErrorMessage>
       </FormControl>
-      <FormControl isInvalid={Boolean(errors.userPhone)}>
+      <FormControl isRequired isInvalid={Boolean(errors.userPhone)}>
         <FormLabel htmlFor="userPhone">Телефон</FormLabel>
         <Input
           id="userPhone"
@@ -50,7 +50,7 @@ export function SimpleFormFields({
         <FormErrorMessage>{errors.userPhone?.message}</FormErrorMessage>
       </FormControl>
       <Box display="flex" gap="4">
-        <FormControl isInvalid={Boolean(errors.service)} flexGrow="1">
+        <FormControl isRequired isInvalid={Boolean(errors.service)} flexGrow="1">
           <FormLabel htmlFor="service">Услуга</FormLabel>
           <Select
             id="service"
@@ -66,7 +66,7 @@ export function SimpleFormFields({
           </Select>
           <FormErrorMessage>{errors.service?.message}</FormErrorMessage>
         </FormControl>
-        <FormControl isInvalid={Boolean(errors.recordDate)}>
+        <FormControl isRequired isInvalid={Boolean(errors.recordDate)}>
           <FormLabel htmlFor="recordDate">Дата</FormLabel>
           <Input
             id="recordDate"

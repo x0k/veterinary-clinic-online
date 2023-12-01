@@ -14,7 +14,7 @@ export function Providers({ children }: PropsWithChildren): JSX.Element {
     <SessionProvider>
       <trpc.Provider client={trpcClient} queryClient={client}>
         <QueryClientProvider client={client}>
-          <UserProvider trpc={trpc}>
+          <UserProvider>
             <CacheProvider>
               <ChakraProvider>{children}</ChakraProvider>
             </CacheProvider>

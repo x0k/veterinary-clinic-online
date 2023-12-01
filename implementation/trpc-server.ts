@@ -5,13 +5,12 @@ import {
   clinicRecordIdSchema,
   type IClinicService,
 } from '@/models/clinic'
-import type { IUserService } from '@/models/user'
+import type { UserId } from '@/models/user'
 
 import { auth } from '@/app/init-auth'
 
 export interface RouterContext {
   clinicService: IClinicService
-  userService: IUserService
 }
 
 const t = initTRPC.context<RouterContext>().create()
@@ -33,14 +32,10 @@ const pub = t.procedure.use(withSession)
 const priv = t.procedure.use(isAuthenticated)
 
 export const appRouter = t.router({
-  fetchUserData: pub.query(async ({ ctx }) => {
-    return ctx.session && (await ctx.userService.fetchUserData(ctx.session))
-  }),
-  logout: priv.mutation(({ ctx }) => ctx.userService.logout()),
   fetchActualRecords: pub.query(async ({ ctx }) => {
-    const userData =
-      ctx.session && (await ctx.userService.fetchUserData(ctx.session))
-    return await ctx.clinicService.fetchActualRecords(userData?.id)
+    return await ctx.clinicService.fetchActualRecords(
+      ctx.session?.user?.id as UserId
+    )
   }),
   createRecord: priv
     .input(clinicRecordCreateSchema)

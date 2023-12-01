@@ -14,6 +14,7 @@ import { isValid } from 'date-fns'
 import { type ClinicServiceEntity } from '@/models/clinic'
 import { type TimePeriod, timeDataToJSON } from '@/models/date'
 import { makeFreeTimePeriodsWithDurationCalculator } from '@/models/schedule'
+
 import { type FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
 
 export interface TimePeriodSelectProps {
@@ -92,7 +93,7 @@ export function TimePeriodSelect({
         name="recordTime"
         rules={{ required: REQUIRED_FIELD_ERROR_MESSAGE }}
         render={({ field, fieldState: { invalid, error } }) => (
-          <FormControl isInvalid={invalid}>
+          <FormControl isRequired isInvalid={invalid}>
             <FormLabel htmlFor="recordTime">Время</FormLabel>
             <RadioGroup id="recordTime" {...field}>
               <Box display="flex" flexDirection="column" gap="4">

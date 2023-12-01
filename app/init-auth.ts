@@ -37,7 +37,6 @@ export const {
   ],
   callbacks: {
     session(arg) {
-      console.log('SESSION----', JSON.stringify(arg))
       if (arg.token.sub) {
         if (arg.session.user) {
           arg.session.user.id = arg.token.sub
@@ -45,10 +44,21 @@ export const {
           arg.session.user = { id: arg.token.sub }
         }
       }
+      switch (arg.token.provider) {
+        case AuthenticationType.VK: {
+          if (arg.session.user) {
+            arg.session.user.name = arg.token.name
+          }
+        }
+      }
       return arg.session
     },
     jwt(arg) {
-      console.log('JWT----', JSON.stringify(arg))
+      const { provider } = arg.account ?? {}
+      arg.token.provider = provider
+      if (provider === AuthenticationType.VK) {
+        arg.token.email = arg.account?.email as string
+      }
       return arg.token
     },
   },

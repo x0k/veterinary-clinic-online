@@ -16,7 +16,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { Link } from '@chakra-ui/next-js'
-import { FaMoon, FaSun, FaSignOutAlt, FaBars, FaVk } from 'react-icons/fa'
+import { FaMoon, FaSun, FaSignOutAlt, FaBars } from 'react-icons/fa'
 import { signIn, signOut } from 'next-auth/react'
 
 import { AppRoute } from '@/models/app'
@@ -39,7 +39,6 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const signInButton = isUnauthenticatedUser(user) && (
     <Button
-      rightIcon={<FaVk />}
       onClick={() => {
         void signIn()
       }}
