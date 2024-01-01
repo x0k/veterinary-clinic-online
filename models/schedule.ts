@@ -1,4 +1,4 @@
-import format from 'date-fns/format'
+import { format } from 'date-fns/format'
 
 import {
   type JSONDate,
@@ -53,7 +53,7 @@ type DateTimePeriodsMapper = (data: DateTimePeriods) => DateTimePeriods
 
 const { PRODUCTION_CALENDAR_URL: productionCalendarUrl } = process.env
 
-export const PRODUCTION_CALENDAR_URL = productionCalendarUrl as string
+export const PRODUCTION_CALENDAR_URL = productionCalendarUrl!
 
 export function makeProductionCalendarWithoutSaturdayWeekend(
   data: ProductionCalendarData

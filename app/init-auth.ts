@@ -1,6 +1,8 @@
 import NextAuth from 'next-auth'
-import GoogleProvider from '@auth/core/providers/google'
-import VKProvider from '@auth/core/providers/vk'
+import GoogleProvider from 'next-auth/providers/google'
+import VKProvider from 'next-auth/providers/vk'
+// import GoogleProvider from '@auth/core/providers/google'
+// import VKProvider from '@auth/core/providers/vk'
 
 import {
   AUTH_SCOPES,

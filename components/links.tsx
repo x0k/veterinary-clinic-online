@@ -1,3 +1,4 @@
+import { isString } from '@/lib/guards'
 import { type ReactNode, Children, isValidElement } from 'react'
 
 export interface LinksProps {
@@ -16,8 +17,12 @@ export function Links({
 }: LinksProps) {
   return (
     <>
-      {Children.map(children, (child) =>
-        isValidElement(child) && 'href' in child.props
+      {Children.map(children, (child) => {
+        if (!isValidElement(child) || !('href' in child.props)) {
+          return child
+        }
+        const href = child.props.href
+        return isString(href)
           ? {
               ...child,
               props: {
@@ -25,14 +30,14 @@ export function Links({
                 className: (
                   child.props['data-exact']
                     ? child.props.href === pathname
-                    : pathname.startsWith(child.props.href)
+                    : pathname.startsWith(href)
                 )
                   ? activeLinkClassName
                   : linkClassName,
               },
             }
           : child
-      )}
+      })}
     </>
   )
 }

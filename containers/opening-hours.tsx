@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { signIn } from 'next-auth/react'
-import isValid from 'date-fns/isValid'
+import { isValid } from 'date-fns/isValid'
 
 import {
   makeBusyPeriodsCalculator,

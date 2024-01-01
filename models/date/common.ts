@@ -1,4 +1,4 @@
-import add from 'date-fns/add'
+import { add } from 'date-fns/add'
 import { z } from 'zod'
 
 export const timeDataSchema = z.object({
