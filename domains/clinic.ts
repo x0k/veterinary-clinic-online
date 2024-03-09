@@ -59,7 +59,7 @@ export function ClinicProvider({
     isLoading: isRecordsLoading,
     isFetching: isRecordsFetching,
   } = trpc.fetchActualRecords.useQuery(undefined, {
-    refetchInterval(data) {
+    refetchInterval({ state: { data } }) {
       if (!data || !userData) {
         return false
       }
@@ -95,11 +95,11 @@ export function ClinicProvider({
     },
   })
   const queryClient = useQueryClient()
-  const { mutateAsync: dismissRecord, isLoading: isDismissRecordLoading } =
+  const { mutateAsync: dismissRecord, isPending: isDismissRecordLoading } =
     trpc.dismissRecord.useMutation({
       async onMutate(recordId) {
         const recordsKey = getQueryKey(trpc.fetchActualRecords)
-        await queryClient.cancelQueries(recordsKey)
+        await queryClient.cancelQueries({ queryKey: recordsKey })
         const previousRecords =
           queryClient.getQueryData<ClinicRecord[]>(recordsKey)
         queryClient.setQueryData<ClinicRecord[] | undefined>(
@@ -123,16 +123,16 @@ export function ClinicProvider({
         // })
       },
       async onSettled() {
-        await queryClient.invalidateQueries(
-          getQueryKey(trpc.fetchActualRecords)
-        )
+        await queryClient.invalidateQueries({
+          queryKey: getQueryKey(trpc.fetchActualRecords),
+        })
       },
     })
-  const { mutateAsync: createRecord, isLoading: isCreateRecordLoading } =
+  const { mutateAsync: createRecord, isPending: isCreateRecordLoading } =
     trpc.createRecord.useMutation({
       async onMutate({ identity, utcDateTimePeriod }) {
         const recordsKey = getQueryKey(trpc.fetchActualRecords)
-        await queryClient.cancelQueries(recordsKey)
+        await queryClient.cancelQueries({ queryKey: recordsKey })
         const previousRecords =
           queryClient.getQueryData<ClinicRecord[]>(recordsKey)
         queryClient.setQueryData<ClinicRecord[] | undefined>(
@@ -172,9 +172,9 @@ export function ClinicProvider({
         // })
       },
       async onSettled() {
-        await queryClient.invalidateQueries(
-          getQueryKey(trpc.fetchActualRecords)
-        )
+        await queryClient.invalidateQueries({
+          queryKey: getQueryKey(trpc.fetchActualRecords),
+        })
       },
     })
   const value: Clinic = useMemo(
