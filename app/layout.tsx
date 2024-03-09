@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
 
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="ru">
       <body>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )
