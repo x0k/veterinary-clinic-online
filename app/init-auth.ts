@@ -1,8 +1,6 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import VKProvider from 'next-auth/providers/vk'
-// import GoogleProvider from '@auth/core/providers/google'
-// import VKProvider from '@auth/core/providers/vk'
 
 import {
   AUTH_SCOPES,
@@ -38,30 +36,29 @@ export const {
     }),
   ],
   callbacks: {
-    session(arg) {
-      if (arg.token.sub) {
-        if (arg.session.user) {
-          arg.session.user.id = arg.token.sub
+    session({ token, session }) {
+      const provider = token.provider
+      const accountId = token.providerAccountId
+      if (typeof provider === 'string' && typeof accountId === 'string') {
+        const userId = `${provider}-${accountId}`
+        if (session.user) {
+          session.user.id = userId
         } else {
-          arg.session.user = { id: arg.token.sub }
-        }
-      }
-      switch (arg.token.provider) {
-        case AuthenticationType.VK: {
-          if (arg.session.user) {
-            arg.session.user.name = arg.token.name
+          session.user = {
+            id: userId,
+            email: token.email ?? '',
+            emailVerified: null,
           }
         }
       }
-      return arg.session
+      return session
     },
-    jwt(arg) {
-      const { provider } = arg.account ?? {}
-      arg.token.provider = provider
-      if (provider === AuthenticationType.VK) {
-        arg.token.email = arg.account?.email as string
+    jwt({ token, account }) {
+      if (account) {
+        token.provider = account.provider
+        token.providerAccountId = String(account.providerAccountId)
       }
-      return arg.token
+      return token
     },
   },
 })
