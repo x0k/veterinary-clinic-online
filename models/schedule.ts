@@ -21,6 +21,10 @@ export enum DayType {
   PreHoliday = 3,
 }
 
+export function isNonWorkingDay(dayType: DayType): boolean {
+  return dayType === DayType.Weekend || dayType === DayType.Holiday
+}
+
 export type ProductionCalendarData = Record<JSONDate, DayType>
 
 export type ProductionCalendar = Map<JSONDate, DayType>
@@ -211,7 +215,7 @@ export function makeNextAvailableDayCalculator(
       date.setDate(date.getDate() + 1)
       nextAvailableDay = dateDataToJSON(dateToDateData(date))
       dayType = productionCalendar.get(nextAvailableDay)
-    } while (dayType === DayType.Holiday || dayType === DayType.Weekend)
+    } while (dayType && isNonWorkingDay(dayType))
     return nextAvailableDay
   }
 }

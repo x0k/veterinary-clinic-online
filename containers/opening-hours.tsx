@@ -3,6 +3,7 @@ import { signIn } from 'next-auth/react'
 import { isValid } from 'date-fns/isValid'
 
 import {
+  isNonWorkingDay,
   makeBusyPeriodsCalculator,
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
@@ -108,8 +109,12 @@ export function OpeningHoursContainer({
   )
   const periods = useMemo(() => {
     const date = new Date(selectedDate)
-    if (!isValid(date)) {
+    if (!isValid(date) || date.getTime() < new Date().getTime()) {
       return null
+    }
+    const dayType = productionCalendar.get(selectedDate)
+    if (dayType && isNonWorkingDay(dayType)) {
+      return []
     }
     const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map(
       (workBreak) => ({
@@ -137,7 +142,13 @@ export function OpeningHoursContainer({
       .concat(workBreaks, busyPeriods)
       .sort(timePeriodsAPI.comparePeriods)
     return periods
-  }, [getBusyPeriods, getWorkBreaks, getFreeTimePeriodsForDate, selectedDate])
+  }, [
+    getBusyPeriods,
+    getWorkBreaks,
+    getFreeTimePeriodsForDate,
+    selectedDate,
+    productionCalendar,
+  ])
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
@@ -157,7 +168,7 @@ export function OpeningHoursContainer({
       <p className="text-center">
         Чтобы записаться необходимо{' '}
         <button
-          className='btn btn-link btn-sm'
+          className="btn btn-link btn-sm"
           onClick={() => {
             void signIn()
           }}
