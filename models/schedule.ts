@@ -94,8 +94,7 @@ export function makeFreeTimePeriodsCalculatorForDate({
   productionCalendar,
   currentDateTime,
 }: FreePeriodsCalculatorConfig): (date: Date) => TimePeriod[] {
-  const { subtractPeriods, sortAndUnitePeriods } =
-    timePeriodsAPI
+  const { subtractPeriods, sortAndUnitePeriods } = timePeriodsAPI
   const getOpeningHours = (date: Date): DateTimePeriods => {
     const period = openingHours[date.getDay() as WeekDay]
     return {
@@ -143,24 +142,24 @@ export function makeFreeTimePeriodsCalculatorForDate({
           return data
         }
         const simplifiedPeriods = sortAndUnitePeriods(periods)
-        let mitesToReduce = -60
-        let i = simplifiedPeriods.length - 1
+        let minutesToReduce = -60
+        let i = simplifiedPeriods.length
         let reducedLastPeriod: TimePeriod
         do {
-          const lastPeriod = simplifiedPeriods[i--]
-          const shift = makeTimeShifter({ minutes: mitesToReduce })
+          const lastPeriod = simplifiedPeriods[--i]
+          const shift = makeTimeShifter({ minutes: minutesToReduce })
           reducedLastPeriod = {
             start: lastPeriod.start,
             end: shift(lastPeriod.end),
           }
-          mitesToReduce = getTimePeriodDurationInMinutes(reducedLastPeriod)
-        } while (mitesToReduce > 0 && i > 0)
+          minutesToReduce = getTimePeriodDurationInMinutes(reducedLastPeriod)
+        } while (minutesToReduce < 0 && i > 0)
         return {
           date,
           periods:
-            mitesToReduce <= 0
-              ? periods.slice(0, i + 1).concat(reducedLastPeriod)
-              : [],
+            minutesToReduce < 0
+              ? []
+              : simplifiedPeriods.slice(0, i).concat(reducedLastPeriod),
         }
       }
       default: {
