@@ -1,4 +1,4 @@
-import { type ClinicRecord, ClinicRecordStatus } from '@/models/clinic'
+import { ClinicRecordStatus, type ClinicRecord, CLINIC_RECORD_STATUS_TITLES } from '@/models/clinic'
 import {
   compareDate,
   dateTimeDataToDate,
@@ -28,7 +28,6 @@ export function RecordInfo({
   hasRecordsBefore,
 }: RecordInfoProps): JSX.Element {
   const { isRecordsFetching, dismissRecord } = useClinic()
-  const inWork = status === ClinicRecordStatus.InWork
   const shouldBeInWork = dateTimePeriodsAPI.makePeriodContainsCheck(
     dateTimePeriod
   )(dateToDateTimeData(new Date()))
@@ -37,37 +36,33 @@ export function RecordInfo({
   }
   return (
     <div className="grow flex flex-col justify-center items-center gap-2">
-      {inWork ? (
-        <p className="text-3xl font-bold">Вы в процессе получения услуги!</p>
-      ) : (
+      <p className="text-3xl font-bold">Вы записаны</p>
+      {!shouldBeInWork ? (
         <>
-          <p className="text-3xl font-bold">Вы записаны</p>
-          {!shouldBeInWork ? (
-            <>
-              <p>{makeWaitedStateText(dateTimePeriod)}</p>
-              <button
-                className="btn btn-error"
-                disabled={isRecordsFetching}
-                onClick={handleCancel}
-              >
-                Отменить запись
-              </button>
-            </>
-          ) : hasRecordsBefore ? (
-            <>
-              <p>Ваша очередь задерживается</p>
-              <button
-                className="btn btn-error"
-                disabled={isRecordsFetching}
-                onClick={handleCancel}
-              >
-                Отменить запись
-              </button>
-            </>
-          ) : (
-            <p>Настала ваша очередь!</p>
-          )}
+          <p>{makeWaitedStateText(dateTimePeriod)}</p>
+          <button
+            className="btn btn-error"
+            disabled={isRecordsFetching}
+            onClick={handleCancel}
+          >
+            Отменить запись
+          </button>
         </>
+      ) : hasRecordsBefore ? (
+        <>
+          <p>Ваша очередь задерживается</p>
+          <button
+            className="btn btn-error"
+            disabled={isRecordsFetching}
+            onClick={handleCancel}
+          >
+            Отменить запись
+          </button>
+        </>
+      ) : status === ClinicRecordStatus.Awaits ? (
+        <p>Настала ваша очередь!</p>
+      ) : (
+        <p>Статус записи: {CLINIC_RECORD_STATUS_TITLES[status]}</p>
       )}
     </div>
   )

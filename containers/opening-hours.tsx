@@ -26,6 +26,7 @@ import {
 } from '@/models/date'
 import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
+import { ClinicRecordStatus } from '@/models/clinic'
 
 export interface OpeningHoursContainerProps {
   sampleRate: number
@@ -79,7 +80,12 @@ export function OpeningHoursContainer({
 }: OpeningHoursContainerProps): JSX.Element {
   const { isRecordsLoading, clinicRecords } = useClinic()
   const getBusyPeriods = useMemo(
-    () => makeBusyPeriodsCalculator(clinicRecords.map((r) => r.dateTimePeriod)),
+    () =>
+      makeBusyPeriodsCalculator(
+        clinicRecords
+          .filter((r) => r.status === ClinicRecordStatus.Awaits)
+          .map((r) => r.dateTimePeriod)
+      ),
     [clinicRecords]
   )
   const getWorkBreaks = useMemo(

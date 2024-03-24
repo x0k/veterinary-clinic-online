@@ -67,7 +67,7 @@ export function ClinicProvider({
       const now = dateToDateTimeData(new Date())
       if (
         !userRecord ||
-        userRecord.status === ClinicRecordStatus.InWork ||
+        userRecord.status !== ClinicRecordStatus.Awaits ||
         compareDate(userRecord.dateTimePeriod.start, now) !== 0
       ) {
         return false

@@ -51,6 +51,14 @@ function moscowDate(dateString: string): Date {
   return date
 }
 
+const statusesMap: Record<ClinicRecordStatus, InnerRecordStatus> = {
+  [ClinicRecordStatus.Awaits]: InnerRecordStatus.Awaits,
+  [ClinicRecordStatus.Done]: InnerRecordStatus.Done,
+  [ClinicRecordStatus.NotAppear]: InnerRecordStatus.NotAppear,
+  [ClinicRecordStatus.ArchivedDone]: InnerRecordStatus.ArchivedDone,
+  [ClinicRecordStatus.ArchivedNotAppear]: InnerRecordStatus.ArchivedNotAppear,
+}
+
 export class ClinicService implements IClinicService {
   private parseDateTimePeriod(
     dateResponse: DateProperty
@@ -104,10 +112,10 @@ export class ClinicService implements IClinicService {
           ? userId
           : undefined),
       status:
-        page.properties[ClinicRecordProperty.State].select?.name ===
-        ClinicRecordStatus.InWork
-          ? InnerRecordStatus.InWork
-          : InnerRecordStatus.Awaits,
+        statusesMap[
+          page.properties[ClinicRecordProperty.State].select
+            ?.name as ClinicRecordStatus
+        ] || InnerRecordStatus.Awaits,
       dateTimePeriod,
     }
   }
@@ -156,9 +164,15 @@ export class ClinicService implements IClinicService {
               {
                 property: ClinicRecordProperty.State,
                 select: {
-                  equals: ClinicRecordStatus.InWork,
+                  equals: ClinicRecordStatus.Done,
                 },
               },
+              {
+                property: ClinicRecordProperty.State,
+                select: {
+                  equals: ClinicRecordStatus.NotAppear,
+                },
+              }
             ],
           },
         ],

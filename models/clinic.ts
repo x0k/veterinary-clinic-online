@@ -22,7 +22,18 @@ export const clinicRecordIdSchema = z.string().refine(fakeGuard<ClinicRecordID>)
 
 export enum ClinicRecordStatus {
   Awaits = 'awaits',
-  InWork = 'inWork',
+  Done = 'done',
+  NotAppear = 'notAppear',
+  ArchivedDone = 'archivedDone',
+  ArchivedNotAppear = 'archivedNotAppear',
+}
+
+export const CLINIC_RECORD_STATUS_TITLES: Record<ClinicRecordStatus, string> = {
+  [ClinicRecordStatus.Awaits]: 'Ожидает',
+  [ClinicRecordStatus.Done]: 'Выполнено',
+  [ClinicRecordStatus.NotAppear]: 'Не пришел',
+  [ClinicRecordStatus.ArchivedDone]: 'Архив (выполнено)',
+  [ClinicRecordStatus.ArchivedNotAppear]: 'Архив (не пришел)',
 }
 
 export interface ClinicRecord {

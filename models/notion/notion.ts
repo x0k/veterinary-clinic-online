@@ -50,9 +50,10 @@ export enum ClinicRecordProperty {
 
 export enum ClinicRecordStatus {
   Awaits = 'Ожидает',
-  InWork = 'В работе',
   Done = 'Выполнено',
-  NotAppear = 'Не пришел'
+  NotAppear = 'Не пришел',
+  ArchivedDone = 'Архив выполнено',
+  ArchivedNotAppear = 'Архив не пришел',
 }
 
 export interface ClinicRecordProperties {

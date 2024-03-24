@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 
-import { type ClinicServiceEntity } from '@/models/clinic'
+import { ClinicRecordStatus, type ClinicServiceEntity } from '@/models/clinic'
 import { type UserData } from '@/models/user'
 import {
   makeBusyPeriodsCalculator,
@@ -54,7 +54,10 @@ export function CreateRecord({
     return [today, nextAvailableDay]
   }, [])
   const busyPeriods = useMemo(
-    () => clinicRecords.map((r) => r.dateTimePeriod),
+    () =>
+      clinicRecords
+        .filter((r) => r.status === ClinicRecordStatus.Awaits)
+        .map((r) => r.dateTimePeriod),
     [clinicRecords]
   )
   const getFreeTimePeriodsForDate = useMemo(() => {
@@ -139,7 +142,11 @@ export function CreateRecord({
         >
           Записаться
         </button>
-        <Link href={AppRoute.Privacy} className="text-center link link-hover" target="_blank">
+        <Link
+          href={AppRoute.Privacy}
+          className="text-center link link-hover"
+          target="_blank"
+        >
           Политика конфиденциальности
         </Link>
       </div>
