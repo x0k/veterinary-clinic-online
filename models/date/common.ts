@@ -12,7 +12,7 @@ export interface TimeData {
 }
 
 export const dateDataSchema = z.object({
-  date: z.number(),
+  days: z.number(),
   month: z.number(),
   year: z.number(),
 })
