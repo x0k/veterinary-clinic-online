@@ -243,3 +243,58 @@ export function makeBusyPeriodsCalculator(
       .filter(dateTimePeriodsAPI.isValidPeriod)
   }
 }
+
+export enum TimePeriodType {
+  Free = 'free',
+  Busy = 'busy',
+}
+
+export type TimePeriodWithType = TimePeriod & {
+  type: TimePeriodType
+  title: string
+}
+
+export function sortAndFlatTimePeriodsWithType(
+  periods: TimePeriodWithType[]
+): TimePeriodWithType[] {
+  if (periods.length < 2) {
+    return periods
+  }
+  const sorted = periods.slice().sort(timePeriodsAPI.comparePeriods)
+  const result = new Array<TimePeriodWithType>(periods.length)
+  result[0] = sorted[0]
+  let nextIndex = 1
+  for (let i = 1; i < sorted.length; i++) {
+    const prevPeriod = result[nextIndex - 1]
+    const currPeriod = sorted[i]
+    if (
+      timePeriodsAPI.isValidPeriod(
+        timePeriodsAPI.intersectPeriods(prevPeriod, currPeriod)
+      )
+    ) {
+      if (
+        prevPeriod.type === TimePeriodType.Busy ||
+        currPeriod.type === TimePeriodType.Free
+      ) {
+        const diff = timePeriodsAPI.subtractPeriods(currPeriod, prevPeriod)
+        if (diff.length === 0) {
+          continue
+        }
+        result[nextIndex] = { ...currPeriod, ...diff[0] }
+      } else {
+        const diff = timePeriodsAPI.subtractPeriods(prevPeriod, currPeriod)
+        if (diff.length === 0) {
+          result[nextIndex - 1] = currPeriod
+          continue
+        }
+        result[nextIndex - 1] = { ...prevPeriod, ...diff[0] }
+        result[nextIndex] = currPeriod
+      }
+    } else {
+      result[nextIndex] = currPeriod
+    }
+    nextIndex++
+  }
+  result.length = nextIndex
+  return result
+}

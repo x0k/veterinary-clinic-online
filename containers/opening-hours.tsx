@@ -8,6 +8,9 @@ import {
   makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
   makeWorkBreaksCalculator,
+  TimePeriodType,
+  sortAndFlatTimePeriodsWithType,
+  type TimePeriodWithType,
   type OpeningHours,
   type ProductionCalendar,
   type WorkBreaks,
@@ -19,7 +22,6 @@ import {
   getTimePeriodDurationInMinutes,
   type JSONDate,
   timeDataToJSON,
-  type TimePeriod,
   timePeriodsAPI,
 } from '@/models/date'
 import { useClinic } from '@/domains/clinic'
@@ -32,19 +34,9 @@ export interface OpeningHoursContainerProps {
   workBreaks: WorkBreaks
 }
 
-enum TimePeriodType {
-  Free = 'free',
-  Busy = 'busy',
-}
-
 const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
   [TimePeriodType.Busy]: 'bg-error',
   [TimePeriodType.Free]: 'bg-primary',
-}
-
-type TimePeriodWithType = TimePeriod & {
-  type: TimePeriodType
-  title: string
 }
 
 interface TimePeriodsProps {
@@ -136,12 +128,10 @@ export function OpeningHoursContainer({
         workBreaks.concat(busyPeriods)
       )
     )
-
     const periods: TimePeriodWithType[] = freePeriods
       .map((p) => ({ ...p, type: TimePeriodType.Free, title: 'Свободно' }))
       .concat(workBreaks, busyPeriods)
-      .sort(timePeriodsAPI.comparePeriods)
-    return periods
+    return sortAndFlatTimePeriodsWithType(periods)
   }, [
     getBusyPeriods,
     getWorkBreaks,

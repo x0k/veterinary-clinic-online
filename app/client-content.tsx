@@ -48,11 +48,8 @@ const workBreaks: WorkBreaks = [
     id: 'vacation',
     matchExpression: `^\\d 2024-03-(2[6-9]|30|31)`,
     title: 'Отпуск',
-    period: {
-      start: { hours: 0, minutes: 0 },
-      end: { hours: 23, minutes: 59 },
-    }
-  }
+    period: weekdayTimePeriod,
+  },
 ]
 const sampleRate = 30
 
