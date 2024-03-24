@@ -20,7 +20,7 @@ export const dateDataSchema = z.object({
 export interface DateData {
   year: number
   month: number
-  date: number
+  days: number
 }
 
 export const DateTimeDataSchema = z.intersection(dateDataSchema, timeDataSchema)
@@ -32,7 +32,7 @@ export function compareTime(a: TimeData, b: TimeData): number {
 }
 
 export function compareDate(a: DateData, b: DateData): number {
-  return a.year - b.year || a.month - b.month || a.date - b.date
+  return a.year - b.year || a.month - b.month || a.days - b.days
 }
 
 export function compareDateTime(a: DateTimeData, b: DateTimeData): number {
@@ -68,7 +68,7 @@ export function dateToDateData(date: Date): DateData {
   return {
     year: date.getFullYear(),
     month: date.getMonth() + 1,
-    date: date.getDate(),
+    days: date.getDate(),
   }
 }
 
@@ -86,7 +86,7 @@ export function dateToDateTimeData(date: Date): DateTimeData {
 export function dateTimeDataToDate({
   year,
   month,
-  date,
+  days: date,
   hours,
   minutes,
 }: DateTimeData): Date {

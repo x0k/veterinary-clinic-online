@@ -12,11 +12,13 @@ export default async function HomePage(): Promise<JSX.Element> {
   })
   const productionCalendarData = await response.json()
   const clinicServices = await clinicServiceWithRevalidation.fetchServices()
+  const dynamicWorkBreaks = await clinicServiceWithRevalidation.fetchWorkBreaks()
   return (
     <MainLayout header={<HeaderContainer title="Запись" />}>
       <ClientContent
         clinicServices={clinicServices}
         productionCalendarData={productionCalendarData}
+        dynamicWorkBreaks={dynamicWorkBreaks}
       />
     </MainLayout>
   )

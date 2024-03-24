@@ -21,13 +21,20 @@ import {
   NOTION_RECORDS_PAGE_ID,
   NOTION_SERVICES_PAGE_ID,
   type Results,
+  NOTION_BREAKS_PAGE_ID,
+  type DateProperty,
+  type ClinicBreakProperties,
+  ClinicBreakProperty,
 } from '@/models/notion'
 import { type UserId } from '@/models/user'
 import {
+  type DateTimePeriod,
   dateTimeDataToJSON,
   dateToDateTimeData,
   makeDateTimeShifter,
+  dateDataToJSON,
 } from '@/models/date'
+import { type WorkBreak, type WorkBreaks } from '@/models/schedule'
 
 const shiftToMoscowTZ = makeDateTimeShifter({
   hours: 3,
@@ -45,15 +52,46 @@ function moscowDate(dateString: string): Date {
 }
 
 export class ClinicService implements IClinicService {
+  private parseDateTimePeriod(
+    dateResponse: DateProperty
+  ): DateTimePeriod | null {
+    const startDateTimePeriod = dateResponse.date?.start
+    const endDateTimePeriod = dateResponse.date?.end
+    if (!startDateTimePeriod || !endDateTimePeriod) {
+      return null
+    }
+    return {
+      start: dateToDateTimeData(moscowDate(startDateTimePeriod)),
+      end: dateToDateTimeData(moscowDate(endDateTimePeriod)),
+    }
+  }
+
+  private buildMatchExpression(dateTimePeriod: DateTimePeriod): string {
+    const shift = makeDateTimeShifter({ days: 1 })
+    const expr = [`^\\d (`]
+    let cursor = dateTimePeriod.start
+    while (
+      cursor.year < dateTimePeriod.end.year ||
+      cursor.month < dateTimePeriod.end.month ||
+      cursor.days < dateTimePeriod.end.days
+    ) {
+      expr.push(dateDataToJSON(cursor))
+      expr.push('|')
+      cursor = shift(cursor)
+    }
+    expr.push(dateDataToJSON(cursor))
+    expr.push(')')
+    return expr.join('')
+  }
+
   private createClinicRecord(
     page: NotionFullQueryResult<ClinicRecordProperties>,
     userId?: UserId
   ): ClinicRecord | null {
-    const startDateTimePeriod =
-      page.properties[ClinicRecordProperty.DateTimePeriod].date?.start
-    const endDateTimePeriod =
-      page.properties[ClinicRecordProperty.DateTimePeriod].date?.end
-    if (!startDateTimePeriod || !endDateTimePeriod) {
+    const dateTimePeriod = this.parseDateTimePeriod(
+      page.properties[ClinicRecordProperty.DateTimePeriod]
+    )
+    if (!dateTimePeriod) {
       return null
     }
     return {
@@ -70,10 +108,7 @@ export class ClinicService implements IClinicService {
         ClinicRecordStatus.InWork
           ? InnerRecordStatus.InWork
           : InnerRecordStatus.Awaits,
-      dateTimePeriod: {
-        start: dateToDateTimeData(moscowDate(startDateTimePeriod)),
-        end: dateToDateTimeData(moscowDate(endDateTimePeriod)),
-      },
+      dateTimePeriod,
     }
   }
 
@@ -192,10 +227,34 @@ export class ClinicService implements IClinicService {
     return this.createClinicRecord(
       response as NotionFullQueryResult<ClinicRecordProperties>,
       identity
-    ) as ClinicRecord
+    )!
   }
 
   async removeRecord(id: string): Promise<void> {
     await this.notionClient.pages.update({ page_id: id, archived: true })
+  }
+
+  async fetchWorkBreaks(): Promise<WorkBreaks> {
+    const { results } = await this.notionClient.databases.query({
+      database_id: NOTION_BREAKS_PAGE_ID,
+    })
+    return (results as Results<ClinicBreakProperties>)
+      .map((result) => {
+        const dateTimePeriod = this.parseDateTimePeriod(
+          result.properties[ClinicBreakProperty.Period]
+        )
+        if (!dateTimePeriod) {
+          return null
+        }
+        return {
+          id: result.id,
+          title: getRichTextValue(
+            result.properties[ClinicBreakProperty.Title].title
+          ),
+          period: dateTimePeriod,
+          matchExpression: this.buildMatchExpression(dateTimePeriod),
+        } satisfies WorkBreak
+      })
+      .filter(isSomething)
   }
 }

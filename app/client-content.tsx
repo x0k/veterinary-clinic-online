@@ -34,7 +34,7 @@ const openingHours: OpeningHours = {
   5: weekdayTimePeriod,
   6: saturdayTimePeriod,
 }
-const workBreaks: WorkBreaks = [
+const staticWorkBreaks: WorkBreaks = [
   {
     id: 'lunch',
     matchExpression: '^[1-5]',
@@ -44,28 +44,28 @@ const workBreaks: WorkBreaks = [
       end: { hours: 13, minutes: 30 },
     },
   },
-  {
-    id: 'vacation',
-    matchExpression: `^\\d 2024-03-(2[6-9]|30|31)`,
-    title: 'Отпуск',
-    period: weekdayTimePeriod,
-  },
 ]
 const sampleRate = 30
 
 export interface ClientContentProps {
   productionCalendarData: ProductionCalendarData
   clinicServices: ClinicServiceEntity[]
+  dynamicWorkBreaks: WorkBreaks,
 }
 
 export function ClientContent({
   clinicServices,
   productionCalendarData,
+  dynamicWorkBreaks,
 }: ClientContentProps): JSX.Element {
   const user = useUser()
   const productionCalendar = useMemo(
     () => makeProductionCalendarWithoutSaturdayWeekend(productionCalendarData),
     [productionCalendarData]
+  )
+  const workBreaks = useMemo(
+    () => staticWorkBreaks.concat(dynamicWorkBreaks),
+    [dynamicWorkBreaks]
   )
   return isAuthenticatedUser(user) ? (
     <ClinicProvider userData={user.userData} trpc={trpc}>

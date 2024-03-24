@@ -6,13 +6,15 @@ const {
   NOTION_SERVICES_PAGE_ID: notionServicesPageId,
   NOTION_RECORDS_PAGE_ID: notionRecordsPageId,
   NOTION_PRIVACY_POLICY_PAGE_ID: notionPrivacyPolicyPageId,
+  NOTION_BREAKS_PAGE_ID: notionBreaksPageId
 } = process.env
 
-export const NOTION_AUTH = NOTION_CLIENT_SECRET as string
-export const NOTION_INFO_PAGE_ID = notionInfoPageId as string
-export const NOTION_SERVICES_PAGE_ID = notionServicesPageId as string
-export const NOTION_RECORDS_PAGE_ID = notionRecordsPageId as string
-export const NOTION_PRIVACY_POLICY_PAGE_ID = notionPrivacyPolicyPageId as string
+export const NOTION_AUTH = NOTION_CLIENT_SECRET!
+export const NOTION_INFO_PAGE_ID = notionInfoPageId!
+export const NOTION_SERVICES_PAGE_ID = notionServicesPageId!
+export const NOTION_RECORDS_PAGE_ID = notionRecordsPageId!
+export const NOTION_BREAKS_PAGE_ID = notionBreaksPageId!
+export const NOTION_PRIVACY_POLICY_PAGE_ID = notionPrivacyPolicyPageId!
 
 export function isRichTextTextItem(item: RichTextItemResponse): item is RichTextTextItem {
   return item.type === 'text'
@@ -61,4 +63,14 @@ export interface ClinicRecordProperties {
   [ClinicRecordProperty.DateTimePeriod]: DateProperty,
   [ClinicRecordProperty.State]: SelectProperty,
   [ClinicRecordProperty.UserId]: RichTextProperty
+}
+
+export enum ClinicBreakProperty {
+  Title = 'Наименование',
+  Period = 'Период',
+}
+
+export interface ClinicBreakProperties {
+  [ClinicBreakProperty.Title]: TitleProperty
+  [ClinicBreakProperty.Period]: DateProperty
 }

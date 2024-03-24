@@ -13,7 +13,7 @@ function pad20(value: number): string {
   return String(value).padStart(2, '0')
 }
 
-export function dateDataToJSON({ year, month, date }: DateData): JSONDate {
+export function dateDataToJSON({ year, month, days: date }: DateData): JSONDate {
   return `${year}-${pad20(month)}-${pad20(date)}` as JSONDate
 }
 
