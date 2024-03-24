@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
+// import GoogleProvider from 'next-auth/providers/google'
 import VKProvider from 'next-auth/providers/vk'
 
 import {
@@ -15,15 +15,15 @@ export const {
   signOut,
 } = NextAuth({
   providers: [
-    GoogleProvider({
-      clientId: CLIENTS_ID[AuthenticationType.Google],
-      clientSecret: CLIENTS_SECRET[AuthenticationType.Google],
-      authorization: {
-        params: {
-          scope: AUTH_SCOPES[AuthenticationType.Google],
-        },
-      },
-    }),
+    // GoogleProvider({
+    //   clientId: CLIENTS_ID[AuthenticationType.Google],
+    //   clientSecret: CLIENTS_SECRET[AuthenticationType.Google],
+    //   authorization: {
+    //     params: {
+    //       scope: AUTH_SCOPES[AuthenticationType.Google],
+    //     },
+    //   },
+    // }),
     VKProvider({
       clientId: CLIENTS_ID[AuthenticationType.VK],
       clientSecret: CLIENTS_SECRET[AuthenticationType.VK],
