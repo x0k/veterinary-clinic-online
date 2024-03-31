@@ -1,0 +1,17 @@
+#!/bin/bash +xe
+
+d:
+  npm run dev -- --experimental-https
+
+b:
+  npm run build
+
+c:
+  npm run check
+
+l:
+  npm run lint
+
+br:
+  $BROWSER --allow-insecure-localhost https://localhost:3000 \
+    --ignore-certificate-errors
