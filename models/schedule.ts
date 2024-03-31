@@ -55,10 +55,6 @@ export interface DateTimePeriods {
 
 type DateTimePeriodsMapper = (data: DateTimePeriods) => DateTimePeriods
 
-const { PRODUCTION_CALENDAR_URL: productionCalendarUrl } = process.env
-
-export const PRODUCTION_CALENDAR_URL = productionCalendarUrl!
-
 export function makeProductionCalendarWithoutSaturdayWeekend(
   data: ProductionCalendarData
 ): ProductionCalendar {

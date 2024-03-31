@@ -76,9 +76,3 @@ export interface IClinicService {
   createRecord: (create: ClinicRecordCreate) => Promise<ClinicRecord>
   removeRecord: (id: ClinicRecordID) => Promise<void>
 }
-
-export interface ClinicRPCConfig {
-  fetchActualRecords: () => Promise<ClinicRecord[]>
-  createRecord: (data: ClinicRecordCreate) => Promise<ClinicRecord>
-  dismissRecord: (recordId: ClinicRecordID) => Promise<void>
-}

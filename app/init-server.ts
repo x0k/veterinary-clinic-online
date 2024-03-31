@@ -2,25 +2,31 @@ import { Client as NotionClient } from '@notionhq/client'
 import { NotionAPI } from 'notion-client'
 import { cache } from 'react'
 
-import { SERVICES_REVALIDATE_INTERVAL } from '@/models/app'
-import { NOTION_AUTH } from '@/models/notion'
 import { ClinicService } from '@/implementation/clinic-service'
+
+import { env } from './env-server'
 
 export const clinicServiceWithRevalidation = new ClinicService(
   new NotionClient({
-    auth: NOTION_AUTH,
+    auth: env.NOTION_CLIENT_SECRET,
     fetch: (url, init) =>
       fetch(url, {
         ...init,
-        next: { revalidate: SERVICES_REVALIDATE_INTERVAL },
+        next: { revalidate: env.SERVICES_REVALIDATE_INTERVAL },
       }),
-  })
+  }),
+  env.NOTION_SERVICES_PAGE_ID,
+  env.NOTION_RECORDS_PAGE_ID,
+  env.NOTION_BREAKS_PAGE_ID,
 )
 
 export const clinicService = new ClinicService(
   new NotionClient({
-    auth: NOTION_AUTH,
-  })
+    auth: env.NOTION_CLIENT_SECRET,
+  }),
+  env.NOTION_SERVICES_PAGE_ID,
+  env.NOTION_RECORDS_PAGE_ID,
+  env.NOTION_BREAKS_PAGE_ID,
 )
 
 const notion = new NotionAPI()

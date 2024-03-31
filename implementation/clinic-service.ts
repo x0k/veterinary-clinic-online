@@ -18,10 +18,7 @@ import {
   ClinicServiceEntityProperty,
   getRichTextValue,
   type NotionFullQueryResult,
-  NOTION_RECORDS_PAGE_ID,
-  NOTION_SERVICES_PAGE_ID,
   type Results,
-  NOTION_BREAKS_PAGE_ID,
   type DateProperty,
   type ClinicBreakProperties,
   ClinicBreakProperty,
@@ -92,16 +89,11 @@ export class ClinicService implements IClinicService {
     return expr.join('')
   }
 
-  private createClinicRecord(
+  private createValidClinicRecord(
     page: NotionFullQueryResult<ClinicRecordProperties>,
+    dateTimePeriod: DateTimePeriod,
     userId?: UserId
-  ): ClinicRecord | null {
-    const dateTimePeriod = this.parseDateTimePeriod(
-      page.properties[ClinicRecordProperty.DateTimePeriod]
-    )
-    if (!dateTimePeriod) {
-      return null
-    }
+  ): ClinicRecord {
     return {
       id: page.id as ClinicRecordID,
       userId:
@@ -120,11 +112,29 @@ export class ClinicService implements IClinicService {
     }
   }
 
-  constructor(private readonly notionClient: NotionClient) {}
+  private createClinicRecord(
+    page: NotionFullQueryResult<ClinicRecordProperties>,
+    userId?: UserId
+  ): ClinicRecord | null {
+    const dateTimePeriod = this.parseDateTimePeriod(
+      page.properties[ClinicRecordProperty.DateTimePeriod]
+    )
+    if (!dateTimePeriod) {
+      return null
+    }
+    return this.createValidClinicRecord(page, dateTimePeriod, userId)
+  }
+
+  constructor(
+    private readonly notionClient: NotionClient,
+    private readonly servicesPageId: string,
+    private readonly recordsPageId: string,
+    private readonly breaksPageId: string
+  ) {}
 
   async fetchServices(): Promise<ClinicServiceEntity[]> {
     const { results } = await this.notionClient.databases.query({
-      database_id: NOTION_SERVICES_PAGE_ID,
+      database_id: this.servicesPageId,
     })
     return (results as Results<ClinicServiceEntityProperties>).map((r) => ({
       id: r.id as ClinicServiceEntityID,
@@ -144,7 +154,7 @@ export class ClinicService implements IClinicService {
 
   async fetchActualRecords(userId?: UserId): Promise<ClinicRecord[]> {
     const { results } = await this.notionClient.databases.query({
-      database_id: NOTION_RECORDS_PAGE_ID,
+      database_id: this.recordsPageId,
       filter: {
         and: [
           {
@@ -172,7 +182,7 @@ export class ClinicService implements IClinicService {
                 select: {
                   equals: ClinicRecordStatus.NotAppear,
                 },
-              }
+              },
             ],
           },
         ],
@@ -197,9 +207,13 @@ export class ClinicService implements IClinicService {
     userName,
     userPhone,
   }: ClinicRecordCreate): Promise<ClinicRecord> {
+    const moscowPeriod = {
+      start: shiftToMoscowTZ(utcDateTimePeriod.start),
+      end: shiftToMoscowTZ(utcDateTimePeriod.end),
+    }
     const response = await this.notionClient.pages.create({
       parent: {
-        database_id: NOTION_RECORDS_PAGE_ID,
+        database_id: this.recordsPageId,
       },
       properties: {
         [ClinicRecordProperty.Title]: {
@@ -221,8 +235,8 @@ export class ClinicService implements IClinicService {
         [ClinicRecordProperty.DateTimePeriod]: {
           type: 'date',
           date: {
-            start: dateTimeDataToJSON(shiftToMoscowTZ(utcDateTimePeriod.start)),
-            end: dateTimeDataToJSON(shiftToMoscowTZ(utcDateTimePeriod.end)),
+            start: dateTimeDataToJSON(moscowPeriod.start),
+            end: dateTimeDataToJSON(moscowPeriod.end),
             time_zone: 'Europe/Moscow',
           },
         },
@@ -238,10 +252,11 @@ export class ClinicService implements IClinicService {
         },
       },
     })
-    return this.createClinicRecord(
+    return this.createValidClinicRecord(
       response as NotionFullQueryResult<ClinicRecordProperties>,
+      moscowPeriod,
       identity
-    )!
+    )
   }
 
   async removeRecord(id: string): Promise<void> {
@@ -250,7 +265,7 @@ export class ClinicService implements IClinicService {
 
   async fetchWorkBreaks(): Promise<WorkBreaks> {
     const { results } = await this.notionClient.databases.query({
-      database_id: NOTION_BREAKS_PAGE_ID,
+      database_id: this.breaksPageId,
     })
     return (results as Results<ClinicBreakProperties>)
       .map((result) => {

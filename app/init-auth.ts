@@ -2,12 +2,20 @@ import NextAuth from 'next-auth'
 // import GoogleProvider from 'next-auth/providers/google'
 import VKProvider from 'next-auth/providers/vk'
 
-import {
-  AUTH_SCOPES,
-  AuthenticationType,
-  CLIENTS_ID,
-  CLIENTS_SECRET,
-} from '@/models/auth'
+import { AUTH_SCOPES, AuthenticationType } from '@/models/auth'
+
+import { env } from './env-server'
+import { env as envClient } from './env-client'
+
+const CLIENTS_ID: Record<AuthenticationType, string> = {
+  [AuthenticationType.Google]: envClient.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  [AuthenticationType.VK]: envClient.NEXT_PUBLIC_VK_CLIENT_ID,
+}
+
+const CLIENTS_SECRET: Record<AuthenticationType, string> = {
+  [AuthenticationType.Google]: env.GOOGLE_CLIENT_SECRET,
+  [AuthenticationType.VK]: env.VK_CLIENT_SECRET,
+}
 
 export const {
   handlers: { GET, POST },

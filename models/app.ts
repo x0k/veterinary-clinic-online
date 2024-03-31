@@ -19,6 +19,3 @@ export const queryKey = {
   user: ['user'],
   clinicRecords: ['clinicRecords'],
 }
-
-export const SERVICES_REVALIDATE_INTERVAL = 24 * 60 * 60
-export const CALENDAR_REVALIDATE_INTERVAL = 30 * 24 * 60 * 60

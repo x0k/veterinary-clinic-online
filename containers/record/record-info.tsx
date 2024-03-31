@@ -10,6 +10,8 @@ import {
 } from '@/models/date'
 import { useClinic } from '@/domains/clinic'
 
+import { Subscription } from './subscription'
+
 export interface RecordInfoProps {
   record: ClinicRecord
   hasRecordsBefore: boolean
@@ -64,6 +66,7 @@ export function RecordInfo({
       ) : (
         <p>Статус записи: {CLINIC_RECORD_STATUS_TITLES[status]}</p>
       )}
+      <Subscription />
     </div>
   )
 }
