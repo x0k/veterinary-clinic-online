@@ -1,0 +1,3 @@
+[submodule "veterinary-clinic-backend"]
+	path = veterinary-clinic-backend
+	url = git@github.com:x0k/veterinary-clinic-backend.git
