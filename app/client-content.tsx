@@ -1,5 +1,5 @@
 'use client'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { BigLoader } from '@/components/big-loader'
 import { type ClinicServiceEntity } from '@/models/clinic'
@@ -50,7 +50,7 @@ const sampleRate = 30
 export interface ClientContentProps {
   productionCalendarData: ProductionCalendarData
   clinicServices: ClinicServiceEntity[]
-  dynamicWorkBreaks: WorkBreaks,
+  dynamicWorkBreaks: WorkBreaks
 }
 
 export function ClientContent({
@@ -67,6 +67,17 @@ export function ClientContent({
     () => staticWorkBreaks.concat(dynamicWorkBreaks),
     [dynamicWorkBreaks]
   )
+  useEffect(() => {
+    const go = new Go()
+    WebAssembly.instantiateStreaming(fetch('/domain.wasm'), go.importObject)
+      .then((result) => {
+        const promise = go.run(result.instance)
+        // @ts-expect-error TODO
+        console.log(window.__init_wasm({}))
+        return promise
+      })
+      .catch(console.error)
+  }, [])
   return isAuthenticatedUser(user) ? (
     <ClinicProvider userData={user.userData} trpc={trpc}>
       <RecordContainer

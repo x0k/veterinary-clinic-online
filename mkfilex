@@ -1,6 +1,6 @@
 #!/bin/bash +xe
 
-d:
+all:
   npm run dev -- --experimental-https
 
 b:
@@ -15,3 +15,13 @@ l:
 br:
   $BROWSER --allow-insecure-localhost https://localhost:3000 \
     --ignore-certificate-errors
+
+wasm:
+  cd veterinary-clinic-backend
+  git pull
+  mkdir -p out
+  mk wasm
+  cp out/domain.wasm ../public/domain.wasm
+
+wasm-exec:
+  cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js public/wasm_exec.js
