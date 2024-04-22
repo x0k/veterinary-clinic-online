@@ -17,11 +17,10 @@ br:
     --ignore-certificate-errors
 
 wasm:
-  cd veterinary-clinic-backend
-  git pull
-  mkdir -p out
-  mk wasm
-  cp out/domain.wasm ../public/domain.wasm
+  pushd veterinary-clinic-backend
+    mk wasm
+  popd
+  cp veterinary-clinic-backend/out/domain.wasm public/domain.wasm
 
 wasm-exec:
   cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js public/wasm_exec.js
