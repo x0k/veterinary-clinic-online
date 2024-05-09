@@ -6,7 +6,7 @@ import {
   useMemo,
 } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { type createTRPCReact, getQueryKey } from '@trpc/react-query'
+import { getQueryKey, type CreateTRPCReact } from '@trpc/react-query'
 
 import { dateId } from '@/lib/date-id'
 import { noopPromise } from '@/lib/function'
@@ -42,7 +42,7 @@ export function useClinic(): Clinic {
 export interface ClinicProviderProps {
   userData?: UserData
   children: ReactNode
-  trpc: ReturnType<typeof createTRPCReact<AppRouter>>
+  trpc: CreateTRPCReact<AppRouter, unknown>
 }
 
 const shiftToMoscowTZ = makeDateTimeShifter({

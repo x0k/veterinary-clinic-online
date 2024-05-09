@@ -1,6 +1,6 @@
 #!/bin/bash +xe
 
-all:
+mk:
   npm run dev -- --experimental-https
 
 b:
@@ -17,10 +17,15 @@ br:
     --ignore-certificate-errors
 
 wasm:
-  pushd veterinary-clinic-backend
-    mk wasm
+  backend_path=veterinary-clinic-backend
+  backend_project_path=~/Projects/$backend_path
+  if [ -e $backend_project_path ]; then
+    backend_path=$backend_project_path
+  fi
+  pushd $backend_path
+    time mk wasm
   popd
-  cp veterinary-clinic-backend/out/domain.wasm public/domain.wasm
+  cp $backend_path/out/domain.wasm public/domain.wasm
 
 wasm-exec:
   cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js public/wasm_exec.js

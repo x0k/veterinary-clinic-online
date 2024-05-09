@@ -1,4 +1,4 @@
-enum ScheduleEntryType {
+export enum ScheduleEntryType {
   Free = 0,
   Busy = 1,
 }
@@ -11,20 +11,33 @@ export interface ScheduleEntryDTO {
 
 export interface AppointmentScheduleDTO {
   date: string
-  entries: unknown[]
+  entries: ScheduleEntryDTO[]
   nextDate: string
   prevDate: string
+}
+
+type ErrorOr<T> = T | Promise<never>
+
+export function isError<T>(v: ErrorOr<T>): v is Promise<never> {
+  return v instanceof Promise
 }
 
 export interface AppointmentDomain {
   schedule: (preferredDate: ISODateDTO) => Promise<AppointmentScheduleDTO>
 }
 
+export interface SharedDomain {
+  timePeriodDurationInMinutes: (
+    timePeriod: PeriodDTO<TimeDTO>
+  ) => ErrorOr<number>
+}
+
 export interface RootDomain {
+  shared: SharedDomain
   appointment: AppointmentDomain
 }
 
-enum LogLevel {
+export enum LogLevel {
   Disabled = -8,
   Debug = -4,
   Info = 0,
@@ -78,7 +91,9 @@ export type CustomerIdDTO = string
 export interface AppointmentRecordsRepositoryConfig {
   createRecord: (record: RecordDTO) => Promise<RecordIdDTO>
   loadBusyPeriods: (date: ISODateDTO) => Promise<Array<PeriodDTO<TimeDTO>>>
-  loadCustomerActiveAppointment: (customerId: CustomerIdDTO) => Promise<RecordDTO>
+  loadCustomerActiveAppointment: (
+    customerId: CustomerIdDTO
+  ) => Promise<RecordDTO>
   removeRecord: (recordId: RecordIdDTO) => Promise<void>
 }
 
@@ -112,7 +127,7 @@ export interface AppConfig {
 }
 
 declare global {
-    export interface Window {
-        __init_wasm: (cfg: AppConfig) => RootDomain | Promise<never>
-    }
+  export interface Window {
+    __init_wasm: (cfg: AppConfig) => RootDomain | Promise<never>
+  }
 }

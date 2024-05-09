@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { BigLoader } from '@/components/big-loader'
 import { type ClinicServiceEntity } from '@/models/clinic'
@@ -15,6 +15,7 @@ import { ClinicProvider } from '@/domains/clinic'
 import { useUser } from '@/domains/user'
 import { OpeningHoursContainer } from '@/containers/opening-hours'
 import { RecordContainer } from '@/containers/record'
+import { useDomain } from '@/implementation/client-domain'
 
 import { trpc } from './init-client'
 
@@ -67,17 +68,12 @@ export function ClientContent({
     () => staticWorkBreaks.concat(dynamicWorkBreaks),
     [dynamicWorkBreaks]
   )
-  useEffect(() => {
-    const go = new Go()
-    WebAssembly.instantiateStreaming(fetch('/domain.wasm'), go.importObject)
-      .then((result) => {
-        const promise = go.run(result.instance)
-        // @ts-expect-error TODO
-        console.log(window.__init_wasm({}))
-        return promise
-      })
-      .catch(console.error)
-  }, [])
+  const domain = useDomain({
+    sampleRateInMinutes: sampleRate,
+    productionCalendar: productionCalendarData,
+    workBreaks,
+  })
+
   return isAuthenticatedUser(user) ? (
     <ClinicProvider userData={user.userData} trpc={trpc}>
       <RecordContainer
@@ -91,12 +87,15 @@ export function ClientContent({
     </ClinicProvider>
   ) : isInvalidatedUser(user) ? (
     <BigLoader />
+  ) : // TODO: handle error
+  domain.isLoading || domain.data === undefined ? (
+    <BigLoader />
   ) : (
     <ClinicProvider trpc={trpc}>
       <OpeningHoursContainer
+        domain={domain.data}
         openingHours={openingHours}
         productionCalendar={productionCalendar}
-        sampleRate={sampleRate}
         workBreaks={workBreaks}
       />
     </ClinicProvider>

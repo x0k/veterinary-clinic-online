@@ -1,150 +1,99 @@
 import { useMemo, useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { isValid } from 'date-fns/isValid'
 
 import {
-  isNonWorkingDay,
-  makeBusyPeriodsCalculator,
-  makeFreeTimePeriodsCalculatorForDate,
   makeNextAvailableDayCalculator,
-  makeWorkBreaksCalculator,
-  TimePeriodType,
-  sortAndFlatTimePeriodsWithType,
-  type TimePeriodWithType,
   type OpeningHours,
   type ProductionCalendar,
   type WorkBreaks,
 } from '@/models/schedule'
-import {
-  dateDataToJSON,
-  dateToDateData,
-  dateToDateTimeData,
-  getTimePeriodDurationInMinutes,
-  type JSONDate,
-  timeDataToJSON,
-  timePeriodsAPI,
-} from '@/models/date'
+import { dateDataToJSON, dateToDateData, type JSONDate } from '@/models/date'
 import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
-import { ClinicRecordStatus } from '@/models/clinic'
+import {
+  type AppointmentScheduleDTO,
+  type RootDomain,
+  ScheduleEntryType,
+  isError,
+  type TimeDTO,
+} from '@/adapters/domain'
+import { useQuery } from '@tanstack/react-query'
 
 export interface OpeningHoursContainerProps {
-  sampleRate: number
   openingHours: OpeningHours
   productionCalendar: ProductionCalendar
   workBreaks: WorkBreaks
+  domain: RootDomain
 }
 
-const TIME_PERIOD_BG_COLORS: Record<TimePeriodType, string> = {
-  [TimePeriodType.Busy]: 'bg-error',
-  [TimePeriodType.Free]: 'bg-primary',
-}
-
-interface TimePeriodsProps {
-  periods: TimePeriodWithType[]
+const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
+  [ScheduleEntryType.Busy]: 'bg-error',
+  [ScheduleEntryType.Free]: 'bg-primary',
 }
 
 const scale = 0.1
 
-function TimePeriodsComponent({ periods }: TimePeriodsProps): JSX.Element {
+interface ScheduleProps {
+  schedule: AppointmentScheduleDTO
+  domain: RootDomain
+}
+
+function formatTime(time: TimeDTO): string {
+  return `${time.hours}:${time.minutes.toString().padStart(2, '0')}`
+}
+
+function Schedule({
+  schedule: { entries },
+  domain,
+}: ScheduleProps): JSX.Element {
   return (
     <>
-      {periods.map((period, i) => (
-        <div
-          key={i}
-          className={`relative rounded-md flex justify-center items-center mx-12 ${
-            TIME_PERIOD_BG_COLORS[period.type]
-          }`}
-          style={{
-            height: `${getTimePeriodDurationInMinutes(period) * scale}rem`,
-          }}
-        >
-          <span className="absolute top-0 -left-12">
-            {timeDataToJSON(period.start)}
-          </span>
-          <span className="absolute bottom-0 -right-12">
-            {timeDataToJSON(period.end)}
-          </span>
-          <span className="text-2xl text-black">{period.title}</span>
-        </div>
-      ))}
+      {entries.map((entry, i) => {
+        const duration = domain.shared.timePeriodDurationInMinutes({
+          start: entry.dateTimePeriod.start.time,
+          end: entry.dateTimePeriod.end.time,
+        })
+        if (isError(duration)) {
+          return null
+        }
+        return (
+          <div
+            key={i}
+            className={`relative rounded-md flex justify-center items-center mx-12 ${
+              TIME_PERIOD_BG_COLORS[entry.type]
+            }`}
+            style={{
+              height: `${duration * scale}rem`,
+            }}
+          >
+            <span className="absolute top-0 -left-12">
+              {formatTime(entry.dateTimePeriod.start.time)}
+            </span>
+            <span className="absolute bottom-0 -right-12">
+              {formatTime(entry.dateTimePeriod.end.time)}
+            </span>
+            <span className="text-2xl text-black">{entry.title}</span>
+          </div>
+        )
+      })}
     </>
   )
 }
 
 export function OpeningHoursContainer({
-  openingHours,
   productionCalendar,
-  sampleRate,
-  workBreaks,
+  domain,
 }: OpeningHoursContainerProps): JSX.Element {
-  const { isRecordsLoading, clinicRecords } = useClinic()
-  const getBusyPeriods = useMemo(
-    () =>
-      makeBusyPeriodsCalculator(
-        clinicRecords
-          .filter((r) => r.status === ClinicRecordStatus.Awaits)
-          .map((r) => r.dateTimePeriod)
-      ),
-    [clinicRecords]
-  )
-  const getWorkBreaks = useMemo(
-    () => makeWorkBreaksCalculator(workBreaks),
-    [workBreaks]
-  )
-  const getFreeTimePeriodsForDate = useMemo(
-    () =>
-      makeFreeTimePeriodsCalculatorForDate({
-        openingHours,
-        productionCalendar,
-        currentDateTime: dateToDateTimeData(new Date()),
-      }),
-    [openingHours, productionCalendar]
-  )
+  const { isRecordsLoading } = useClinic()
   const today = useMemo(() => dateDataToJSON(dateToDateData(new Date())), [])
   const [selectedDate, setDate] = useState(() =>
     makeNextAvailableDayCalculator(productionCalendar)(today)
   )
-  const periods = useMemo(() => {
-    const date = new Date(selectedDate)
-    if (!isValid(date) || date.getTime() < new Date().getTime()) {
-      return null
-    }
-    const dayType = productionCalendar.get(selectedDate)
-    if (dayType && isNonWorkingDay(dayType)) {
-      return []
-    }
-    const workBreaks: TimePeriodWithType[] = getWorkBreaks(date).map(
-      (workBreak) => ({
-        ...workBreak.period,
-        type: TimePeriodType.Busy,
-        title: workBreak.title,
-      })
-    )
-    const busyPeriods: TimePeriodWithType[] = timePeriodsAPI
-      .sortAndUnitePeriods(getBusyPeriods(date))
-      .map((period) => ({
-        ...period,
-        type: TimePeriodType.Busy,
-        title: 'Запись',
-      }))
-    const freePeriods = timePeriodsAPI.sortAndUnitePeriods(
-      timePeriodsAPI.subtractPeriodsFromPeriods(
-        getFreeTimePeriodsForDate(date),
-        workBreaks.concat(busyPeriods)
-      )
-    )
-    const periods: TimePeriodWithType[] = freePeriods
-      .map((p) => ({ ...p, type: TimePeriodType.Free, title: 'Свободно' }))
-      .concat(workBreaks, busyPeriods)
-    return sortAndFlatTimePeriodsWithType(periods)
-  }, [
-    getBusyPeriods,
-    getWorkBreaks,
-    getFreeTimePeriodsForDate,
-    selectedDate,
-    productionCalendar,
-  ])
+  const now = useMemo(() => new Date(), [])
+  const schedule = useQuery({
+    queryKey: ['schedule', now.toISOString()],
+    queryFn: () => domain.appointment.schedule(now.toISOString()),
+  })
   return isRecordsLoading ? (
     <BigLoader />
   ) : (
@@ -172,8 +121,8 @@ export function OpeningHoursContainer({
           войти
         </button>
       </p>
-      {periods ? (
-        <TimePeriodsComponent periods={periods} />
+      {schedule.data ? (
+        <Schedule domain={domain} schedule={schedule.data} />
       ) : (
         <p className="text-center text-error">Введите правильную дату</p>
       )}
