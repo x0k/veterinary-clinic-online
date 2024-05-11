@@ -39,13 +39,11 @@ export interface ClinicServiceEntityProperties {
 }
 
 export enum ClinicRecordProperty {
-  Title = 'ФИО',
-  Service = 'Услуга',
-  PhoneNumber = 'Телефон',
-  Email = 'Почта',
+  Title = 'Сводка',
   DateTimePeriod = 'Время записи',
   State = 'Статус',
-  UserId = 'identity',
+  Client = 'Клиент',
+  Service = 'Услуга',
 }
 
 export enum ClinicRecordStatus {
@@ -58,12 +56,25 @@ export enum ClinicRecordStatus {
 
 export interface ClinicRecordProperties {
   [ClinicRecordProperty.Title]: TitleProperty
-  [ClinicRecordProperty.Service]: RelationProperty
-  [ClinicRecordProperty.PhoneNumber]: PhoneNumberProperty
-  [ClinicRecordProperty.Email]: EmailProperty
   [ClinicRecordProperty.DateTimePeriod]: DateProperty
   [ClinicRecordProperty.State]: SelectProperty
-  [ClinicRecordProperty.UserId]: RichTextProperty
+  [ClinicRecordProperty.Client]: RelationProperty
+  [ClinicRecordProperty.Service]: RelationProperty
+
+}
+
+export enum ClinicClientProperty {
+  Title = 'ФИО',
+  Email = 'Почта',
+  Phone = 'Телефон',
+  Identity = 'identity',
+}
+
+export interface ClinicClientProperties {
+  [ClinicClientProperty.Title]: TitleProperty
+  [ClinicClientProperty.Email]: EmailProperty
+  [ClinicClientProperty.Phone]: PhoneNumberProperty
+  [ClinicClientProperty.Identity]: RichTextProperty
 }
 
 export enum ClinicBreakProperty {

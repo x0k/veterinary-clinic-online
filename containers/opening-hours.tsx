@@ -1,28 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { signIn } from 'next-auth/react'
-
-import {
-  makeNextAvailableDayCalculator,
-  type OpeningHours,
-  type ProductionCalendar,
-  type WorkBreaks,
-} from '@/models/schedule'
-import { dateDataToJSON, dateToDateData, type JSONDate } from '@/models/date'
-import { useClinic } from '@/domains/clinic'
-import { BigLoader } from '@/components/big-loader'
-import {
-  type AppointmentScheduleDTO,
-  type RootDomain,
-  ScheduleEntryType,
-  isError,
-  type TimeDTO,
-} from '@/adapters/domain'
 import { useQuery } from '@tanstack/react-query'
 
+import { BigLoader } from '@/components/big-loader'
+import { type RootDomain, ScheduleEntryType, isErr } from '@/adapters/domain'
+import { formatDate, formatTime, toIsoDate } from '@/domains/date'
+import { useDomain } from '@/domains/domain'
+
 export interface OpeningHoursContainerProps {
-  openingHours: OpeningHours
-  productionCalendar: ProductionCalendar
-  workBreaks: WorkBreaks
   domain: RootDomain
 }
 
@@ -33,19 +18,50 @@ const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
 
 const scale = 0.1
 
-interface ScheduleProps {
-  schedule: AppointmentScheduleDTO
-  domain: RootDomain
+interface ErrorTextProps {
+  errorMessage: string
 }
 
-function formatTime(time: TimeDTO): string {
-  return `${time.hours}:${time.minutes.toString().padStart(2, '0')}`
+function ErrorText({ errorMessage }: ErrorTextProps): JSX.Element {
+  return <p className="text-center text-error">{errorMessage}</p>
+}
+
+interface ScheduleProps {
+  domain: RootDomain
+  selectedDate: string
+  setDate: (date: string) => void
 }
 
 function Schedule({
-  schedule: { entries },
   domain,
+  selectedDate,
+  setDate,
 }: ScheduleProps): JSX.Element {
+  const {
+    isPending,
+    isError,
+    data: schedule,
+    error,
+  } = useQuery({
+    queryKey: ['schedule', selectedDate],
+    queryFn: () => domain.appointment.schedule(toIsoDate(selectedDate)),
+  })
+  useEffect(() => {
+    if (!schedule || isErr(schedule)) {
+      return
+    }
+    setDate(formatDate(new Date(schedule.value.date)))
+  }, [schedule, setDate])
+  if (isPending) {
+    return <BigLoader />
+  }
+  if (isError) {
+    return <ErrorText errorMessage={error.message} />
+  }
+  if (isErr(schedule)) {
+    return <ErrorText errorMessage={schedule.error.message} />
+  }
+  const { entries } = schedule.value
   return (
     <>
       {entries.map((entry, i) => {
@@ -53,7 +69,7 @@ function Schedule({
           start: entry.dateTimePeriod.start.time,
           end: entry.dateTimePeriod.end.time,
         })
-        if (isError(duration)) {
+        if (isErr(duration)) {
           return null
         }
         return (
@@ -63,7 +79,7 @@ function Schedule({
               TIME_PERIOD_BG_COLORS[entry.type]
             }`}
             style={{
-              height: `${duration * scale}rem`,
+              height: `${duration.value * scale}rem`,
             }}
           >
             <span className="absolute top-0 -left-12">
@@ -80,23 +96,11 @@ function Schedule({
   )
 }
 
-export function OpeningHoursContainer({
-  productionCalendar,
-  domain,
-}: OpeningHoursContainerProps): JSX.Element {
-  const { isRecordsLoading } = useClinic()
-  const today = useMemo(() => dateDataToJSON(dateToDateData(new Date())), [])
-  const [selectedDate, setDate] = useState(() =>
-    makeNextAvailableDayCalculator(productionCalendar)(today)
-  )
-  const now = useMemo(() => new Date(), [])
-  const schedule = useQuery({
-    queryKey: ['schedule', now.toISOString()],
-    queryFn: () => domain.appointment.schedule(now.toISOString()),
-  })
-  return isRecordsLoading ? (
-    <BigLoader />
-  ) : (
+export function OpeningHoursContainer(): JSX.Element {
+  const domain = useDomain()
+  const today = useMemo(() => formatDate(new Date()), [])
+  const [selectedDate, setDate] = useState(today)
+  return (
     <div className="flex flex-col gap-4 grow py-4 w-full max-w-sm shrink-0">
       <div className="flex items-baseline gap-2">
         <span className="grow">График работы на </span>
@@ -105,7 +109,7 @@ export function OpeningHoursContainer({
           className="max-w-max input input-bordered input-sm"
           value={selectedDate}
           onChange={(e) => {
-            setDate(e.target.value as JSONDate)
+            setDate(e.target.value)
           }}
           min={today}
         />
@@ -121,11 +125,7 @@ export function OpeningHoursContainer({
           войти
         </button>
       </p>
-      {schedule.data ? (
-        <Schedule domain={domain} schedule={schedule.data} />
-      ) : (
-        <p className="text-center text-error">Введите правильную дату</p>
-      )}
+      <Schedule domain={domain} selectedDate={selectedDate} setDate={setDate} />
     </div>
   )
 }

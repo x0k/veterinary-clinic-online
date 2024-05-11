@@ -20,16 +20,24 @@ const withSession = t.middleware(async ({ ctx, next }) => {
   return await next({ ctx: { ...ctx, session } })
 })
 
-const isAuthenticated = t.middleware(async ({ ctx, next }) => {
+const withAuthentication = t.middleware(async ({ ctx, next }) => {
   const session = await auth()
   if (!session) {
     throw new TRPCError({ code: 'UNAUTHORIZED' })
   }
-  return await next({ ctx: { ...ctx, session } })
+  const user = session.user
+  if (!user) {
+    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+  }
+  const userId = user.id
+  if (!userId) {
+    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' })
+  }
+  return await next({ ctx: { ...ctx, session, user, userId } })
 })
 
 const pub = t.procedure.use(withSession)
-const priv = t.procedure.use(isAuthenticated)
+const priv = t.procedure.use(withAuthentication)
 
 export const appRouter = t.router({
   fetchActualRecords: pub.query(async ({ ctx }) => {
@@ -40,11 +48,13 @@ export const appRouter = t.router({
   createRecord: priv
     .input(clinicRecordCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.clinicService.createRecord(input)
+      await ctx.clinicService.createRecord(ctx.userId as UserId, input)
     }),
   dismissRecord: priv
     .input(clinicRecordIdSchema)
-    .mutation(({ ctx, input }) => ctx.clinicService.removeRecord(input)),
+    .mutation(({ ctx, input }) =>
+      ctx.clinicService.removeRecord(ctx.userId as UserId, input)
+    ),
 })
 
 export type AppRouter = typeof appRouter

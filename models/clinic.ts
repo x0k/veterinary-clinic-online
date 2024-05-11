@@ -45,7 +45,6 @@ export interface ClinicRecord {
 }
 
 export const clinicRecordCreateSchema = z.object({
-  identity: z.string().refine(fakeGuard<UserId>),
   userName: z.string(),
   userEmail: z.string(),
   userPhone: z.string(),
@@ -54,7 +53,6 @@ export const clinicRecordCreateSchema = z.object({
 })
 
 export interface ClinicRecordCreate {
-  identity: UserId
   userName: string
   userEmail: string
   userPhone: string
@@ -73,6 +71,6 @@ export interface Clinic {
 export interface IClinicService {
   fetchServices: () => Promise<ClinicServiceEntity[]>
   fetchActualRecords: (userId?: UserId) => Promise<ClinicRecord[]>
-  createRecord: (create: ClinicRecordCreate) => Promise<ClinicRecord>
-  removeRecord: (id: ClinicRecordID) => Promise<void>
+  createRecord: (userId: UserId, create: ClinicRecordCreate) => Promise<ClinicRecord>
+  removeRecord: (userId: UserId, id: ClinicRecordID) => Promise<void>
 }

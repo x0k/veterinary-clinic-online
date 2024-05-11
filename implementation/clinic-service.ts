@@ -199,14 +199,16 @@ export class ClinicService implements IClinicService {
       .filter(isSomething)
   }
 
-  async createRecord({
-    utcDateTimePeriod,
-    identity,
-    service,
-    userEmail,
-    userName,
-    userPhone,
-  }: ClinicRecordCreate): Promise<ClinicRecord> {
+  async createRecord(
+    customerId: UserId,
+    {
+      utcDateTimePeriod,
+      service,
+      userEmail,
+      userName,
+      userPhone,
+    }: ClinicRecordCreate
+  ): Promise<ClinicRecord> {
     const moscowPeriod = {
       start: shiftToMoscowTZ(utcDateTimePeriod.start),
       end: shiftToMoscowTZ(utcDateTimePeriod.end),
@@ -219,18 +221,6 @@ export class ClinicService implements IClinicService {
         [ClinicRecordProperty.Title]: {
           type: 'title',
           title: [{ type: 'text', text: { content: userName } }],
-        },
-        [ClinicRecordProperty.Service]: {
-          type: 'relation',
-          relation: [{ id: service }],
-        },
-        [ClinicRecordProperty.PhoneNumber]: {
-          type: 'phone_number',
-          phone_number: userPhone,
-        },
-        [ClinicRecordProperty.Email]: {
-          type: 'email',
-          email: userEmail,
         },
         [ClinicRecordProperty.DateTimePeriod]: {
           type: 'date',
@@ -246,20 +236,24 @@ export class ClinicService implements IClinicService {
             name: ClinicRecordStatus.Awaits,
           },
         },
-        [ClinicRecordProperty.UserId]: {
-          type: 'rich_text',
-          rich_text: [{ type: 'text', text: { content: identity } }],
+        [ClinicRecordProperty.Service]: {
+          type: 'relation',
+          relation: [{ id: service }],
+        },
+        [ClinicRecordProperty.Client]: {
+          type: 'relation',
+          relation: [{ id: customerId }],
         },
       },
     })
     return this.createValidClinicRecord(
       response as NotionFullQueryResult<ClinicRecordProperties>,
       moscowPeriod,
-      identity
+      customerId
     )
   }
 
-  async removeRecord(id: string): Promise<void> {
+  async removeRecord(identity: UserId, id: string): Promise<void> {
     await this.notionClient.pages.update({ page_id: id, archived: true })
   }
 
