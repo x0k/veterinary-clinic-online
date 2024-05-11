@@ -1,13 +1,9 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 
-import {
-  clinicRecordCreateSchema,
-  clinicRecordIdSchema,
-  type IClinicService,
-} from '@/models/clinic'
-import type { UserId } from '@/models/user'
+import { type IClinicService } from '@/models/clinic'
 
 import { auth } from '@/app/init-auth'
+import { recordSchema } from '@/adapters/backend'
 
 export interface RouterContext {
   clinicService: IClinicService
@@ -40,21 +36,22 @@ const pub = t.procedure.use(withSession)
 const priv = t.procedure.use(withAuthentication)
 
 export const appRouter = t.router({
-  fetchActualRecords: pub.query(async ({ ctx }) => {
-    return await ctx.clinicService.fetchActualRecords(
-      ctx.session?.user?.id as UserId
-    )
-  }),
-  createRecord: priv
-    .input(clinicRecordCreateSchema)
-    .mutation(async ({ ctx, input }) => {
-      await ctx.clinicService.createRecord(ctx.userId as UserId, input)
-    }),
-  dismissRecord: priv
-    .input(clinicRecordIdSchema)
-    .mutation(({ ctx, input }) =>
-      ctx.clinicService.removeRecord(ctx.userId as UserId, input)
-    ),
+  // fetchActualRecords: pub.query(async ({ ctx }) => {
+  //   return await ctx.clinicService.fetchActualRecords(
+  //     ctx.session?.user?.id as UserId
+  //   )
+  // }),
+  // createRecord: priv
+  //   .input(clinicRecordCreateSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     await ctx.clinicService.createRecord(ctx.userId as UserId, input)
+  //   }),
+  // dismissRecord: priv
+  //   .input(clinicRecordIdSchema)
+  //   .mutation(({ ctx, input }) =>
+  //     ctx.clinicService.removeRecord(ctx.userId as UserId, input)
+  //   ),
+  createRecord: priv.input(recordSchema).mutation(async ({ ctx, input }) => {}),
 })
 
 export type AppRouter = typeof appRouter

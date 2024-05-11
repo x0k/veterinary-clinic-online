@@ -19,11 +19,32 @@ export interface AppointmentScheduleDTO {
   prevDate: string
 }
 
+export type ServiceIdDTO = string
+
+export interface ServiceDTO {
+  id: string
+  title: string
+  durationInMinutes: number
+  description: string
+  costDescription: string
+}
+
+export interface AppointmentDTO {
+  record: RecordDTO
+  service: ServiceDTO
+}
+
 export interface AppointmentDomain {
   schedule: (
     preferredDate: ISODateDTO
   ) => Promise<Result<AppointmentScheduleDTO>>
   dayOrNextWorkingDay: (now: ISODateDTO) => Promise<Result<ISODateDTO>>
+  createAppointment: (
+    now: ISODateDTO,
+    appointmentDate: ISODateDTO,
+    customerId: CustomerIdDTO,
+    serviceId: ServiceIdDTO
+  ) => Promise<Result<AppointmentDTO>>
 }
 
 export interface AppointmentSchedulingServiceConfig {
@@ -31,7 +52,7 @@ export interface AppointmentSchedulingServiceConfig {
 }
 
 export interface RecordDTO {
-  id: string
+  id: RecordIdDTO
   title: string
   status: string
   isArchived: boolean
