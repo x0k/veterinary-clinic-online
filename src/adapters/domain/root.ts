@@ -1,4 +1,4 @@
-import { type AppointmentConfig, type AppointmentDomain } from './appointment'
+import { type AppointmentDomainConfig, type AppointmentDomain } from './appointment'
 import { type LoggerConfig } from './logger'
 import { type Result } from './result'
 import { type SharedDomain } from './shared'
@@ -10,7 +10,7 @@ export interface RootDomain {
 
 export interface AppConfig {
   logger: LoggerConfig
-  appointment: AppointmentConfig
+  appointment: AppointmentDomainConfig
 }
 
 declare global {

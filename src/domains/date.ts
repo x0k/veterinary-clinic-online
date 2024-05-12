@@ -8,7 +8,7 @@ function pad20(value: number): string {
 }
 
 export function formatTime(time: Time): string {
-  return `${time.hours}:${pad20(time.minutes)}`
+  return `${pad20(time.hours)}:${pad20(time.minutes)}`
 }
 
 export function formatDate(date: Date): string {

@@ -47,14 +47,20 @@ export interface AppointmentDomain {
   ) => Promise<Result<AppointmentDTO>>
 }
 
-export interface AppointmentSchedulingServiceConfig {
+export interface SchedulingServiceConfig {
   sampleRateInMinutes: number
+}
+
+export enum RecordDTOStatus {
+  Awaits = 'awaits',
+  Done = 'done',
+  NotAppear = 'failed',
 }
 
 export interface RecordDTO {
   id: RecordIdDTO
   title: string
-  status: string
+  status: RecordDTOStatus
   isArchived: boolean
   dateTimePeriod: PeriodDTO<DateTimeDTO>
   customerId: string
@@ -68,7 +74,7 @@ export type ISODateDTO = string
 
 export type CustomerIdDTO = string
 
-export interface AppointmentRecordsRepositoryConfig {
+export interface RecordsRepositoryConfig {
   createRecord: (record: RecordDTO) => Promise<RecordIdDTO>
   loadBusyPeriods: (date: ISODateDTO) => Promise<Array<PeriodDTO<TimeDTO>>>
   loadCustomerActiveAppointment: (
@@ -79,7 +85,7 @@ export interface AppointmentRecordsRepositoryConfig {
 
 export type ProductionCalendarDTO = Record<string, number>
 
-export interface AppointmentProductionCalendarRepositoryConfig {
+export interface ProductionCalendarRepositoryConfig {
   loadProductionCalendar: () => Promise<ProductionCalendarDTO>
 }
 
@@ -90,7 +96,7 @@ export interface WorkBreakDTO {
   period: PeriodDTO<TimeDTO>
 }
 
-export interface AppointmentWorkBreaksRepositoryConfig {
+export interface WorkBreaksRepositoryConfig {
   loadWorkBreaks: () => Promise<WorkBreakDTO[]>
 }
 
@@ -104,7 +110,7 @@ export interface CustomerDTO {
 
 export type CustomerIdentityDTO = string
 
-export interface AppointmentCustomerRepositoryConfig {
+export interface CustomerRepositoryConfig {
   createCustomer: (customer: CustomerDTO) => Promise<CustomerIdDTO>
   loadCustomerByIdentity: (
     customerIdentity: CustomerIdentityDTO
@@ -112,10 +118,10 @@ export interface AppointmentCustomerRepositoryConfig {
   updateCustomer: (customer: CustomerDTO) => Promise<void>
 }
 
-export interface AppointmentConfig {
-  schedulingService: AppointmentSchedulingServiceConfig
-  recordsRepository: AppointmentRecordsRepositoryConfig
-  productionCalendarRepository: AppointmentProductionCalendarRepositoryConfig
-  workBreaksRepository: AppointmentWorkBreaksRepositoryConfig
-  customerRepository: AppointmentCustomerRepositoryConfig
+export interface AppointmentDomainConfig {
+  schedulingService: SchedulingServiceConfig
+  recordsRepository: RecordsRepositoryConfig
+  productionCalendarRepository: ProductionCalendarRepositoryConfig
+  workBreaksRepository: WorkBreaksRepositoryConfig
+  customerRepository: CustomerRepositoryConfig
 }

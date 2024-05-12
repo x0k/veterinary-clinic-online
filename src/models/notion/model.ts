@@ -60,7 +60,6 @@ export interface ClinicRecordProperties {
   [ClinicRecordProperty.State]: SelectProperty
   [ClinicRecordProperty.Client]: RelationProperty
   [ClinicRecordProperty.Service]: RelationProperty
-
 }
 
 export enum ClinicClientProperty {

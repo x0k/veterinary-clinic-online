@@ -1,7 +1,8 @@
 import { type ReactNode, createContext, createElement, useContext } from 'react'
-import type { CreateTRPCClient } from '@trpc/client'
 import {
   LogLevel,
+  type RecordsRepositoryConfig,
+  type CustomerRepositoryConfig,
   type ProductionCalendarDTO,
   type AppConfig,
   type RootDomain,
@@ -11,8 +12,6 @@ import {
 import { useQuery } from '@tanstack/react-query'
 
 import { BigLoader } from '@/components/big-loader'
-
-import type { AppRouter } from '@/trpc/model'
 
 async function createDomain(config: AppConfig): Promise<RootDomain> {
   const go = new Go()
@@ -32,7 +31,8 @@ export interface DomainProviderProps {
   sampleRateInMinutes: number
   productionCalendar: ProductionCalendarDTO
   workBreaks: WorkBreakDTO[]
-  trpcClient: CreateTRPCClient<AppRouter>
+  recordsRepository: RecordsRepositoryConfig
+  customerRepository: CustomerRepositoryConfig
   children: ReactNode
 }
 
@@ -50,7 +50,8 @@ export function DomainProvider({
   sampleRateInMinutes,
   productionCalendar,
   workBreaks,
-  trpcClient,
+  customerRepository,
+  recordsRepository,
   children,
 }: DomainProviderProps): JSX.Element {
   const query = useQuery({
@@ -70,34 +71,8 @@ export function DomainProvider({
           workBreaksRepository: {
             loadWorkBreaks: () => Promise.resolve(workBreaks),
           },
-          recordsRepository: {
-            async createRecord(record) {
-              throw new Error('Not implemented')
-              // const rec = await trpcClient.createRecord.mutate({
-              //   service: record.serviceId,
-              // })
-              // return record.id
-            },
-            async loadBusyPeriods(date) {
-              console.log('Load busy periods')
-              return []
-            },
-            async loadCustomerActiveAppointment(customerId) {
-              return await Promise.reject(new Error('Not implemented'))
-            },
-            async removeRecord(recordId) {},
-          },
-          customerRepository: {
-            async createCustomer(customer) {
-              throw new Error('Not implemented')
-            },
-            async loadCustomerByIdentity(customerIdentity) {
-              throw new Error('Not implemented')
-            },
-            async updateCustomer(customer) {
-              throw new Error('Not implemented')
-            },
-          },
+          recordsRepository,
+          customerRepository,
         },
       }),
   })
@@ -105,12 +80,13 @@ export function DomainProvider({
     return createElement(BigLoader)
   }
   if (query.isError) {
+    const node: ReactNode = query.error.message
     return createElement(
       'p',
       {
         className: 'text-center text-error',
       },
-      query.error.message
+      node
     )
   }
   return createElement(
