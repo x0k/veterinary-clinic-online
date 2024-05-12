@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { BigLoader } from '@/components/big-loader'
 
-import type { AppRouter } from '@/implementation/trpc-server'
+import type { AppRouter } from '@/trpc/model'
 
 async function createDomain(config: AppConfig): Promise<RootDomain> {
   const go = new Go()

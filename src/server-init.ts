@@ -4,7 +4,7 @@ import { cache } from 'react'
 
 import { ClinicService } from '@/implementation/clinic-service'
 
-import { env } from './env-server'
+import { env } from './server-env'
 
 export const clinicServiceWithRevalidation = new ClinicService(
   new NotionClient({

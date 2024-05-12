@@ -1,9 +1,9 @@
 import { MainLayout } from '@/components/main-layout'
 import { HeaderContainer } from '@/containers/header'
 
-import { env } from '../env-server'
+import { env } from '../server-env'
 import { ClientContent } from './client-content'
-import { clinicServiceWithRevalidation } from '../init-server'
+import { clinicServiceWithRevalidation } from '../server-init'
 
 export default async function HomePage(): Promise<JSX.Element> {
   const response = await fetch(env.PRODUCTION_CALENDAR_URL, {

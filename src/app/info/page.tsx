@@ -2,8 +2,8 @@ import { MainLayout } from '@/components/main-layout'
 import { NotionContent } from '@/components/notion-content'
 import { HeaderContainer } from '@/containers/header'
 
-import { queryNotionPage } from '../../init-server'
-import { env } from '../../env-server'
+import { queryNotionPage } from '@/server-init'
+import { env } from '@/server-env'
 
 export const revalidate = 86400
 

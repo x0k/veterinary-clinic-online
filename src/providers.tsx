@@ -5,7 +5,7 @@ import { SessionProvider } from 'next-auth/react'
 
 import { UserProvider } from '@/domains/user'
 
-import { client, trpc, trpcReactClient } from './init-client'
+import { client, trpc, trpcReactClient } from './client-init'
 
 export function Providers({ children }: PropsWithChildren): JSX.Element {
   return (

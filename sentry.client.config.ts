@@ -4,7 +4,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-import { env } from './src/env-client'
+import { env } from './src/client-ent'
 
 Sentry.init({
   dsn: env.NEXT_PUBLIC_SENTRY_DSN,

@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 
 import { recordSchema } from '@/adapters/backend'
-import { auth } from '@/init-auth'
+import { auth } from '@/auth'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RouterContext {
@@ -52,5 +52,3 @@ export const appRouter = t.router({
   //   ),
   createRecord: priv.input(recordSchema).mutation(async ({ ctx, input }) => {}),
 })
-
-export type AppRouter = typeof appRouter

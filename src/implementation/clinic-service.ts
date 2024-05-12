@@ -3,11 +3,9 @@ import { type Client as NotionClient } from '@notionhq/client'
 import { isSomething } from '@/lib/guards'
 import {
   type ClinicRecord,
-  type ClinicRecordCreate,
   type ClinicRecordID,
   type ClinicServiceEntity,
   type ClinicServiceEntityID,
-  type IClinicService,
   ClinicRecordStatus as InnerRecordStatus,
 } from '@/models/clinic'
 import {
@@ -26,16 +24,10 @@ import {
 import { type UserId } from '@/models/user'
 import {
   type DateTimePeriod,
-  dateTimeDataToJSON,
   dateToDateTimeData,
-  makeDateTimeShifter,
-  dateDataToJSON,
 } from '@/models/date'
 import { type WorkBreak, type WorkBreaks } from '@/models/schedule'
 
-const shiftToMoscowTZ = makeDateTimeShifter({
-  hours: 3,
-})
 
 const serverOffset = (() => {
   const serverDate = new Date()
@@ -56,7 +48,7 @@ const statusesMap: Record<ClinicRecordStatus, InnerRecordStatus> = {
   [ClinicRecordStatus.ArchivedNotAppear]: InnerRecordStatus.ArchivedNotAppear,
 }
 
-export class ClinicService implements IClinicService {
+export class ClinicService {
   private parseDateTimePeriod(
     dateResponse: DateProperty
   ): DateTimePeriod | null {
@@ -72,20 +64,20 @@ export class ClinicService implements IClinicService {
   }
 
   private buildMatchExpression(dateTimePeriod: DateTimePeriod): string {
-    const shift = makeDateTimeShifter({ days: 1 })
+    // const shift = makeDateTimeShifter({ days: 1 })
     const expr = [`^\\d (`]
-    let cursor = dateTimePeriod.start
-    while (
-      cursor.year < dateTimePeriod.end.year ||
-      cursor.month < dateTimePeriod.end.month ||
-      cursor.days < dateTimePeriod.end.days
-    ) {
-      expr.push(dateDataToJSON(cursor))
-      expr.push('|')
-      cursor = shift(cursor)
-    }
-    expr.push(dateDataToJSON(cursor))
-    expr.push(')')
+    // let cursor = dateTimePeriod.start
+    // while (
+    //   cursor.year < dateTimePeriod.end.year ||
+    //   cursor.month < dateTimePeriod.end.month ||
+    //   cursor.days < dateTimePeriod.end.days
+    // ) {
+    //   expr.push(dateDataToJSON(cursor))
+    //   expr.push('|')
+    //   cursor = shift(cursor)
+    // }
+    // expr.push(dateDataToJSON(cursor))
+    // expr.push(')')
     return expr.join('')
   }
 
@@ -96,13 +88,13 @@ export class ClinicService implements IClinicService {
   ): ClinicRecord {
     return {
       id: page.id as ClinicRecordID,
-      userId:
-        userId &&
-        (getRichTextValue(
-          page.properties[ClinicRecordProperty.UserId].rich_text
-        ) === userId
-          ? userId
-          : undefined),
+      // userId:
+      //   userId &&
+      //   (getRichTextValue(
+      //     page.properties[ClinicRecordProperty.UserId].rich_text
+      //   ) === userId
+      //     ? userId
+      //     : undefined),
       status:
         statusesMap[
           page.properties[ClinicRecordProperty.State].select
@@ -199,59 +191,59 @@ export class ClinicService implements IClinicService {
       .filter(isSomething)
   }
 
-  async createRecord(
-    customerId: UserId,
-    {
-      utcDateTimePeriod,
-      service,
-      userEmail,
-      userName,
-      userPhone,
-    }: ClinicRecordCreate
-  ): Promise<ClinicRecord> {
-    const moscowPeriod = {
-      start: shiftToMoscowTZ(utcDateTimePeriod.start),
-      end: shiftToMoscowTZ(utcDateTimePeriod.end),
-    }
-    const response = await this.notionClient.pages.create({
-      parent: {
-        database_id: this.recordsPageId,
-      },
-      properties: {
-        [ClinicRecordProperty.Title]: {
-          type: 'title',
-          title: [{ type: 'text', text: { content: userName } }],
-        },
-        [ClinicRecordProperty.DateTimePeriod]: {
-          type: 'date',
-          date: {
-            start: dateTimeDataToJSON(moscowPeriod.start),
-            end: dateTimeDataToJSON(moscowPeriod.end),
-            time_zone: 'Europe/Moscow',
-          },
-        },
-        [ClinicRecordProperty.State]: {
-          type: 'select',
-          select: {
-            name: ClinicRecordStatus.Awaits,
-          },
-        },
-        [ClinicRecordProperty.Service]: {
-          type: 'relation',
-          relation: [{ id: service }],
-        },
-        [ClinicRecordProperty.Client]: {
-          type: 'relation',
-          relation: [{ id: customerId }],
-        },
-      },
-    })
-    return this.createValidClinicRecord(
-      response as NotionFullQueryResult<ClinicRecordProperties>,
-      moscowPeriod,
-      customerId
-    )
-  }
+  // async createRecord(
+  //   customerId: UserId,
+  //   {
+  //     utcDateTimePeriod,
+  //     service,
+  //     userEmail,
+  //     userName,
+  //     userPhone,
+  //   }: ClinicRecordCreate
+  // ): Promise<ClinicRecord> {
+  //   const moscowPeriod = {
+  //     start: shiftToMoscowTZ(utcDateTimePeriod.start),
+  //     end: shiftToMoscowTZ(utcDateTimePeriod.end),
+  //   }
+  //   const response = await this.notionClient.pages.create({
+  //     parent: {
+  //       database_id: this.recordsPageId,
+  //     },
+  //     properties: {
+  //       [ClinicRecordProperty.Title]: {
+  //         type: 'title',
+  //         title: [{ type: 'text', text: { content: userName } }],
+  //       },
+  //       [ClinicRecordProperty.DateTimePeriod]: {
+  //         type: 'date',
+  //         date: {
+  //           start: dateTimeDataToJSON(moscowPeriod.start),
+  //           end: dateTimeDataToJSON(moscowPeriod.end),
+  //           time_zone: 'Europe/Moscow',
+  //         },
+  //       },
+  //       [ClinicRecordProperty.State]: {
+  //         type: 'select',
+  //         select: {
+  //           name: ClinicRecordStatus.Awaits,
+  //         },
+  //       },
+  //       [ClinicRecordProperty.Service]: {
+  //         type: 'relation',
+  //         relation: [{ id: service }],
+  //       },
+  //       [ClinicRecordProperty.Client]: {
+  //         type: 'relation',
+  //         relation: [{ id: customerId }],
+  //       },
+  //     },
+  //   })
+  //   return this.createValidClinicRecord(
+  //     response as NotionFullQueryResult<ClinicRecordProperties>,
+  //     moscowPeriod,
+  //     customerId
+  //   )
+  // }
 
   async removeRecord(identity: UserId, id: string): Promise<void> {
     await this.notionClient.pages.update({ page_id: id, archived: true })

@@ -25,7 +25,7 @@ import {
   makeDateTimeShifter,
 } from '@/models/date'
 
-import type { AppRouter } from '@/implementation/trpc-server'
+import type { AppRouter } from '@/trpc/model'
 
 const ClinicContext = createContext<Clinic>({
   isRecordsLoading: false,
