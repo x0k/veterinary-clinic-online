@@ -17,7 +17,7 @@ import { useUser } from '@/domains/user'
 import { OpeningHoursContainer } from '@/containers/opening-hours'
 import { RecordContainer } from '@/containers/record'
 
-import { trpc, trpcClient } from './init-client'
+import { trpc, trpcClient } from '../init-client'
 
 const weekdayTimePeriod: TimePeriod = {
   start: { hours: 9, minutes: 30 },

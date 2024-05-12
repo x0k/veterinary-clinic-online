@@ -1,9 +1,8 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
-import { ApiRoute } from '@/models/app'
-import { type RouterContext, appRouter } from '@/implementation/trpc-server'
-
-import { clinicService } from '@/app/init-server'
+import { ApiRoute } from '@/trpc/model'
+import { type RouterContext, appRouter } from '@/trpc/server'
+import { clinicService } from '@/init-server'
 
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({

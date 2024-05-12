@@ -1,12 +1,11 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 
-import { type IClinicService } from '@/models/clinic'
-
-import { auth } from '@/app/init-auth'
 import { recordSchema } from '@/adapters/backend'
+import { auth } from '@/init-auth'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RouterContext {
-  clinicService: IClinicService
+  // clinicService: IClinicService
 }
 
 const t = initTRPC.context<RouterContext>().create()

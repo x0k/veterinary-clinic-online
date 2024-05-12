@@ -5,7 +5,7 @@ import { signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
 
-import { AppRoute } from '@/models/app'
+import { AppRoute } from '@/app/model'
 import { isAuthenticatedUser, isUnauthenticatedUser } from '@/models/user'
 import { useUser } from '@/domains/user'
 import { Links } from '@/components/links'

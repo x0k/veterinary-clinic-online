@@ -21,7 +21,7 @@ import {
   makeDateTimeShifter,
   timePeriodsAPI,
 } from '@/models/date'
-import { AppRoute } from '@/models/app'
+import { AppRoute } from '@/app/model'
 import { useClinic } from '@/domains/clinic'
 
 import { type FormFields } from './model'
