@@ -1,8 +1,8 @@
 import { createTRPCClient, createTRPCReact, httpBatchLink } from '@trpc/react-query'
 import { QueryClient } from '@tanstack/react-query'
 
-import  { ApiRoute, type AppRouter } from '@/trpc/model'
-import '@/public/wasm_exec.js'
+import { ApiRoute, type AppRouter } from '@/trpc/model'
+import '@/vendor/wasm_exec.js'
 
 export const trpc = createTRPCReact<AppRouter>()
 

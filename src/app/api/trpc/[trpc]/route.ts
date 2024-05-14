@@ -2,7 +2,7 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 
 import { ApiRoute } from '@/trpc/model'
 import { type RouterContext, appRouter } from '@/trpc/server'
-import { clinicService } from '@/server-init'
+// import { clinicService } from '@/server-init'
 
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({
@@ -11,7 +11,7 @@ function handler(request: Request): Promise<Response> {
     router: appRouter,
     createContext: (): RouterContext => {
       return {
-        clinicService,
+        // clinicService,
       }
     },
   })

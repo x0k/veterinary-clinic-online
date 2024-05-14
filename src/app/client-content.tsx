@@ -12,12 +12,11 @@ import {
 } from '@/models/schedule'
 import { isAuthenticatedUser, isInvalidatedUser } from '@/models/user'
 import { ClinicProvider } from '@/domains/clinic'
-import { DomainProvider } from '@/domains/domain'
 import { useUser } from '@/domains/user'
 import { OpeningHoursContainer } from '@/containers/opening-hours'
 import { RecordContainer } from '@/containers/record'
 
-import { trpc, trpcClient } from '../client-init'
+import { trpc } from '../client-init'
 
 const weekdayTimePeriod: TimePeriod = {
   start: { hours: 9, minutes: 30 },
@@ -68,31 +67,22 @@ export function ClientContent({
     () => staticWorkBreaks.concat(dynamicWorkBreaks),
     [dynamicWorkBreaks]
   )
-  return (
-    <DomainProvider
-      sampleRateInMinutes={sampleRate}
-      productionCalendar={productionCalendarData}
-      workBreaks={workBreaks}
-      trpcClient={trpcClient}
-    >
-      {isAuthenticatedUser(user) ? (
-        <ClinicProvider userData={user.userData} trpc={trpc}>
-          <RecordContainer
-            sampleRate={sampleRate}
-            userData={user.userData}
-            clinicServices={clinicServices}
-            openingHours={openingHours}
-            productionCalendar={productionCalendar}
-            workBreaks={workBreaks}
-          />
-        </ClinicProvider>
-      ) : isInvalidatedUser(user) ? (
-        <BigLoader />
-      ) : (
-        <ClinicProvider trpc={trpc}>
-          <OpeningHoursContainer />
-        </ClinicProvider>
-      )}
-    </DomainProvider>
+  return isAuthenticatedUser(user) ? (
+    <ClinicProvider userData={user.userData} trpc={trpc}>
+      <RecordContainer
+        sampleRate={sampleRate}
+        userData={user.userData}
+        clinicServices={clinicServices}
+        openingHours={openingHours}
+        productionCalendar={productionCalendar}
+        workBreaks={workBreaks}
+      />
+    </ClinicProvider>
+  ) : isInvalidatedUser(user) ? (
+    <BigLoader />
+  ) : (
+    <ClinicProvider trpc={trpc}>
+      <OpeningHoursContainer />
+    </ClinicProvider>
   )
 }

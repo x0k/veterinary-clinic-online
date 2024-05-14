@@ -3,6 +3,13 @@ export interface Time {
   minutes: number
 }
 
+export function durationInMinutes(
+  start: Time,
+  end: Time,
+): number {
+  return (end.hours - start.hours) * 60 + (end.minutes - start.minutes)
+}
+
 function pad20(value: number): string {
   return String(value).padStart(2, '0')
 }

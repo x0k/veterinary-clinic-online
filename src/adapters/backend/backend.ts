@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const isoDateSchema = z.string()
+
 function periodSchema<S extends z.ZodType<any>>(
   itemSchema: S
 ): z.ZodObject<{

@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
+import { type CreateTRPCReact } from '@trpc/react-query'
 import { signIn } from 'next-auth/react'
-import { useQuery } from '@tanstack/react-query'
 
 import { BigLoader } from '@/components/big-loader'
-import { type RootDomain, ScheduleEntryType, isErr } from '@/adapters/domain'
-import { formatDate, formatTime, toIsoDate } from '@/domains/date'
-import { useDomain } from '@/domains/domain'
+import { ScheduleEntryType, isErr } from '@/adapters/domain'
+import { durationInMinutes, formatDate, formatTime } from '@/domains/date'
+import { type AppRouter } from '@/trpc/model'
+// import { queryKey } from '@/query-key'
 
-export interface OpeningHoursContainerProps {
-  domain: RootDomain
-}
 
 const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
   [ScheduleEntryType.Busy]: 'bg-error',
@@ -27,25 +25,18 @@ function ErrorText({ errorMessage }: ErrorTextProps): JSX.Element {
 }
 
 interface ScheduleProps {
-  domain: RootDomain
+  trpc: CreateTRPCReact<AppRouter, unknown>
   selectedDate: string
   setDate: (date: string) => void
 }
 
-function Schedule({
-  domain,
-  selectedDate,
-  setDate,
-}: ScheduleProps): JSX.Element {
+function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
   const {
     isPending,
     isError,
     data: schedule,
     error,
-  } = useQuery({
-    queryKey: ['schedule', selectedDate],
-    queryFn: () => domain.appointment.schedule(toIsoDate(selectedDate)),
-  })
+  } = trpc.schedule.useQuery(selectedDate)
   useEffect(() => {
     if (!schedule || isErr(schedule)) {
       return
@@ -65,13 +56,10 @@ function Schedule({
   return (
     <>
       {entries.map((entry, i) => {
-        const duration = domain.shared.timePeriodDurationInMinutes({
-          start: entry.dateTimePeriod.start.time,
-          end: entry.dateTimePeriod.end.time,
-        })
-        if (isErr(duration)) {
-          return null
-        }
+        const duration = durationInMinutes(
+          entry.dateTimePeriod.start.time,
+          entry.dateTimePeriod.end.time,
+        )
         return (
           <div
             key={i}
@@ -79,7 +67,7 @@ function Schedule({
               TIME_PERIOD_BG_COLORS[entry.type]
             }`}
             style={{
-              height: `${duration.value * scale}rem`,
+              height: `${duration * scale}rem`,
             }}
           >
             <span className="absolute top-0 -left-12">
@@ -96,8 +84,13 @@ function Schedule({
   )
 }
 
-export function OpeningHoursContainer(): JSX.Element {
-  const domain = useDomain()
+export interface OpeningHoursContainerProps {
+  trpc: CreateTRPCReact<AppRouter, unknown>
+}
+
+export function OpeningHoursContainer({
+  trpc
+}: OpeningHoursContainerProps): JSX.Element {
   const today = useMemo(() => formatDate(new Date()), [])
   const [selectedDate, setDate] = useState(today)
   return (
@@ -125,7 +118,7 @@ export function OpeningHoursContainer(): JSX.Element {
           войти
         </button>
       </p>
-      <Schedule domain={domain} selectedDate={selectedDate} setDate={setDate} />
+      <Schedule trpc={trpc} selectedDate={selectedDate} setDate={setDate} />
     </div>
   )
 }

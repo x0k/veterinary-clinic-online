@@ -1,11 +1,12 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 
-import { recordSchema } from '@/adapters/backend'
+import { isoDateSchema, recordSchema } from '@/adapters/backend'
+import { type RootDomain } from '@/adapters/domain'
 import { auth } from '@/auth'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RouterContext {
-  // clinicService: IClinicService
+  root: RootDomain
 }
 
 const t = initTRPC.context<RouterContext>().create()
@@ -35,6 +36,9 @@ const pub = t.procedure.use(withSession)
 const priv = t.procedure.use(withAuthentication)
 
 export const appRouter = t.router({
+  schedule: pub.input(isoDateSchema).query(async ({ ctx, input }) => {
+    return await ctx.root.appointment.schedule(input)
+  }),
   // fetchActualRecords: pub.query(async ({ ctx }) => {
   //   return await ctx.clinicService.fetchActualRecords(
   //     ctx.session?.user?.id as UserId
