@@ -8,7 +8,7 @@ export interface Err<E> {
   error: E
 }
 
-export type Result<T, E = Error> = Ok<T> | Err<E>
+export type Result<T, E = string> = Ok<T> | Err<E>
 
 export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
   return result.ok

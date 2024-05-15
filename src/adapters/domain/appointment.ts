@@ -74,30 +74,13 @@ export type ISODateDTO = string
 
 export type CustomerIdDTO = string
 
-export interface RecordsRepositoryConfig {
-  createRecord: (record: RecordDTO) => Promise<RecordIdDTO>
-  loadBusyPeriods: (date: ISODateDTO) => Promise<Array<PeriodDTO<TimeDTO>>>
-  loadCustomerActiveAppointment: (
-    customerId: CustomerIdDTO
-  ) => Promise<RecordDTO | null>
-  removeRecord: (recordId: RecordIdDTO) => Promise<void>
-}
-
 export type ProductionCalendarDTO = Record<string, number>
-
-export interface ProductionCalendarRepositoryConfig {
-  loadProductionCalendar: () => Promise<ProductionCalendarDTO>
-}
 
 export interface WorkBreakDTO {
   id: string
   title: string
   matchExpression: string
   period: PeriodDTO<TimeDTO>
-}
-
-export interface WorkBreaksRepositoryConfig {
-  loadWorkBreaks: () => Promise<WorkBreakDTO[]>
 }
 
 export interface CustomerDTO {
@@ -110,18 +93,19 @@ export interface CustomerDTO {
 
 export type CustomerIdentityDTO = string
 
-export interface CustomerRepositoryConfig {
-  createCustomer: (customer: CustomerDTO) => Promise<CustomerIdDTO>
-  loadCustomerByIdentity: (
-    customerIdentity: CustomerIdentityDTO
-  ) => Promise<CustomerDTO | null>
-  updateCustomer: (customer: CustomerDTO) => Promise<void>
+export interface AppointmentNotionConfig {
+	servicesDatabaseId: string
+	recordsDatabaseId: string
+	breaksDatabaseId: string
+	customersDatabaseId: string
+}
+
+export interface ProductionCalendarConfig {
+  url: string
 }
 
 export interface AppointmentDomainConfig {
   schedulingService: SchedulingServiceConfig
-  recordsRepository: RecordsRepositoryConfig
-  productionCalendarRepository: ProductionCalendarRepositoryConfig
-  workBreaksRepository: WorkBreaksRepositoryConfig
-  customerRepository: CustomerRepositoryConfig
+  notion: AppointmentNotionConfig
+  productionCalendar: ProductionCalendarConfig
 }

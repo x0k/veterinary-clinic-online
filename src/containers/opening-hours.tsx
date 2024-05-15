@@ -4,10 +4,13 @@ import { signIn } from 'next-auth/react'
 
 import { BigLoader } from '@/components/big-loader'
 import { ScheduleEntryType, isErr } from '@/adapters/domain'
-import { durationInMinutes, formatDate, formatTime } from '@/domains/date'
+import {
+  durationInMinutes,
+  formatDate,
+  formatTime,
+  toIsoDate,
+} from '@/domains/date'
 import { type AppRouter } from '@/trpc/model'
-// import { queryKey } from '@/query-key'
-
 
 const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
   [ScheduleEntryType.Busy]: 'bg-error',
@@ -36,7 +39,7 @@ function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
     isError,
     data: schedule,
     error,
-  } = trpc.schedule.useQuery(selectedDate)
+  } = trpc.schedule.useQuery(toIsoDate(selectedDate))
   useEffect(() => {
     if (!schedule || isErr(schedule)) {
       return
@@ -50,7 +53,7 @@ function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
     return <ErrorText errorMessage={error.message} />
   }
   if (isErr(schedule)) {
-    return <ErrorText errorMessage={schedule.error.message} />
+    return <ErrorText errorMessage={schedule.error} />
   }
   const { entries } = schedule.value
   return (
@@ -58,7 +61,7 @@ function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
       {entries.map((entry, i) => {
         const duration = durationInMinutes(
           entry.dateTimePeriod.start.time,
-          entry.dateTimePeriod.end.time,
+          entry.dateTimePeriod.end.time
         )
         return (
           <div
@@ -89,7 +92,7 @@ export interface OpeningHoursContainerProps {
 }
 
 export function OpeningHoursContainer({
-  trpc
+  trpc,
 }: OpeningHoursContainerProps): JSX.Element {
   const today = useMemo(() => formatDate(new Date()), [])
   const [selectedDate, setDate] = useState(today)

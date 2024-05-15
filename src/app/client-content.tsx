@@ -82,7 +82,7 @@ export function ClientContent({
     <BigLoader />
   ) : (
     <ClinicProvider trpc={trpc}>
-      <OpeningHoursContainer />
+      <OpeningHoursContainer trpc={trpc} />
     </ClinicProvider>
   )
 }
