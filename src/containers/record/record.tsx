@@ -1,52 +1,30 @@
-import { useMemo } from 'react'
-
-import { type ClinicServiceEntity } from '@/models/clinic'
-import { type OpeningHours, type ProductionCalendar, type WorkBreaks } from '@/models/schedule'
-import { type UserData } from '@/models/user'
-import { useClinic } from '@/domains/clinic'
 import { BigLoader } from '@/components/big-loader'
+import { ErrorText } from '@/components/error-text'
+import { isErr } from '@/adapters/domain'
+
+import { trpc } from '@/client-init'
 
 import { RecordInfo } from './record-info'
-import { CreateRecord } from './create-record'
 
 export interface RecordContainerProps {
-  sampleRate: number
-  userData: UserData
-  openingHours: OpeningHours
-  productionCalendar: ProductionCalendar
-  workBreaks: WorkBreaks
-  clinicServices: ClinicServiceEntity[]
+  children: React.ReactNode
 }
 
 export function RecordContainer({
-  sampleRate,
-  userData,
-  clinicServices,
-  openingHours,
-  productionCalendar,
-  workBreaks,
+  children,
 }: RecordContainerProps): JSX.Element | null {
-  const { isRecordsLoading, clinicRecords } = useClinic()
-  const userRecordIndex = useMemo(
-    () => clinicRecords.findIndex((r) => r.userId === userData.id),
-    [clinicRecords, userData.id]
-  )
-  const userHasRecord = userRecordIndex > -1
-  return isRecordsLoading ? (
-    <BigLoader />
-  ) : userHasRecord ? (
-    <RecordInfo
-      record={clinicRecords[userRecordIndex]}
-      hasRecordsBefore={userRecordIndex > 0}
-    />
-  ) : (
-    <CreateRecord
-      sampleRate={sampleRate}
-      clinicServices={clinicServices}
-      openingHours={openingHours}
-      productionCalendar={productionCalendar}
-      userData={userData}
-      workBreaks={workBreaks}
-    />
-  )
+  const { isPending, isError, data, error } = trpc.actualRecord.useQuery()
+  if (isPending) {
+    return <BigLoader />
+  }
+  if (isError) {
+    return <ErrorText text={error.message} />
+  }
+  if (isErr(data)) {
+    return <ErrorText text={data.error} />
+  }
+  if (data.value === null) {
+    return <>{children}</>
+  }
+  return <RecordInfo appointment={data.value} />
 }

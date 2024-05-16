@@ -6,66 +6,30 @@ import {
   type FieldErrors,
   type UseFormRegister,
 } from 'react-hook-form'
-import { isValid } from 'date-fns'
 
-import { type ClinicServiceEntity } from '@/models/clinic'
-import { type TimePeriod, timeDataToJSON } from '@/models/date'
-import { makeFreeTimePeriodsWithDurationCalculator } from '@/models/schedule'
-
+import { type PeriodDTO, type ServiceIdDTO, type TimeDTO } from '@/adapters/domain'
 import { REQUIRED_FIELD_ERROR_MESSAGE, type FormFields } from './model'
 
 export interface TimePeriodSelectProps {
-  sampleRate: number
+  freeTimePeriods: Array<PeriodDTO<TimeDTO>>
   control: Control<FormFields, any>
-  clinicServices: ClinicServiceEntity[]
-  getFreeTimePeriodsForDate: (date: Date) => TimePeriod[]
   setValue: UseFormSetValue<FormFields>
   errors: FieldErrors<FormFields>
   register: UseFormRegister<FormFields>
+  serviceId: ServiceIdDTO
 }
 
 export function TimePeriodSelect({
-  sampleRate,
   setValue,
   control,
-  clinicServices,
-  getFreeTimePeriodsForDate,
   errors,
   register,
+  serviceId,
 }: TimePeriodSelectProps): JSX.Element {
   const [selectedServiceId, selectedDate] = useWatch({
     name: ['service', 'recordDate'],
     control,
   })
-  const freeTimePeriods = useMemo(() => {
-    const date = new Date(selectedDate)
-    return isValid(date) ? getFreeTimePeriodsForDate(date) : null
-  }, [getFreeTimePeriodsForDate, selectedDate])
-  const selectedClinicService = useMemo(
-    () =>
-      selectedServiceId &&
-      clinicServices.find((s) => s.id === selectedServiceId),
-    [selectedServiceId, clinicServices]
-  )
-  const getTimePeriodsForService = useMemo(() => {
-    return selectedClinicService
-      ? makeFreeTimePeriodsWithDurationCalculator(
-          selectedClinicService.durationInMinutes,
-          sampleRate
-        )
-      : null
-  }, [selectedClinicService, sampleRate])
-  const periods = useMemo(
-    () =>
-      getTimePeriodsForService && freeTimePeriods
-        ? freeTimePeriods.flatMap(getTimePeriodsForService)
-        : [],
-    [getTimePeriodsForService, freeTimePeriods]
-  )
-  const periodValues = useMemo(
-    () => periods.map((period) => JSON.stringify(period)),
-    [periods]
-  )
   useEffect(() => {
     setValue('recordTime', '')
   }, [periods, setValue])

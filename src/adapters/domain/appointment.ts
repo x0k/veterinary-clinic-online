@@ -34,24 +34,56 @@ export interface AppointmentDTO {
   service: ServiceDTO
 }
 
+export type CustomerIdentityDTO = string
+
+export interface CreateCustomerDTO {
+  identity: CustomerIdentityDTO
+  name: string
+  phone: string
+  email: string
+}
+
+export type CustomerIdDTO = string
+
+export interface CustomerDTO {
+  id: CustomerIdDTO
+  identity: CustomerIdentityDTO
+  name: string
+  phone: string
+  email: string
+}
+
 export interface AppointmentDomain {
   schedule: (
     preferredDate: ISODateDTO
   ) => Promise<Result<AppointmentScheduleDTO>>
   dayOrNextWorkingDay: (now: ISODateDTO) => Promise<Result<ISODateDTO>>
+  upsertCustomer: (
+    createCustomer: CreateCustomerDTO
+  ) => Promise<Result<CustomerIdDTO>>
+  freeTimeSlots: (
+    serviceId: ServiceIdDTO,
+    appointmentDate: ISODateDTO
+  ) => Promise<Result<Array<PeriodDTO<TimeDTO>>>>
+  activeAppointment: (
+    customerIdentity: CustomerIdentityDTO
+  ) => Promise<Result<AppointmentDTO | null>>
   createAppointment: (
-    now: ISODateDTO,
     appointmentDate: ISODateDTO,
-    customerId: CustomerIdDTO,
+    customerIdentity: CustomerIdentityDTO,
     serviceId: ServiceIdDTO
   ) => Promise<Result<AppointmentDTO>>
+  cancelAppointment: (
+    customerIdentity: CustomerIdentityDTO
+  ) => Promise<Result<true>>
+  services: () => Promise<Result<ServiceDTO[]>>
 }
 
 export interface SchedulingServiceConfig {
   sampleRateInMinutes: number
 }
 
-export enum RecordDTOStatus {
+export enum RecordStatusDTO {
   Awaits = 'awaits',
   Done = 'done',
   NotAppear = 'failed',
@@ -60,7 +92,7 @@ export enum RecordDTOStatus {
 export interface RecordDTO {
   id: RecordIdDTO
   title: string
-  status: RecordDTOStatus
+  status: RecordStatusDTO
   isArchived: boolean
   dateTimePeriod: PeriodDTO<DateTimeDTO>
   customerId: string
@@ -72,8 +104,6 @@ export type RecordIdDTO = string
 
 export type ISODateDTO = string
 
-export type CustomerIdDTO = string
-
 export type ProductionCalendarDTO = Record<string, number>
 
 export interface WorkBreakDTO {
@@ -83,21 +113,11 @@ export interface WorkBreakDTO {
   period: PeriodDTO<TimeDTO>
 }
 
-export interface CustomerDTO {
-  id: string
-  identity: string
-  name: string
-  phone: string
-  email: string
-}
-
-export type CustomerIdentityDTO = string
-
 export interface AppointmentNotionConfig {
-	servicesDatabaseId: string
-	recordsDatabaseId: string
-	breaksDatabaseId: string
-	customersDatabaseId: string
+  servicesDatabaseId: string
+  recordsDatabaseId: string
+  breaksDatabaseId: string
+  customersDatabaseId: string
 }
 
 export interface ProductionCalendarConfig {

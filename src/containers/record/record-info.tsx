@@ -1,70 +1,72 @@
-import { ClinicRecordStatus, type ClinicRecord, CLINIC_RECORD_STATUS_TITLES } from '@/models/clinic'
+import { useMemo } from 'react'
+
 import {
-  compareDate,
-  dateTimeDataToDate,
-  type DateTimePeriod,
-  dateTimePeriodsAPI,
-  dateToDateTimeData,
-  formatDate,
-  timeDataToJSON,
-} from '@/models/date'
-import { useClinic } from '@/domains/clinic'
+  type DateTimeDTO,
+  type PeriodDTO,
+  type AppointmentDTO,
+  RecordStatusDTO,
+} from '@/adapters/domain'
+import {
+  compareDomainDate,
+  dateTimeToDate,
+  formatDateWithLocal,
+  formatTime,
+} from '@/domains/date'
 
 import { Subscription } from './subscription'
+import { trpc } from '@/client-init'
 
 export interface RecordInfoProps {
-  record: ClinicRecord
-  hasRecordsBefore: boolean
+  appointment: AppointmentDTO
 }
 
-function makeWaitedStateText({ start, end }: DateTimePeriod): string {
-  return `на ${formatDate(dateTimeDataToDate(start))} - ${
-    compareDate(start, end) === 0
-      ? timeDataToJSON(end)
-      : formatDate(dateTimeDataToDate(end))
+function makeWaitedStateText({ start, end }: PeriodDTO<DateTimeDTO>): string {
+  return `на ${formatDateWithLocal(dateTimeToDate(start))} - ${
+    compareDomainDate(start.date, end.date) === 0
+      ? formatTime(end.time)
+      : formatDateWithLocal(dateTimeToDate(end))
   }`
 }
 
+const RECORD_STATUS_TITLES: Record<RecordStatusDTO, string> = {
+  [RecordStatusDTO.Awaits]: 'Ожидает',
+  [RecordStatusDTO.Done]: 'Выполнено',
+  [RecordStatusDTO.NotAppear]: 'Не пришел',
+}
+
 export function RecordInfo({
-  record: { id, dateTimePeriod, status },
-  hasRecordsBefore,
+  appointment: {
+    record: { dateTimePeriod, status, isArchived },
+  },
 }: RecordInfoProps): JSX.Element {
-  const { isRecordsFetching, dismissRecord } = useClinic()
-  const shouldBeInWork = dateTimePeriodsAPI.makePeriodContainsCheck(
-    dateTimePeriod
-  )(dateToDateTimeData(new Date()))
-  const handleCancel = (): void => {
-    void dismissRecord(id)
-  }
+  const shouldBeInWork = useMemo(() => {
+    const now = new Date()
+    const start = dateTimeToDate(dateTimePeriod.start)
+    return now >= start
+  }, [dateTimePeriod])
+  const { mutate, isPending } = trpc.cancelAppointment.useMutation()
   return (
     <div className="grow flex flex-col justify-center items-center gap-2">
-      <p className="text-3xl font-bold">Вы записаны</p>
-      {!shouldBeInWork ? (
+      <p className="text-3xl font-bold">
+        {isArchived ? 'Ваша запись закрыта' : 'Вы записаны'}
+      </p>
+      {!shouldBeInWork && !isArchived ? (
         <>
           <p>{makeWaitedStateText(dateTimePeriod)}</p>
           <button
             className="btn btn-error"
-            disabled={isRecordsFetching}
-            onClick={handleCancel}
+            disabled={isPending}
+            onClick={() => {
+              mutate()
+            }}
           >
             Отменить запись
           </button>
         </>
-      ) : hasRecordsBefore ? (
-        <>
-          <p>Ваша очередь задерживается</p>
-          <button
-            className="btn btn-error"
-            disabled={isRecordsFetching}
-            onClick={handleCancel}
-          >
-            Отменить запись
-          </button>
-        </>
-      ) : status === ClinicRecordStatus.Awaits ? (
+      ) : status === RecordStatusDTO.Awaits ? (
         <p>Настала ваша очередь!</p>
       ) : (
-        <p>Статус записи: {CLINIC_RECORD_STATUS_TITLES[status]}</p>
+        <p>Статус записи: {RECORD_STATUS_TITLES[status]}</p>
       )}
       <Subscription />
     </div>

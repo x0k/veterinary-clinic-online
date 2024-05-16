@@ -129,7 +129,7 @@ export function ClinicProvider({
       },
     })
   const { mutateAsync: createRecord, isPending: isCreateRecordLoading } =
-    trpc.createRecord.useMutation({
+    trpc.createAppointment.useMutation({
       async onMutate({ identity, utcDateTimePeriod }) {
         const recordsKey = getQueryKey(trpc.fetchActualRecords)
         await queryClient.cancelQueries({ queryKey: recordsKey })

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { type CreateTRPCReact } from '@trpc/react-query'
 import { signIn } from 'next-auth/react'
 
 import { BigLoader } from '@/components/big-loader'
+import { ErrorText } from '@/components/error-text'
 import { ScheduleEntryType, isErr } from '@/adapters/domain'
 import {
   durationInMinutes,
@@ -10,7 +10,7 @@ import {
   formatTime,
   toIsoDate,
 } from '@/domains/date'
-import { type AppRouter } from '@/trpc/model'
+import { trpc } from '@/client-init'
 
 const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
   [ScheduleEntryType.Busy]: 'bg-error',
@@ -19,21 +19,12 @@ const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
 
 const scale = 0.1
 
-interface ErrorTextProps {
-  errorMessage: string
-}
-
-function ErrorText({ errorMessage }: ErrorTextProps): JSX.Element {
-  return <p className="text-center text-error">{errorMessage}</p>
-}
-
 interface ScheduleProps {
-  trpc: CreateTRPCReact<AppRouter, unknown>
   selectedDate: string
   setDate: (date: string) => void
 }
 
-function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
+function Schedule({ selectedDate, setDate }: ScheduleProps): JSX.Element {
   const {
     isPending,
     isError,
@@ -50,10 +41,10 @@ function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
     return <BigLoader />
   }
   if (isError) {
-    return <ErrorText errorMessage={error.message} />
+    return <ErrorText text={error.message} />
   }
   if (isErr(schedule)) {
-    return <ErrorText errorMessage={schedule.error} />
+    return <ErrorText text={schedule.error} />
   }
   const { entries } = schedule.value
   return (
@@ -87,13 +78,7 @@ function Schedule({ trpc, selectedDate, setDate }: ScheduleProps): JSX.Element {
   )
 }
 
-export interface OpeningHoursContainerProps {
-  trpc: CreateTRPCReact<AppRouter, unknown>
-}
-
-export function OpeningHoursContainer({
-  trpc,
-}: OpeningHoursContainerProps): JSX.Element {
+export function OpeningHoursContainer(): JSX.Element {
   const today = useMemo(() => formatDate(new Date()), [])
   const [selectedDate, setDate] = useState(today)
   return (
@@ -121,7 +106,7 @@ export function OpeningHoursContainer({
           войти
         </button>
       </p>
-      <Schedule trpc={trpc} selectedDate={selectedDate} setDate={setDate} />
+      <Schedule selectedDate={selectedDate} setDate={setDate} />
     </div>
   )
 }

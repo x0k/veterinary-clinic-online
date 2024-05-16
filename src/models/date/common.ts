@@ -93,10 +93,10 @@ export function dateTimeDataToDate({
   return new Date(year, month - 1, date, hours, minutes)
 }
 
-export function formatDate(date: Date): string {
+export function formatDateWithLocal(date: Date): string {
   return date.toLocaleString('ru', { dateStyle: 'long', timeStyle: 'short' })
 }
 
-export function formatShortDate(date: Date): string {
+export function formatShortDateWithLocal(date: Date): string {
   return date.toLocaleDateString('ru')
 }

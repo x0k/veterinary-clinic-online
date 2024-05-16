@@ -1,9 +1,9 @@
-import { type ClinicServiceEntityID } from '@/models/clinic'
-import { type JSONDate } from '@/models/date'
+import { type ServiceIdDTO } from '@/adapters/domain'
+import { type FormattedDate } from '@/domains/date'
 
 export interface FormFields {
-  service: ClinicServiceEntityID
-  recordDate: JSONDate
+  service: ServiceIdDTO
+  recordDate: FormattedDate
   userName: string
   userPhone: string
   recordTime: string

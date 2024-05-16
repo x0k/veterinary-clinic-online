@@ -1,10 +1,14 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 
-import { isoDateSchema, recordSchema } from '@/adapters/backend'
+import {
+  createCustomerSchema,
+  createAppointmentSchema,
+  freeTimeSlotsQuery,
+  isoDateSchema,
+} from '@/adapters/trpc'
 import { type RootDomain } from '@/adapters/domain'
 import { auth } from '@/auth'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RouterContext {
   root: RootDomain
 }
@@ -36,23 +40,37 @@ const pub = t.procedure.use(withSession)
 const priv = t.procedure.use(withAuthentication)
 
 export const appRouter = t.router({
-  schedule: pub.input(isoDateSchema).query(async ({ ctx, input }) => {
-    return await ctx.root.appointment.schedule(input)
+  dayOrNextWorkingDay: pub
+    .input(isoDateSchema)
+    .query(({ ctx, input }) => ctx.root.appointment.dayOrNextWorkingDay(input)),
+  schedule: pub
+    .input(isoDateSchema)
+    .query(({ ctx, input }) => ctx.root.appointment.schedule(input)),
+  actualRecord: priv.query(async ({ ctx }) => {
+    return await ctx.root.appointment.activeAppointment(ctx.userId)
   }),
-  // fetchActualRecords: pub.query(async ({ ctx }) => {
-  //   return await ctx.clinicService.fetchActualRecords(
-  //     ctx.session?.user?.id as UserId
-  //   )
-  // }),
-  // createRecord: priv
-  //   .input(clinicRecordCreateSchema)
-  //   .mutation(async ({ ctx, input }) => {
-  //     await ctx.clinicService.createRecord(ctx.userId as UserId, input)
-  //   }),
-  // dismissRecord: priv
-  //   .input(clinicRecordIdSchema)
-  //   .mutation(({ ctx, input }) =>
-  //     ctx.clinicService.removeRecord(ctx.userId as UserId, input)
-  //   ),
-  createRecord: priv.input(recordSchema).mutation(async ({ ctx, input }) => {}),
+  cancelAppointment: priv.mutation(({ ctx }) =>
+    ctx.root.appointment.cancelAppointment(ctx.userId)
+  ),
+  upsertCustomer: priv.input(createCustomerSchema).mutation(({ ctx, input }) =>
+    ctx.root.appointment.upsertCustomer({
+      ...input,
+      identity: ctx.userId,
+    })
+  ),
+  services: priv.query(({ ctx }) => ctx.root.appointment.services()),
+  freeTimeSlots: priv
+    .input(freeTimeSlotsQuery)
+    .query(({ ctx, input }) =>
+      ctx.root.appointment.freeTimeSlots(input.serviceId, input.appointmentDate)
+    ),
+  createAppointment: priv
+    .input(createAppointmentSchema)
+    .mutation(({ ctx, input }) =>
+      ctx.root.appointment.createAppointment(
+        input.appointmentDate,
+        ctx.userId,
+        input.serviceId
+      )
+    ),
 })
