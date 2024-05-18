@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider } from 'next-auth/react'
 
-import { UserProvider } from '@/shared/user'
+import { UserProvider } from '@/adapters/user'
 
 import { client, trpc, trpcReactClient } from './client-init'
 

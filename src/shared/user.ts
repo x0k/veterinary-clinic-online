@@ -1,44 +1,52 @@
-import {
-  createContext,
-  createElement,
-  type ReactNode,
-  useContext,
-  useMemo,
-} from 'react'
-import { signOut, useSession } from 'next-auth/react'
+import type { Session } from 'next-auth'
 
-import { type User, UserStatus, type UserData } from '@/models/user'
+import { type Brand } from '@/lib/type'
 
-const UserContext = createContext<User>({
-  state: UserStatus.Unauthenticated,
-})
+export type UserId = Brand<'userId'>
 
-export function useUser(): User {
-  return useContext(UserContext)
+export interface UserData {
+  id: UserId
+  name: string
+  phone?: string
+  email?: string
 }
 
-export interface UserProviderProps {
-  children: ReactNode
+export enum UserStatus {
+  Authenticated = 'authenticated',
+  Invalidated = 'invalidated',
+  Unauthenticated = 'unauthenticated',
 }
 
-export function UserProvider({ children }: UserProviderProps): JSX.Element {
-  const session = useSession()
-  const value: User = useMemo(
-    () =>
-      session.status === 'loading'
-        ? { state: UserStatus.Invalidated }
-        : session.data?.user
-          ? {
-              state: UserStatus.Authenticated,
-              userData: session.data.user as UserData,
-              logout: () => {
-                void signOut()
-              },
-            }
-          : {
-              state: UserStatus.Unauthenticated,
-            },
-    [session.data?.user, session.status]
-  )
-  return createElement(UserContext.Provider, { value }, children)
+export interface AbstractUser<S extends UserStatus> {
+  state: S
+}
+
+export interface AuthenticatedUser
+  extends AbstractUser<UserStatus.Authenticated> {
+  userData: UserData
+  logout: () => void
+}
+
+export interface InvalidatedUser extends AbstractUser<UserStatus.Invalidated> {}
+
+export interface UnauthenticatedUser
+  extends AbstractUser<UserStatus.Unauthenticated> {}
+
+export type User = AuthenticatedUser | InvalidatedUser | UnauthenticatedUser
+
+export interface IUserService {
+  fetchUserData: (session: Session) => Promise<UserData>
+  logout: () => Promise<void>
+}
+
+export function isAuthenticatedUser(user: User): user is AuthenticatedUser {
+  return user.state === UserStatus.Authenticated
+}
+
+export function isUnauthenticatedUser(user: User): user is UnauthenticatedUser {
+  return user.state === UserStatus.Unauthenticated
+}
+
+export function isInvalidatedUser(user: User): user is InvalidatedUser {
+  return user.state === UserStatus.Invalidated
 }

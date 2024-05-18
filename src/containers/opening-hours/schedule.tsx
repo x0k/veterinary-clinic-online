@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { useEffect } from 'react'
 
-import { BigLoader } from '@/components/big-loader'
-import { ErrorText } from '@/components/error-text'
-import { ScheduleEntryType, isErr } from '@/adapters/domain'
 import {
   type FormattedDate,
   durationInMinutes,
   formatDate,
   formatTime,
-  toIsoDate,
+  formattedToDate,
 } from '@/shared/date'
+import { BigLoader } from '@/components/big-loader'
+import { ErrorText } from '@/components/error-text'
+import { ScheduleEntryType, isErr } from '@/adapters/domain'
+
 import { trpc } from '@/client-init'
 
 const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
@@ -20,18 +20,21 @@ const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
 
 const scale = 0.1
 
-interface ScheduleProps {
+export interface ScheduleProps {
   selectedDate: FormattedDate
   setDate: (date: FormattedDate) => void
 }
 
-function Schedule({ selectedDate, setDate }: ScheduleProps): JSX.Element {
+export function Schedule({
+  selectedDate,
+  setDate,
+}: ScheduleProps): JSX.Element {
   const {
     isPending,
     isError,
     data: schedule,
     error,
-  } = trpc.schedule.useQuery(toIsoDate(selectedDate))
+  } = trpc.schedule.useQuery(formattedToDate(selectedDate).toISOString())
   useEffect(() => {
     if (!schedule || isErr(schedule)) {
       return
@@ -76,38 +79,5 @@ function Schedule({ selectedDate, setDate }: ScheduleProps): JSX.Element {
         )
       })}
     </>
-  )
-}
-
-export function OpeningHoursContainer(): JSX.Element {
-  const today = useMemo(() => formatDate(new Date()), [])
-  const [selectedDate, setDate] = useState(today)
-  return (
-    <div className="flex flex-col gap-4 grow py-4 w-full max-w-sm shrink-0">
-      <div className="flex items-baseline gap-2">
-        <span className="grow">График работы на </span>
-        <input
-          type="date"
-          className="max-w-max input input-bordered input-sm"
-          value={selectedDate}
-          onChange={(e) => {
-            setDate(e.target.value as FormattedDate)
-          }}
-          min={today}
-        />
-      </div>
-      <p className="text-center">
-        Чтобы записаться необходимо{' '}
-        <button
-          className="btn btn-link btn-sm"
-          onClick={() => {
-            void signIn()
-          }}
-        >
-          войти
-        </button>
-      </p>
-      <Schedule selectedDate={selectedDate} setDate={setDate} />
-    </div>
   )
 }

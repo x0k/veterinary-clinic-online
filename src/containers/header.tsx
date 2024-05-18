@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { FaSignOutAlt, FaSignInAlt } from 'react-icons/fa'
 
 import { AppRoute } from '@/shared/app'
-import { isAuthenticatedUser, isUnauthenticatedUser } from '@/models/user'
-import { useUser } from '@/shared/user'
+import { isAuthenticatedUser, isUnauthenticatedUser } from '@/shared/user'
+import { useUser } from '@/adapters/user'
 import { Links } from '@/components/links'
 
 export interface HeaderContainerProps {

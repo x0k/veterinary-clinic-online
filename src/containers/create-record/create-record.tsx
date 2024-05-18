@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 
-import { type UserData } from '@/models/user'
-
+import { type UserData } from '@/shared/user'
 import { BigLoader } from '@/components/big-loader'
 import { ErrorText } from '@/components/error-text'
 import { isErr } from '@/adapters/domain'

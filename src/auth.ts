@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 // import GoogleProvider from 'next-auth/providers/google'
 import VKProvider from 'next-auth/providers/vk'
 
-import { AUTH_SCOPES, AuthenticationType } from '@/models/auth'
+import { AUTH_SCOPES, AuthenticationType } from '@/shared/auth'
 
 import { env } from './server-env'
 import { env as envClient } from './client-ent'

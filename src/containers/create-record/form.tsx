@@ -4,11 +4,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { getQueryKey } from '@trpc/react-query'
 import Link from 'next/link'
 
-import { ErrorText } from '@/components/error-text'
-import { type UserData } from '@/models/user'
+import { type UserData } from '@/shared/user'
 import { AppRoute } from '@/shared/app'
-import { isErr, type ServiceDTO } from '@/adapters/domain'
 import { formatDate } from '@/shared/date'
+
+import { isErr, type ServiceDTO } from '@/adapters/domain'
+import { ErrorText } from '@/components/error-text'
 import { trpc } from '@/client-init'
 
 import { type FormFields } from './model'

@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
 import { useWatch, useFormContext } from 'react-hook-form'
 
-import { isErr, ok } from '@/adapters/domain'
-import { REQUIRED_FIELD_ERROR_MESSAGE, type FormFields } from './model'
-import { trpc } from '@/client-init'
+import { formatTime, formattedToDate } from '@/shared/date'
 import { BigLoader } from '@/components/big-loader'
 import { ErrorText } from '@/components/error-text'
-import { formatTime, toIsoDate } from '@/shared/date'
+import { isErr, ok } from '@/adapters/domain'
+
+import { trpc } from '@/client-init'
+
+import { REQUIRED_FIELD_ERROR_MESSAGE, type FormFields } from './model'
 
 export function TimePeriodSelect(): JSX.Element {
   const {
@@ -22,7 +24,7 @@ export function TimePeriodSelect(): JSX.Element {
   const { isPending, isError, data, error } = trpc.freeTimeSlots.useQuery(
     {
       serviceId: selectedServiceId,
-      appointmentDate: toIsoDate(selectedDate),
+      appointmentDate: formattedToDate(selectedDate).toISOString(),
     },
     {
       enabled: Boolean(selectedServiceId && selectedDate),

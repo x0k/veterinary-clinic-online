@@ -20,9 +20,7 @@ export function compareDomainDate(a: DomainDate, b: DomainDate): number {
   return a.year - b.year || a.month - b.month || a.day - b.day
 }
 
-export function dateTimeToDate(
-  dateTime: DateTime
-): Date {
+export function dateTimeToDate(dateTime: DateTime): Date {
   return new Date(
     dateTime.date.year,
     dateTime.date.month - 1,
@@ -32,10 +30,7 @@ export function dateTimeToDate(
   )
 }
 
-export function durationInMinutes(
-  start: Time,
-  end: Time,
-): number {
+export function durationInMinutes(start: Time, end: Time): number {
   return (end.hours - start.hours) * 60 + (end.minutes - start.minutes)
 }
 
@@ -43,22 +38,20 @@ function pad20(value: number): string {
   return String(value).padStart(2, '0')
 }
 
-export type FormattedTime = Brand<"FormattedTime">
+export type FormattedTime = Brand<'FormattedTime'>
 
 export function formatTime(time: Time): FormattedTime {
   return `${pad20(time.hours)}:${pad20(time.minutes)}` as FormattedTime
 }
 
-export type FormattedDate = Brand<"FormattedDate">
+export type FormattedDate = Brand<'FormattedDate'>
 
 export function formatDate(date: Date): FormattedDate {
   return `${date.getFullYear()}-${pad20(date.getMonth() + 1)}-${pad20(date.getDate())}` as FormattedDate
 }
 
-export function toIsoDate(date: FormattedDate): string {
-  const dt = new Date(date)
-  // dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset())
-  return dt.toISOString()
+export function formattedToDate(formattedDate: FormattedDate): Date {
+  return new Date(formattedDate)
 }
 
 export function formatDateWithLocal(date: Date): string {
@@ -68,4 +61,3 @@ export function formatDateWithLocal(date: Date): string {
 export function formatShortDateWithLocal(date: Date): string {
   return date.toLocaleDateString('ru')
 }
-
