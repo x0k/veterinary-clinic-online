@@ -97,14 +97,24 @@ export function Subscription(): JSX.Element | null {
       {subscription ? (
         <>
           <p>Вы подписаны на обновления вашей записи</p>
-          <button className="btn btn-ghost" onClick={removeSubscription}>
+          <button
+            className="btn btn-ghost"
+            onClick={() => {
+              void removeSubscription()
+            }}
+          >
             Отписаться от уведомлений
           </button>
         </>
       ) : (
         <>
           <p>Что бы оперативно получать обновления вашей записи, вы можете</p>
-          <button className="btn btn-primary max-w-fit" onClick={subscribe}>
+          <button
+            className="btn btn-primary max-w-fit"
+            onClick={() => {
+              void subscribe()
+            }}
+          >
             Подписаться на уведомления
           </button>
         </>
