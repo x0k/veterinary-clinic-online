@@ -1,4 +1,3 @@
-import { isString } from '@/lib/guards'
 import { type ReactNode, Children, isValidElement } from 'react'
 
 export interface LinksProps {
@@ -22,7 +21,7 @@ export function Links({
           return child
         }
         const href = child.props.href
-        return isString(href)
+        return typeof href === 'string'
           ? {
               ...child,
               props: {
