@@ -2,7 +2,6 @@ import { LogLevel, isErr } from './adapters/domain'
 import { createDateTimeLocksRepositoryConfig } from './implementation/kv-date-time-locks-repository-config'
 import { createWasmDomain } from './implementation/wasm-domain'
 import { env } from './server-env'
-import './vendor/wasm_exec.js'
 
 export const domainPromise = (async () => {
   const domain = await createWasmDomain({

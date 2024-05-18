@@ -5,8 +5,6 @@ import { type RouterContext, appRouter } from '@/trpc/server'
 
 import { domainPromise } from '@/edge-server-init'
 
-export const runtime = 'edge'
-
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({
     endpoint: ApiRoute.TRPC,
