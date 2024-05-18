@@ -1,4 +1,5 @@
-import { useFormContext } from 'react-hook-form'
+import { useMemo } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { type FormattedDate } from '@/shared/date'
 import { type ServiceDTO } from '@/adapters/domain'
@@ -15,9 +16,18 @@ export function SimpleFormFields({
   services,
 }: SimpleFormFieldsProps): JSX.Element {
   const {
+    control,
     register,
     formState: { errors },
   } = useFormContext<FormFields>()
+  const selectedServiceId = useWatch({
+    control,
+    name: 'service',
+  })
+  const selectedService = useMemo(
+    () => services.find((s) => s.id === selectedServiceId),
+    [selectedServiceId, services]
+  )
   return (
     <>
       <label className="form-control w-full">
@@ -110,6 +120,24 @@ export function SimpleFormFields({
           </div>
         </label>
       </div>
+      {selectedService && (
+        <>
+          {selectedService.description && (
+            <div>
+              <p className="text-neutral-content pb-1">
+                Дополнительная информация
+              </p>
+              <p className="text-info">{selectedService.description}</p>
+            </div>
+          )}
+          {selectedService.costDescription && (
+            <div>
+              <p className="text-neutral-content pb-1">Стоимость</p>
+              <p className="text-info">{selectedService.costDescription}</p>
+            </div>
+          )}
+        </>
+      )}
     </>
   )
 }

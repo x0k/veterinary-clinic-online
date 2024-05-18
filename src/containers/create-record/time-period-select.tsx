@@ -4,7 +4,7 @@ import { useWatch, useFormContext } from 'react-hook-form'
 import { formatTime, formattedToDate } from '@/shared/date'
 import { BigLoader } from '@/components/big-loader'
 import { ErrorText } from '@/components/error-text'
-import { isErr, ok } from '@/adapters/domain'
+import { isErr } from '@/adapters/domain'
 
 import { trpc } from '@/client-init'
 
@@ -28,7 +28,6 @@ export function TimePeriodSelect(): JSX.Element {
     },
     {
       enabled: Boolean(selectedServiceId && selectedDate),
-      initialData: ok([]),
     }
   )
   useEffect(() => {
@@ -46,26 +45,6 @@ export function TimePeriodSelect(): JSX.Element {
   const { value: slots } = data
   return (
     <>
-      {/* {selectedClinicService && (
-        <>
-          {selectedClinicService.description && (
-            <div>
-              <p className="text-neutral-content pb-1">
-                Дополнительная информация
-              </p>
-              <p className="text-info">{selectedClinicService.description}</p>
-            </div>
-          )}
-          {selectedClinicService.costDescription && (
-            <div>
-              <p className="text-neutral-content pb-1">Стоимость</p>
-              <p className="text-info">
-                {selectedClinicService.costDescription}
-              </p>
-            </div>
-          )}
-        </>
-      )} */}
       <p className="text-neutral-content pb-1">Время</p>
       <div className="flex flex-col gap-2">
         {slots.map((slot) => {

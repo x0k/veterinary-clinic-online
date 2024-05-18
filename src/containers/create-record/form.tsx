@@ -40,19 +40,21 @@ export function CreateRecordForm({
     },
     mode: 'onChange',
   })
+  const {
+    setError,
+    formState: { errors },
+  } = form
   const { mutateAsync: upsertCustomer } = trpc.upsertCustomer.useMutation()
   const queryClient = useQueryClient()
-  const {
-    mutateAsync: createAppointment,
-    isError,
-    error,
-  } = trpc.createAppointment.useMutation({
-    async onSettled() {
-      await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.actualRecord),
-      })
-    },
-  })
+  const { mutateAsync: createAppointment } = trpc.createAppointment.useMutation(
+    {
+      async onSettled() {
+        await queryClient.invalidateQueries({
+          queryKey: getQueryKey(trpc.actualRecord),
+        })
+      },
+    }
+  )
   const handleCreate = useCallback(
     async ({
       recordDate,
@@ -61,23 +63,45 @@ export function CreateRecordForm({
       userName,
       userPhone,
     }: FormFields) => {
-      const customerId = await upsertCustomer({
-        name: userName,
-        email: userData.email ?? '',
-        phone: userPhone,
-      })
-      if (isErr(customerId)) {
-        throw new Error(customerId.error)
-      }
-      const appointment = await createAppointment({
-        appointmentDate: new Date(`${recordDate}T${recordTime}`).toISOString(),
-        serviceId: service,
-      })
-      if (isErr(appointment)) {
-        throw new Error(appointment.error)
+      try {
+        const customerId = await upsertCustomer({
+          name: userName,
+          email: userData.email ?? '',
+          phone: userPhone,
+        })
+        if (isErr(customerId)) {
+          setError('root', {
+            message: customerId.error,
+          })
+          return
+        }
+        const date = new Date(
+          `${recordDate}T${recordTime}`
+        )
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+        const appointment = await createAppointment({
+          appointmentDate: date.toISOString(),
+          serviceId: service,
+        })
+        if (!isErr(appointment)) {
+          return
+        }
+        setError('root', {
+          message: appointment.error,
+        })
+      } catch (error) {
+        if (error instanceof Error) {
+          setError('root', {
+            message: error.message,
+          })
+        } else {
+          setError('root', {
+            message: 'Произошла ошибка',
+          })
+        }
       }
     },
-    [upsertCustomer, createAppointment, userData]
+    [upsertCustomer, createAppointment, setError, userData]
   )
   return (
     <FormProvider {...form}>
@@ -96,7 +120,7 @@ export function CreateRecordForm({
           >
             Записаться
           </button>
-          {isError && <ErrorText text={error.message} />}
+          {errors.root && <ErrorText text={errors.root.message} />}
           <Link
             href={AppRoute.Privacy}
             className="text-center link link-hover"
