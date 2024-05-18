@@ -16,6 +16,11 @@ export const env = createEnv({
     AUTH_SECRET: z.string(),
     VK_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    KV_REST_API_READ_ONLY_TOKEN: z.string(),
+    KV_REST_API_TOKEN: z.string(),
+    KV_REST_API_URL: z.string(),
+    KV_URL: z.string(),
+    KV_PREFIX: z.string(),
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {}

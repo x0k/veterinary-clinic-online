@@ -25,4 +25,8 @@ export interface SharedDomain {
   timePeriodDurationInMinutes: (
     timePeriod: PeriodDTO<TimeDTO>
   ) => Result<number>
+  isDateTimePeriodIntersectWithPeriods: (
+    period: PeriodDTO<DateTimeDTO>,
+    ...periods: Array<PeriodDTO<DateTimeDTO>>
+  ) => Result<boolean>
 }

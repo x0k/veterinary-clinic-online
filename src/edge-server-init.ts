@@ -1,9 +1,10 @@
-import { LogLevel } from './adapters/domain'
-import { createDomain } from './implementation/domain'
+import { LogLevel, isErr } from './adapters/domain'
+import { createDateTimeLocksRepositoryConfig } from './implementation/kv-date-time-locks-repository-config'
+import { createWasmDomain } from './implementation/wasm-domain'
 import { env } from './server-env'
 import './vendor/wasm_exec.js'
 
-export const root = await createDomain({
+export const root = await createWasmDomain({
   logger: {
     level: LogLevel.Debug,
   },
@@ -23,5 +24,17 @@ export const root = await createDomain({
     schedulingService: {
       sampleRateInMinutes: 30,
     },
+    dateTimeLocksRepository: createDateTimeLocksRepositoryConfig({
+      periodsIntersectionChecker: (...periods) => {
+        const result = root.shared.isDateTimePeriodIntersectWithPeriods.apply(
+          root.shared,
+          periods
+        )
+        if (isErr(result)) {
+          throw new Error(result.error)
+        }
+        return result.value
+      },
+    }),
   },
 })
