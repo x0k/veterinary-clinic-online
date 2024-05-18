@@ -1,3 +1,5 @@
+import { type Brand } from '@/lib/type'
+
 export interface Time {
   hours: number
   minutes: number
@@ -41,17 +43,19 @@ function pad20(value: number): string {
   return String(value).padStart(2, '0')
 }
 
-export function formatTime(time: Time): string {
-  return `${pad20(time.hours)}:${pad20(time.minutes)}`
+export type FormattedTime = Brand<"FormattedTime">
+
+export function formatTime(time: Time): FormattedTime {
+  return `${pad20(time.hours)}:${pad20(time.minutes)}` as FormattedTime
 }
 
-export type FormattedDate = string
+export type FormattedDate = Brand<"FormattedDate">
 
 export function formatDate(date: Date): FormattedDate {
-  return `${date.getFullYear()}-${pad20(date.getMonth() + 1)}-${pad20(date.getDate())}`
+  return `${date.getFullYear()}-${pad20(date.getMonth() + 1)}-${pad20(date.getDate())}` as FormattedDate
 }
 
-export function toIsoDate(date: string): string {
+export function toIsoDate(date: FormattedDate): string {
   const dt = new Date(date)
   // dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset())
   return dt.toISOString()

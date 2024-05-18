@@ -1,41 +1,50 @@
-import { useMemo, useEffect } from 'react'
-import {
-  type Control,
-  type UseFormSetValue,
-  useWatch,
-  type FieldErrors,
-  type UseFormRegister,
-} from 'react-hook-form'
+import { useEffect } from 'react'
+import { useWatch, useFormContext } from 'react-hook-form'
 
-import { type PeriodDTO, type ServiceIdDTO, type TimeDTO } from '@/adapters/domain'
+import { isErr, ok } from '@/adapters/domain'
 import { REQUIRED_FIELD_ERROR_MESSAGE, type FormFields } from './model'
+import { trpc } from '@/client-init'
+import { BigLoader } from '@/components/big-loader'
+import { ErrorText } from '@/components/error-text'
+import { formatTime, toIsoDate } from '@/shared/date'
 
-export interface TimePeriodSelectProps {
-  freeTimePeriods: Array<PeriodDTO<TimeDTO>>
-  control: Control<FormFields, any>
-  setValue: UseFormSetValue<FormFields>
-  errors: FieldErrors<FormFields>
-  register: UseFormRegister<FormFields>
-  serviceId: ServiceIdDTO
-}
-
-export function TimePeriodSelect({
-  setValue,
-  control,
-  errors,
-  register,
-  serviceId,
-}: TimePeriodSelectProps): JSX.Element {
-  const [selectedServiceId, selectedDate] = useWatch({
-    name: ['service', 'recordDate'],
+export function TimePeriodSelect(): JSX.Element {
+  const {
     control,
+    setValue,
+    register,
+    formState: { errors },
+  } = useFormContext<FormFields>()
+  const [selectedServiceId, selectedDate] = useWatch({
+    control,
+    name: ['service', 'recordDate'],
   })
+  const { isPending, isError, data, error } = trpc.freeTimeSlots.useQuery(
+    {
+      serviceId: selectedServiceId,
+      appointmentDate: toIsoDate(selectedDate),
+    },
+    {
+      enabled: Boolean(selectedServiceId && selectedDate),
+      initialData: ok([]),
+    }
+  )
   useEffect(() => {
     setValue('recordTime', '')
-  }, [periods, setValue])
+  }, [data, setValue])
+  if (isPending) {
+    return <BigLoader />
+  }
+  if (isError) {
+    return <ErrorText text={error.message} />
+  }
+  if (isErr(data)) {
+    return <ErrorText text={data.error} />
+  }
+  const { value: slots } = data
   return (
     <>
-      {selectedClinicService && (
+      {/* {selectedClinicService && (
         <>
           {selectedClinicService.description && (
             <div>
@@ -54,26 +63,29 @@ export function TimePeriodSelect({
             </div>
           )}
         </>
-      )}
+      )} */}
       <p className="text-neutral-content pb-1">Время</p>
       <div className="flex flex-col gap-2">
-        {periods.map((p, i) => (
-          <div className="form-control" key={periodValues[i]}>
-            <label className="label cursor-pointer justify-start gap-4">
-              <input
-                {...register('recordTime', {
-                  required: REQUIRED_FIELD_ERROR_MESSAGE,
-                })}
-                value={periodValues[i]}
-                type="radio"
-                className="radio checked:radio-primary"
-              />
-              <span className="label-text">
-                {timeDataToJSON(p.start)} - {timeDataToJSON(p.end)}
-              </span>
-            </label>
-          </div>
-        ))}
+        {slots.map((slot) => {
+          const formatted = formatTime(slot.start)
+          return (
+            <div className="form-control" key={formatted}>
+              <label className="label cursor-pointer justify-start gap-4">
+                <input
+                  {...register('recordTime', {
+                    required: REQUIRED_FIELD_ERROR_MESSAGE,
+                  })}
+                  value={formatted}
+                  type="radio"
+                  className="radio checked:radio-primary"
+                />
+                <span className="label-text">
+                  {formatted} - {formatTime(slot.end)}
+                </span>
+              </label>
+            </div>
+          )
+        })}
       </div>
       {errors.recordTime && (
         <div className="label">

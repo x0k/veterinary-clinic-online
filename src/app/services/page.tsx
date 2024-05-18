@@ -1,4 +1,4 @@
-import { AppRoute } from '@/app/model'
+import { AppRoute } from '@/shared/app'
 
 import { MainLayout } from '@/components/main-layout'
 import { NotionContent } from '@/components/notion-content'

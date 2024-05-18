@@ -1,23 +1,23 @@
-import { type FieldErrors, type UseFormRegister } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 
-import { type ClinicServiceEntity } from '@/models/clinic'
-import { type JSONDate } from '@/models/date'
+import { type FormattedDate } from '@/shared/date'
+import { type ServiceDTO } from '@/adapters/domain'
 
 import { type FormFields, REQUIRED_FIELD_ERROR_MESSAGE } from './model'
 
 export interface SimpleFormFieldsProps {
-  today: JSONDate
-  clinicServices: ClinicServiceEntity[]
-  errors: FieldErrors<FormFields>
-  register: UseFormRegister<FormFields>
+  today: FormattedDate
+  services: ServiceDTO[]
 }
 
 export function SimpleFormFields({
   today,
-  clinicServices,
-  register,
-  errors,
+  services,
 }: SimpleFormFieldsProps): JSX.Element {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<FormFields>()
   return (
     <>
       <label className="form-control w-full">
@@ -74,7 +74,7 @@ export function SimpleFormFields({
             className="select select-bordered w-full invalid:select-error"
             {...register('service', { required: REQUIRED_FIELD_ERROR_MESSAGE })}
           >
-            {clinicServices.map((s) => (
+            {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.title}
               </option>

@@ -2,18 +2,20 @@ import { useMemo } from 'react'
 
 import { type UserData } from '@/models/user'
 
-import { trpc } from '@/client-init'
 import { BigLoader } from '@/components/big-loader'
 import { ErrorText } from '@/components/error-text'
 import { isErr } from '@/adapters/domain'
-import { CreateRecordForm } from './create-record-form'
+
+import { trpc } from '@/client-init'
+
+import { CreateRecordForm } from './form'
 
 export interface CreateRecordProps {
   userData: UserData
 }
 
 export function CreateRecord({ userData }: CreateRecordProps): JSX.Element {
-  const now = useMemo(() => new Date().toString(), [])
+  const now = useMemo(() => new Date().toISOString(), [])
   const [services, dayOrNextWorkingDay] = trpc.useQueries((t) => [
     t.services(),
     t.dayOrNextWorkingDay(now),
@@ -33,5 +35,11 @@ export function CreateRecord({ userData }: CreateRecordProps): JSX.Element {
   if (isErr(dayOrNextWorkingDay.data)) {
     return <ErrorText text={dayOrNextWorkingDay.data.error} />
   }
-  return <CreateRecordForm />
+  return (
+    <CreateRecordForm
+      userData={userData}
+      dayOrNextWorkingDay={dayOrNextWorkingDay.data.value}
+      services={services.data.value}
+    />
+  )
 }

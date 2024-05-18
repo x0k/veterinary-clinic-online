@@ -5,11 +5,12 @@ import { BigLoader } from '@/components/big-loader'
 import { ErrorText } from '@/components/error-text'
 import { ScheduleEntryType, isErr } from '@/adapters/domain'
 import {
+  type FormattedDate,
   durationInMinutes,
   formatDate,
   formatTime,
   toIsoDate,
-} from '@/domains/date'
+} from '@/shared/date'
 import { trpc } from '@/client-init'
 
 const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
@@ -20,8 +21,8 @@ const TIME_PERIOD_BG_COLORS: Record<ScheduleEntryType, string> = {
 const scale = 0.1
 
 interface ScheduleProps {
-  selectedDate: string
-  setDate: (date: string) => void
+  selectedDate: FormattedDate
+  setDate: (date: FormattedDate) => void
 }
 
 function Schedule({ selectedDate, setDate }: ScheduleProps): JSX.Element {
@@ -90,7 +91,7 @@ export function OpeningHoursContainer(): JSX.Element {
           className="max-w-max input input-bordered input-sm"
           value={selectedDate}
           onChange={(e) => {
-            setDate(e.target.value)
+            setDate(e.target.value as FormattedDate)
           }}
           min={today}
         />

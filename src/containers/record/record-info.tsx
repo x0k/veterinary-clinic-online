@@ -1,5 +1,8 @@
 import { useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { getQueryKey } from '@trpc/react-query'
 
+import { ErrorText } from '@/components/error-text'
 import {
   type DateTimeDTO,
   type PeriodDTO,
@@ -11,10 +14,11 @@ import {
   dateTimeToDate,
   formatDateWithLocal,
   formatTime,
-} from '@/domains/date'
+} from '@/shared/date'
+
+import { trpc } from '@/client-init'
 
 import { Subscription } from './subscription'
-import { trpc } from '@/client-init'
 
 export interface RecordInfoProps {
   appointment: AppointmentDTO
@@ -44,7 +48,14 @@ export function RecordInfo({
     const start = dateTimeToDate(dateTimePeriod.start)
     return now >= start
   }, [dateTimePeriod])
-  const { mutate, isPending } = trpc.cancelAppointment.useMutation()
+  const queryClient = useQueryClient()
+  const { mutate, isPending, isError, error } = trpc.cancelAppointment.useMutation({
+    async onSettled() {
+      await queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.actualRecord),
+      })
+    },
+  })
   return (
     <div className="grow flex flex-col justify-center items-center gap-2">
       <p className="text-3xl font-bold">
@@ -62,6 +73,7 @@ export function RecordInfo({
           >
             Отменить запись
           </button>
+          {isError && <ErrorText text={error.message} />}
         </>
       ) : status === RecordStatusDTO.Awaits ? (
         <p>Настала ваша очередь!</p>
