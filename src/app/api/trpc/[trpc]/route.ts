@@ -3,16 +3,18 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { ApiRoute } from '@/trpc/model'
 import { type RouterContext, appRouter } from '@/trpc/server'
 
-import { root } from '@/edge-server-init'
+import { domainPromise } from '@/edge-server-init'
+
+export const runtime = 'edge'
 
 function handler(request: Request): Promise<Response> {
   return fetchRequestHandler({
     endpoint: ApiRoute.TRPC,
     req: request,
     router: appRouter,
-    createContext: (): RouterContext => {
+    createContext: async (): Promise<RouterContext> => {
       return {
-        root,
+        root: await domainPromise,
       }
     },
   })

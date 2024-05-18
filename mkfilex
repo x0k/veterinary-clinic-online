@@ -25,7 +25,7 @@ wasm:
   pushd $backend_path
     time mk wasm
   popd
-  cp $backend_path/out/domain-fat.wasm public/domain.wasm
+  cp $backend_path/out/domain-fat.wasm src/vendor/domain.wasm
 
 wasm-exec:
   cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" src/vendor/wasm_exec.js
