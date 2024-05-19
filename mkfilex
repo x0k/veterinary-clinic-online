@@ -42,4 +42,4 @@ tiny-wasm:
   cp $backend_path/out/domain.wasm public/domain.wasm
 
 wasm-exec:
-  cp "$(go1.20.14 env GOROOT)/misc/wasm/wasm_exec.js" src/vendor/wasm_exec.js
+  cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" src/vendor/wasm_exec.js
