@@ -1,13 +1,11 @@
 import { kv } from '@vercel/kv'
 
 import { type DateTimeLocksRepositoryConfig } from '@/adapters/domain/appointment'
-import {
-  dateTimePeriodLocksLockKey,
-  dateTimePeriodLocksPeriodsKey,
-} from '@/kv-key'
 import { type DateTimeDTO, type PeriodDTO } from '@/adapters/domain'
 
 export interface CreateDateTimeLocksRepositoryConfigOptions {
+  dateTimePeriodLocksPeriodsKey: string
+  dateTimePeriodLocksLockKey: string
   periodsIntersectionChecker: (
     period: PeriodDTO<DateTimeDTO>,
     ...periods: Array<PeriodDTO<DateTimeDTO>>
@@ -15,6 +13,8 @@ export interface CreateDateTimeLocksRepositoryConfigOptions {
 }
 
 export function createDateTimeLocksRepositoryConfig({
+  dateTimePeriodLocksPeriodsKey,
+  dateTimePeriodLocksLockKey,
   periodsIntersectionChecker,
 }: CreateDateTimeLocksRepositoryConfigOptions): DateTimeLocksRepositoryConfig {
   return {

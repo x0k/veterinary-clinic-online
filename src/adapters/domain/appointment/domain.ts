@@ -1,3 +1,4 @@
+import { type SimpleCacheConfig } from '../cache'
 import { type Result } from '../result'
 import { type DateTimeDTO, type PeriodDTO, type TimeDTO } from '../shared'
 
@@ -25,8 +26,17 @@ export interface AppointmentNotionConfig {
   customersDatabaseId: string
 }
 
-export interface ProductionCalendarConfig {
+export interface ProductionCalendarRepositoryConfig {
   url: string
+  cache: SimpleCacheConfig<ProductionCalendarDTO>
+}
+
+export interface ServicesRepositoryConfig {
+  cache: SimpleCacheConfig<ServiceDTO[]>
+}
+
+export interface WorkBreaksRepositoryConfig {
+  cache: SimpleCacheConfig<unknown>
 }
 
 export interface DateTimeLocksRepositoryConfig {
@@ -35,9 +45,11 @@ export interface DateTimeLocksRepositoryConfig {
 }
 
 export interface AppointmentDomainConfig {
-  schedulingService: SchedulingServiceConfig
   notion: AppointmentNotionConfig
-  productionCalendar: ProductionCalendarConfig
+  servicesRepository: ServicesRepositoryConfig
+  workBreaksRepository: WorkBreaksRepositoryConfig
+  productionCalendar: ProductionCalendarRepositoryConfig
+  schedulingService: SchedulingServiceConfig
   dateTimeLocksRepository: DateTimeLocksRepositoryConfig
 }
 

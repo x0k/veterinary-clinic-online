@@ -46,11 +46,7 @@ const proxyGlobalThis = new Proxy(globalThis, {
     if (property === 'process') {
       return proxyProcess
     }
-    const val = target[property as keyof typeof target]
-    if (typeof val === 'function') {
-      return val.bind(target)
-    }
-    return val
+    return target[property as keyof typeof target]
   },
 })
 
