@@ -1,5 +1,6 @@
 import { LogLevel, isErr } from './adapters/domain'
 import { createDateTimeLocksRepositoryConfig } from './implementation/kv-date-time-locks-repository-config'
+import { createKeyedCacheConfig } from './implementation/kv-keyed-cache-config'
 import { createSimpleCacheConfig } from './implementation/kv-simple-cache-config'
 import { createWasmDomain } from './implementation/wasm-domain'
 import { KVKey } from './kv-key'
@@ -21,15 +22,17 @@ export const domainPromise = (async () => {
         servicesDatabaseId: env.NOTION_SERVICES_PAGE_ID,
       },
       servicesRepository: {
-        cache: createSimpleCacheConfig({
-          enabled: true,
+        servicesCache: createSimpleCacheConfig({
           key: KVKey.ServicesCache,
           expireTimeInSeconds: 60 * 60,
         }),
+        serviceCache: createKeyedCacheConfig({
+          key: KVKey.ServiceCache,
+          expireTimeInSeconds: 60 * 60,
+        })
       },
       workBreaksRepository: {
         cache: createSimpleCacheConfig({
-          enabled: true,
           key: KVKey.WorkBreaksCache,
           expireTimeInSeconds: 60 * 60,
         }),
@@ -37,7 +40,6 @@ export const domainPromise = (async () => {
       productionCalendar: {
         url: env.PRODUCTION_CALENDAR_URL,
         cache: createSimpleCacheConfig({
-          enabled: true,
           key: KVKey.ProductionCalendarCache,
           expireTimeInSeconds: 60 * 60 * 24,
         }),

@@ -1,4 +1,4 @@
-import { type SimpleCacheConfig } from '../cache'
+import { type KeyedCacheConfig, type SimpleCacheConfig } from '../cache'
 import { type Result } from '../result'
 import { type DateTimeDTO, type PeriodDTO, type TimeDTO } from '../shared'
 
@@ -28,15 +28,16 @@ export interface AppointmentNotionConfig {
 
 export interface ProductionCalendarRepositoryConfig {
   url: string
-  cache: SimpleCacheConfig<ProductionCalendarDTO>
+  cache: SimpleCacheConfig<ProductionCalendarDTO> | null
 }
 
 export interface ServicesRepositoryConfig {
-  cache: SimpleCacheConfig<ServiceDTO[]>
+  servicesCache: SimpleCacheConfig<ServiceDTO[]> | null
+  serviceCache: KeyedCacheConfig<ServiceIdDTO, ServiceDTO> | null
 }
 
 export interface WorkBreaksRepositoryConfig {
-  cache: SimpleCacheConfig<unknown>
+  cache: SimpleCacheConfig<unknown> | null
 }
 
 export interface DateTimeLocksRepositoryConfig {
