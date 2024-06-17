@@ -67,6 +67,9 @@ export function TimePeriodSelect(): JSX.Element {
             </div>
           )
         })}
+        {slots.length === 0 && (
+          <ErrorText text="Сегодня нет свободных слотов" />
+        )}
       </div>
       {errors.recordTime && (
         <div className="label">
