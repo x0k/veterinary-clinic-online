@@ -18,8 +18,6 @@ import {
 
 import { trpc } from '@/client-init'
 
-import { Subscription } from './subscription'
-
 export interface RecordInfoProps {
   appointment: AppointmentDTO
 }
@@ -80,7 +78,6 @@ export function RecordInfo({
       ) : (
         <p>Статус записи: {RECORD_STATUS_TITLES[status]}</p>
       )}
-      <Subscription />
     </div>
   )
 }
