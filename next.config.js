@@ -4,14 +4,17 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 const { withSentryConfig } = require('@sentry/nextjs')
 
-process.env.TZ = "UTC";
+process.env.TZ = 'UTC'
 console.log(
   `Running with timezone ${Intl.DateTimeFormat().resolvedOptions().timeZone}`
-);
+)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    instrumentationHook: true,
+  },
 }
 
 module.exports = withSentryConfig(

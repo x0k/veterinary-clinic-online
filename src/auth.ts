@@ -5,7 +5,7 @@ import VKProvider from 'next-auth/providers/vk'
 import { AUTH_SCOPES, AuthenticationType } from '@/shared/auth'
 
 import { env } from './server-env'
-import { env as envClient } from './client-ent'
+import { env as envClient } from './client-env'
 
 const CLIENTS_ID: Record<AuthenticationType, string> = {
   [AuthenticationType.Google]: envClient.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
