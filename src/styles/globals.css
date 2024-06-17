@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scrollbar-gutter {
+  scrollbar-gutter: stable both-edges;
+}
+
+/* Notion styles override */
+
+.notion-table {
+  overflow-x: hidden !important;
+}
+
+.notion-collection-header {
+  display: none !important;
+}

@@ -1,0 +1,45 @@
+#!/bin/bash +xe
+
+mk:
+  npm run dev -- --experimental-https
+
+b:
+  npm run build
+
+c:
+  npm run check
+
+l:
+  npm run lint
+
+p:
+  npm run start
+
+br:
+  $BROWSER --allow-insecure-localhost https://localhost:3000 \
+    --ignore-certificate-errors
+
+wasm:
+  backend_path=veterinary-clinic-backend
+  backend_project_path=~/Projects/$backend_path
+  if [ -e $backend_project_path ]; then
+    backend_path=$backend_project_path
+  fi
+  pushd $backend_path
+    time mk wasm
+  popd
+  cp $backend_path/out/domain.wasm public/domain.wasm
+
+tiny-wasm:
+  backend_path=veterinary-clinic-backend
+  backend_project_path=~/Projects/$backend_path
+  if [ -e $backend_project_path ]; then
+    backend_path=$backend_project_path
+  fi
+  pushd $backend_path
+    time mk tiny-wasm
+  popd
+  cp $backend_path/out/domain.wasm public/domain.wasm
+
+wasm-exec:
+  cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" src/vendor/wasm_exec.js
