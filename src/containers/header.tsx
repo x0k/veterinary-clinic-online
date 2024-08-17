@@ -12,9 +12,10 @@ import { Links } from '@/components/links'
 
 export interface HeaderContainerProps {
   title: ReactNode
+  appointments: boolean
 }
 
-export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
+export function HeaderContainer({ title, appointments }: HeaderContainerProps): JSX.Element {
   const pathname = usePathname() ?? ''
   const user = useUser()
   return (
@@ -50,9 +51,9 @@ export function HeaderContainer({ title }: HeaderContainerProps): JSX.Element {
               activeLinkClassName="link link-hover text-white"
               pathname={pathname}
             >
-              <Link href={AppRoute.Home} data-exact>
+              {appointments && <Link href={AppRoute.Home} data-exact>
                 Запись
-              </Link>
+              </Link>}
               <Link href={AppRoute.Services}>Услуги</Link>
               <Link href={AppRoute.Info}>Информация</Link>
             </Links>

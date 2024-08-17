@@ -1,6 +1,6 @@
 #!/bin/bash +xe
 
-mk:
+d:
   npm run dev -- --experimental-https
 
 b:

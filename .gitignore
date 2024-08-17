@@ -42,3 +42,5 @@ next.config.original.js
 
 # Backend
 /veterinary-clinic-backend
+
+.direnv/

@@ -1,8 +1,8 @@
 diff --git a/node_modules/oauth4webapi/build/index.js b/node_modules/oauth4webapi/build/index.js
-index 7eccce2..9d595dd 100644
+index 4a178ba..a47af07 100644
 --- a/node_modules/oauth4webapi/build/index.js
 +++ b/node_modules/oauth4webapi/build/index.js
-@@ -933,13 +933,13 @@ async function processGenericAccessTokenResponse(as, client, response, ignoreIdT
+@@ -963,13 +963,13 @@ async function processGenericAccessTokenResponse(as, client, response, ignoreIdT
      if (!validateString(json.access_token)) {
          throw new OPE('"response" body "access_token" property must be a non-empty string');
      }
